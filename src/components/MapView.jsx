@@ -1,46 +1,53 @@
-import { useState, useCallback, useRef, useEffect } from 'react'
-import { GoogleMap, useJsApiLoader, OverlayView, InfoWindow } from '@react-google-maps/api'
+import { useState, useCallback, useRef, useEffect, useMemo } from 'react'
+import { GoogleMap, useJsApiLoader, OverlayView } from '@react-google-maps/api'
 import PropertyDrawer from './PropertyDrawer.jsx'
 
 const GMAPS_KEY = 'AIzaSyCLnBGWiIGI8OtYlHgLImzn0JY5FVjuQ6k'
 const LIBRARIES = ['visualization']
 
+const PARCEL_URL = 'https://gis-public.sandiegocounty.gov/arcgis/rest/services/Lots/MapServer/export'
+const PARCEL_LAYERS = encodeURIComponent(JSON.stringify([{
+  id: 0, source: { type: 'mapLayer', mapLayerId: 0 },
+  drawingInfo: { renderer: { type: 'simple', symbol: {
+    type: 'esriSFS', style: 'esriSFSNull',
+    outline: { type: 'esriSLS', style: 'esriSLSSolid', color: [255, 235, 59, 255], width: 1.5 }
+  }}}
+}]))
+
 const STATUS_COLORS = {
-  not_called: '#60a5fa',
-  called: '#34d399',
-  interested: '#f59e0b',
-  not_interested: '#94a3b8',
-  under_nda: '#a78bfa',
-  listed: '#f87171',
+  not_called: '#60a5fa', called: '#34d399', interested: '#f59e0b',
+  not_interested: '#94a3b8', under_nda: '#a78bfa', listed: '#f87171',
 }
 
-const MAP_STYLES = {
-  dark: [
-    { elementType: 'geometry', stylers: [{ color: '#0d1526' }] },
-    { elementType: 'labels.text.stroke', stylers: [{ color: '#0d1526' }] },
-    { elementType: 'labels.text.fill', stylers: [{ color: '#746855' }] },
-    { featureType: 'administrative.locality', elementType: 'labels.text.fill', stylers: [{ color: '#d59563' }] },
-    { featureType: 'poi', stylers: [{ visibility: 'off' }] },
-    { featureType: 'road', elementType: 'geometry', stylers: [{ color: '#1e2d47' }] },
-    { featureType: 'road', elementType: 'geometry.stroke', stylers: [{ color: '#212a37' }] },
-    { featureType: 'road', elementType: 'labels.text.fill', stylers: [{ color: '#9ca5b3' }] },
-    { featureType: 'road.highway', elementType: 'geometry', stylers: [{ color: '#2d3f5e' }] },
-    { featureType: 'road.highway', elementType: 'labels.text.fill', stylers: [{ color: '#f3d19c' }] },
-    { featureType: 'transit', stylers: [{ visibility: 'off' }] },
-    { featureType: 'water', elementType: 'geometry', stylers: [{ color: '#040d1a' }] },
-    { featureType: 'water', elementType: 'labels.text.fill', stylers: [{ color: '#515c6d' }] },
-  ],
-  street: [],
-  aerial: null,
-  hybrid: null,
+const REITS = ['public storage','extra space','cubesmart','life storage','simply self','national storage','smartstop','nsa ','stor-quest','storquest']
+const UHAUL = ['u-haul','uhaul']
+
+function classifyOwner(p) {
+  const n = (p.parentCompany || p.trueOwner || p.owner || '').toLowerCase()
+  if (UHAUL.some(k => n.includes(k))) return 'uhaul'
+  if (REITS.some(k => n.includes(k))) return 'reit'
+  return 'private'
+}
+
+function getLogoName(p) {
+  const n = (p.parentCompany || p.trueOwner || p.owner || '').toLowerCase()
+  if (n.includes('public storage')) return 'Public Storage'
+  if (n.includes('extra space')) return 'Extra Space Storage'
+  if (n.includes('cubesmart')) return 'CubeSmart'
+  if (n.includes('life storage')) return 'Life Storage'
+  if (n.includes('simply self')) return 'Simply Self Storage'
+  if (n.includes('smartstop')) return 'SmartStop Self Storage'
+  if (n.includes('national storage')) return 'National Storage Affiliates'
+  if (n.includes('u-haul') || n.includes('uhaul')) return 'U-Haul'
+  return null
 }
 
 function getMarkerColor(prop, colorMode) {
   if (colorMode === 'status') return STATUS_COLORS[prop.callStatus] || '#60a5fa'
   if (colorMode === 'owner') {
-    const n = (prop.parentCompany || prop.owner || '').toLowerCase()
-    if (n.includes('u-haul') || n.includes('uhaul')) return '#ef4444'
-    if (['public storage', 'extra space', 'cubesmart', 'life storage', 'national storage'].some(r => n.includes(r))) return '#3b82f6'
+    const cls = classifyOwner(prop)
+    if (cls === 'uhaul') return '#ef4444'
+    if (cls === 'reit') return '#3b82f6'
     return '#f59e0b'
   }
   if (colorMode === 'size') {
@@ -52,150 +59,202 @@ function getMarkerColor(prop, colorMode) {
   return STATUS_COLORS[prop.callStatus] || '#60a5fa'
 }
 
+function tile2mercBbox(x, y, z) {
+  const n = Math.pow(2, z)
+  const lonToMerc = lon => lon * 20037508.34 / 180
+  const latToMerc = lat => Math.log(Math.tan((90+lat)*Math.PI/360)) / (Math.PI/180) * 20037508.34 / 180
+  const tile2lng = x => x/n*360-180
+  const tile2lat = y => { const r=Math.PI-2*Math.PI*y/n; return 180/Math.PI*Math.atan(0.5*(Math.exp(r)-Math.exp(-r))) }
+  const w=lonToMerc(tile2lng(x)), s=latToMerc(tile2lat(y+1)), e=lonToMerc(tile2lng(x+1)), nn=latToMerc(tile2lat(y))
+  return `${w},${s},${e},${nn}`
+}
+
 function Marker({ prop, colorMode, onClick, isSelected }) {
   const color = getMarkerColor(prop, colorMode)
-  const size = prop.sf > 100000 ? 14 : prop.sf > 60000 ? 11 : prop.sf > 30000 ? 9 : 7
+  const size = prop.sf > 100000 ? 16 : prop.sf > 60000 ? 13 : prop.sf > 30000 ? 10 : 8
+  const logoName = getLogoName(prop)
+  const [logoErr, setLogoErr] = useState(false)
+  const showLogo = logoName && !logoErr
+
   return (
     <OverlayView position={{ lat: prop.lat, lng: prop.lng }} mapPaneName={OverlayView.OVERLAY_MOUSE_TARGET}>
-      <div onClick={() => onClick(prop)} style={{ cursor: 'pointer', transform: 'translate(-50%,-50%)' }}>
-        <svg width="24" height="24" style={{ overflow: 'visible' }}>
-          {isSelected && <circle cx="12" cy="12" r={size + 5} fill="none" stroke="#fff" strokeWidth="2" opacity="0.8" />}
-          {prop.forSale && <circle cx="12" cy="12" r={size + 3} fill="none" stroke="#f87171" strokeWidth="2" strokeDasharray="4,2" />}
-          <circle cx="12" cy="12" r={size} fill={color} fillOpacity="0.9" stroke="#fff" strokeWidth="1.5" />
-        </svg>
+      <div onClick={() => onClick(prop)} title={prop.name || prop.address}
+        style={{ cursor: 'pointer', transform: 'translate(-50%,-50%)', position: 'relative' }}>
+        {showLogo ? (
+          <div style={{
+            width: `${size*2+8}px`, height: `${size*2+8}px`,
+            borderRadius: '6px', background: '#fff', border: `2px solid ${isSelected ? '#fff' : color}`,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            boxShadow: isSelected ? '0 0 0 3px white, 0 0 0 5px ' + color : '0 1px 4px rgba(0,0,0,0.5)',
+            overflow: 'hidden', padding: '2px',
+          }}>
+            <img src={`https://logos.gentz.co/logo/by-name/${encodeURIComponent(logoName)}`}
+              onError={() => setLogoErr(true)}
+              style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+          </div>
+        ) : (
+          <svg width={size*2+4} height={size*2+4} style={{ overflow: 'visible' }}>
+            {isSelected && <circle cx={size+2} cy={size+2} r={size+5} fill="none" stroke="#fff" strokeWidth="2" opacity="0.8" />}
+            {prop.forSale && <circle cx={size+2} cy={size+2} r={size+3} fill="none" stroke="#f87171" strokeWidth="2" strokeDasharray="4,2" />}
+            <circle cx={size+2} cy={size+2} r={size} fill={color} fillOpacity="0.9" stroke="#fff" strokeWidth="1.5" />
+          </svg>
+        )}
       </div>
     </OverlayView>
   )
 }
 
+const MAP_DARK_STYLE = [
+  { elementType: 'geometry', stylers: [{ color: '#0d1526' }] },
+  { elementType: 'labels.text.stroke', stylers: [{ color: '#0d1526' }] },
+  { elementType: 'labels.text.fill', stylers: [{ color: '#746855' }] },
+  { featureType: 'administrative.locality', elementType: 'labels.text.fill', stylers: [{ color: '#d59563' }] },
+  { featureType: 'poi', stylers: [{ visibility: 'off' }] },
+  { featureType: 'road', elementType: 'geometry', stylers: [{ color: '#1e2d47' }] },
+  { featureType: 'road.highway', elementType: 'geometry', stylers: [{ color: '#2d3f5e' }] },
+  { featureType: 'road.highway', elementType: 'labels.text.fill', stylers: [{ color: '#f3d19c' }] },
+  { featureType: 'transit', stylers: [{ visibility: 'off' }] },
+  { featureType: 'water', elementType: 'geometry', stylers: [{ color: '#040d1a' }] },
+]
+
 export default function MapView({ properties, selectedProperty, setSelectedProperty, updateProperty, currentUser }) {
   const { isLoaded } = useJsApiLoader({ googleMapsApiKey: GMAPS_KEY, libraries: LIBRARIES })
   const mapRef = useRef(null)
-  const [mapType, setMapType] = useState('dark')
-  const [showParcelOverlay, setShowParcelOverlay] = useState(false)
-  const [showIndustrialOverlay, setShowIndustrialOverlay] = useState(true)
-  const [industrialData, setIndustrialData] = useState(null)
+  const parcelOverlayRef = useRef(null)
   const industrialLayerRef = useRef(null)
+  const [industrialData, setIndustrialData] = useState(null)
+  const [mapType, setMapType] = useState('dark')
+  const [showParcel, setShowParcel] = useState(false)
+  const [showIndustrial, setShowIndustrial] = useState(true)
   const [colorMode, setColorMode] = useState('status')
   const [filterOwner, setFilterOwner] = useState('all')
   const [filterStatus, setFilterStatus] = useState('all')
   const [filterSubmarket, setFilterSubmarket] = useState('all')
-  const [tooltip, setTooltip] = useState(null)
 
-  const submarkets = [...new Set(properties.map(p => p.submarket))].filter(Boolean).sort()
+  const submarkets = useMemo(() => [...new Set(properties.map(p => p.submarket))].filter(Boolean).sort(), [properties])
 
-  const filteredProps = properties.filter(p => {
+  const filteredProps = useMemo(() => properties.filter(p => {
     if (filterStatus !== 'all' && p.callStatus !== filterStatus) return false
     if (filterSubmarket !== 'all' && p.submarket !== filterSubmarket) return false
     if (filterOwner !== 'all') {
-      const n = (p.parentCompany || p.owner || '').toLowerCase()
-      if (filterOwner === 'uhaul' && !(n.includes('u-haul') || n.includes('uhaul'))) return false
-      if (filterOwner === 'reit' && !['public storage','extra space','cubesmart','life storage'].some(r => n.includes(r))) return false
-      if (filterOwner === 'private' && ['u-haul','uhaul','public storage','extra space','cubesmart','life storage'].some(r => n.includes(r))) return false
+      const cls = classifyOwner(p)
+      if (filterOwner === 'uhaul' && cls !== 'uhaul') return false
+      if (filterOwner === 'reit' && cls !== 'reit') return false
+      if (filterOwner === 'private' && cls !== 'private') return false
     }
     return true
-  })
+  }), [properties, filterStatus, filterSubmarket, filterOwner])
 
-  // Load industrial overlay geojson
   useEffect(() => {
     fetch('/industrial_overlay.geojson').then(r => r.json()).then(setIndustrialData).catch(() => {})
   }, [])
 
-  // Manage industrial overlay on map
+  // Industrial overlay
   useEffect(() => {
     const map = mapRef.current
     if (!map || !industrialData || !window.google) return
-    if (industrialLayerRef.current) { industrialLayerRef.current.setMap(null) }
-    if (!showIndustrialOverlay) return
+    if (industrialLayerRef.current) industrialLayerRef.current.setMap(null)
+    if (!showIndustrial) return
     const layer = new window.google.maps.Data()
     layer.addGeoJson(industrialData)
     layer.setStyle({ fillColor: '#ef4444', fillOpacity: 0.18, strokeColor: '#ef4444', strokeWeight: 1, strokeOpacity: 0.4 })
     layer.setMap(map)
     industrialLayerRef.current = layer
-  }, [showIndustrialOverlay, industrialData, mapRef.current])
+  }, [showIndustrial, industrialData, mapRef.current])
 
-  const onMapLoad = useCallback((map) => {
-    mapRef.current = map
-  }, [])
+  // Parcel overlay — using SD County ArcGIS exactly like Atlas
+  useEffect(() => {
+    const map = mapRef.current
+    if (!map || !window.google) return
+    if (parcelOverlayRef.current) {
+      const arr = map.overlayMapTypes.getArray()
+      const idx = arr.indexOf(parcelOverlayRef.current)
+      if (idx > -1) map.overlayMapTypes.removeAt(idx)
+      parcelOverlayRef.current = null
+    }
+    if (!showParcel) return
+    const overlay = new window.google.maps.ImageMapType({
+      name: 'Parcels',
+      tileSize: new window.google.maps.Size(256, 256),
+      maxZoom: 21, minZoom: 14, opacity: 1.0,
+      getTileUrl: (coord, zoom) => {
+        if (zoom < 14) return null
+        const bbox = tile2mercBbox(coord.x, coord.y, zoom)
+        return `${PARCEL_URL}?bbox=${bbox}&size=256,256&imageSR=3857&bboxSR=3857&format=png32&transparent=true&f=image&dynamicLayers=${PARCEL_LAYERS}`
+      }
+    })
+    map.overlayMapTypes.push(overlay)
+    parcelOverlayRef.current = overlay
+  }, [showParcel, mapRef.current])
 
-  const mapOptions = {
-    center: { lat: 32.78, lng: -117.1 },
-    zoom: 10,
-    disableDefaultUI: false,
-    mapTypeId: mapType === 'aerial' ? 'satellite' : mapType === 'hybrid' ? 'hybrid' : 'roadmap',
-    styles: mapType === 'dark' ? MAP_STYLES.dark : mapType === 'street' ? [] : undefined,
-    mapTypeControl: false,
-    streetViewControl: false,
-    fullscreenControl: false,
-  }
+  const onMapLoad = useCallback((map) => { mapRef.current = map }, [])
 
-  // Pan to selected
+  // Pan to selected WITHOUT changing zoom
   useEffect(() => {
     if (selectedProperty && mapRef.current) {
       mapRef.current.panTo({ lat: selectedProperty.lat, lng: selectedProperty.lng })
     }
   }, [selectedProperty])
 
-  const btnStyle = (active, color) => ({
-    padding: '5px 10px', border: 'none', borderRadius: '5px', cursor: 'pointer',
-    fontSize: '11px', fontWeight: 600,
-    background: active ? (color || '#f59e0b') : '#1e2d47',
-    color: active ? (color ? '#fff' : '#000') : '#94a3b8',
-  })
+  const mapOptions = useMemo(() => ({
+    center: { lat: 32.78, lng: -117.1 },
+    zoom: 10,
+    mapTypeId: mapType === 'aerial' ? 'satellite' : mapType === 'hybrid' ? 'hybrid' : 'roadmap',
+    styles: mapType === 'dark' ? MAP_DARK_STYLE : mapType === 'street' ? [] : undefined,
+    mapTypeControl: false, streetViewControl: false, fullscreenControl: false,
+    gestureHandling: 'greedy',
+  }), [mapType])
 
-  const selStyle = { background: '#1e2d47', border: '1px solid #2d3f5e', borderRadius: '5px', color: '#e2e8f0', fontSize: '11px', padding: '5px 8px', width: '100%' }
+  const btnStyle = (active, accent) => ({
+    padding: '5px 9px', border: 'none', borderRadius: '5px', cursor: 'pointer',
+    fontSize: '10px', fontWeight: 600, transition: 'all 0.15s',
+    background: active ? (accent || '#f59e0b') : '#1e2d47',
+    color: active ? (accent ? '#fff' : '#000') : '#94a3b8',
+  })
+  const selStyle = { background: '#1e2d47', border: '1px solid #2d3f5e', borderRadius: '5px', color: '#e2e8f0', fontSize: '11px', padding: '5px 7px', width: '100%' }
 
   return (
     <div style={{ display: 'flex', height: '100%' }}>
-      {/* Left sidebar */}
-      <div style={{ width: '190px', background: '#0d1526', borderRight: '1px solid #1e2d47', padding: '14px', display: 'flex', flexDirection: 'column', gap: '14px', overflowY: 'auto', flexShrink: 0 }}>
-        
-        {/* Map style */}
+      {/* Sidebar */}
+      <div style={{ width: '185px', background: '#0d1526', borderRight: '1px solid #1e2d47', padding: '12px', display: 'flex', flexDirection: 'column', gap: '12px', overflowY: 'auto', flexShrink: 0 }}>
+
         <div>
-          <div style={{ fontSize: '10px', color: '#475569', letterSpacing: '0.1em', marginBottom: '6px' }}>MAP STYLE</div>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '4px' }}>
-            {[['dark','🌑 Dark'],['street','🗺 Street'],['aerial','🛰 Aerial'],['hybrid','🌐 Hybrid']].map(([val,label]) => (
-              <button key={val} onClick={() => setMapType(val)} style={btnStyle(mapType === val)}>{label}</button>
+          <div style={{ fontSize: '9px', color: '#475569', letterSpacing: '0.1em', marginBottom: '5px' }}>MAP STYLE</div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '3px' }}>
+            {[['dark','🌑 Dark'],['street','🗺 Street'],['aerial','🛰 Aerial'],['hybrid','🌐 Hybrid']].map(([v,l]) => (
+              <button key={v} onClick={() => setMapType(v)} style={btnStyle(mapType===v)}>{l}</button>
             ))}
           </div>
         </div>
 
-        {/* Overlays */}
         <div>
-          <div style={{ fontSize: '10px', color: '#475569', letterSpacing: '0.1em', marginBottom: '6px' }}>OVERLAYS</div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-            <button onClick={() => setShowIndustrialOverlay(v => !v)} style={{
-              ...btnStyle(showIndustrialOverlay, '#ef4444'),
-              background: showIndustrialOverlay ? 'rgba(239,68,68,0.2)' : '#1e2d47',
-              color: showIndustrialOverlay ? '#f87171' : '#94a3b8',
-              border: showIndustrialOverlay ? '1px solid rgba(239,68,68,0.3)' : '1px solid transparent',
-              textAlign: 'left', fontSize: '10px',
-            }}>🔴 Industrial Zones</button>
-            <button onClick={() => setShowParcelOverlay(v => !v)} style={{
-              ...btnStyle(showParcelOverlay, '#a78bfa'),
-              background: showParcelOverlay ? 'rgba(167,139,250,0.2)' : '#1e2d47',
-              color: showParcelOverlay ? '#a78bfa' : '#94a3b8',
-              border: showParcelOverlay ? '1px solid rgba(167,139,250,0.3)' : '1px solid transparent',
-              textAlign: 'left', fontSize: '10px',
-            }}>🟣 SD Parcels</button>
-          </div>
-          <div style={{ fontSize: '9px', color: '#334155', marginTop: '5px', lineHeight: 1.4 }}>
-            Red = No self-storage (City SD industrial)
-          </div>
-        </div>
-
-        {/* Color by */}
-        <div>
-          <div style={{ fontSize: '10px', color: '#475569', letterSpacing: '0.1em', marginBottom: '6px' }}>COLOR BY</div>
+          <div style={{ fontSize: '9px', color: '#475569', letterSpacing: '0.1em', marginBottom: '5px' }}>OVERLAYS</div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
-            {[['status','Call Status'],['owner','Owner Type'],['size','Building Size']].map(([val,label]) => (
-              <button key={val} onClick={() => setColorMode(val)} style={{ ...btnStyle(colorMode === val), textAlign: 'left', fontSize: '10px' }}>{label}</button>
-            ))}
+            <button onClick={() => setShowIndustrial(v => !v)} style={{
+              ...btnStyle(showIndustrial), textAlign: 'left', fontSize: '10px',
+              background: showIndustrial ? 'rgba(239,68,68,0.2)' : '#1e2d47',
+              color: showIndustrial ? '#f87171' : '#94a3b8',
+              border: showIndustrial ? '1px solid rgba(239,68,68,0.3)' : '1px solid transparent',
+            }}>🔴 Industrial Zones</button>
+            <button onClick={() => setShowParcel(v => !v)} style={{
+              ...btnStyle(showParcel), textAlign: 'left', fontSize: '10px',
+              background: showParcel ? 'rgba(255,235,59,0.15)' : '#1e2d47',
+              color: showParcel ? '#fde047' : '#94a3b8',
+              border: showParcel ? '1px solid rgba(255,235,59,0.3)' : '1px solid transparent',
+            }}>🟡 SD Parcels {showParcel ? '(zoom in)' : ''}</button>
           </div>
+          <div style={{ fontSize: '9px', color: '#334155', marginTop: '4px', lineHeight: 1.4 }}>Parcels visible at zoom 14+</div>
         </div>
 
         <div>
-          <div style={{ fontSize: '10px', color: '#475569', letterSpacing: '0.1em', marginBottom: '5px' }}>FILTER OWNER</div>
+          <div style={{ fontSize: '9px', color: '#475569', letterSpacing: '0.1em', marginBottom: '5px' }}>COLOR BY</div>
+          {[['status','Call Status'],['owner','Owner Type'],['size','Building Size']].map(([v,l]) => (
+            <button key={v} onClick={() => setColorMode(v)} style={{ ...btnStyle(colorMode===v), display: 'block', width: '100%', textAlign: 'left', marginBottom: '3px', fontSize: '10px' }}>{l}</button>
+          ))}
+        </div>
+
+        <div>
+          <div style={{ fontSize: '9px', color: '#475569', letterSpacing: '0.1em', marginBottom: '4px' }}>FILTER OWNER</div>
           <select value={filterOwner} onChange={e => setFilterOwner(e.target.value)} style={selStyle}>
             <option value="all">All Owners</option>
             <option value="private">Private / Local</option>
@@ -205,80 +264,59 @@ export default function MapView({ properties, selectedProperty, setSelectedPrope
         </div>
 
         <div>
-          <div style={{ fontSize: '10px', color: '#475569', letterSpacing: '0.1em', marginBottom: '5px' }}>FILTER STATUS</div>
+          <div style={{ fontSize: '9px', color: '#475569', letterSpacing: '0.1em', marginBottom: '4px' }}>FILTER STATUS</div>
           <select value={filterStatus} onChange={e => setFilterStatus(e.target.value)} style={selStyle}>
             <option value="all">All</option>
-            <option value="not_called">Not Called</option>
-            <option value="called">Called</option>
-            <option value="interested">Interested</option>
-            <option value="not_interested">Not Interested</option>
-            <option value="under_nda">Under NDA</option>
-            <option value="listed">Listed</option>
+            {Object.keys(STATUS_COLORS).map(s => <option key={s} value={s}>{s.replace(/_/g,' ')}</option>)}
           </select>
         </div>
 
         <div>
-          <div style={{ fontSize: '10px', color: '#475569', letterSpacing: '0.1em', marginBottom: '5px' }}>SUBMARKET</div>
+          <div style={{ fontSize: '9px', color: '#475569', letterSpacing: '0.1em', marginBottom: '4px' }}>SUBMARKET</div>
           <select value={filterSubmarket} onChange={e => setFilterSubmarket(e.target.value)} style={selStyle}>
             <option value="all">All Submarkets</option>
             {submarkets.map(s => <option key={s} value={s}>{s}</option>)}
           </select>
         </div>
 
-        {/* Legend */}
         {colorMode === 'status' && (
           <div>
-            <div style={{ fontSize: '10px', color: '#475569', letterSpacing: '0.1em', marginBottom: '6px' }}>LEGEND</div>
+            <div style={{ fontSize: '9px', color: '#475569', letterSpacing: '0.1em', marginBottom: '5px' }}>LEGEND</div>
             {Object.entries(STATUS_COLORS).map(([k,c]) => (
-              <div key={k} style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '3px' }}>
-                <div style={{ width: '9px', height: '9px', borderRadius: '50%', background: c, flexShrink: 0 }} />
+              <div key={k} style={{ display: 'flex', alignItems: 'center', gap: '5px', marginBottom: '3px' }}>
+                <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: c, flexShrink: 0 }} />
                 <span style={{ fontSize: '10px', color: '#94a3b8', textTransform: 'capitalize' }}>{k.replace(/_/g,' ')}</span>
               </div>
             ))}
           </div>
         )}
 
-        <div style={{ fontSize: '11px', color: '#475569', marginTop: 'auto', paddingTop: '10px', borderTop: '1px solid #1e2d47' }}>
-          <strong style={{ color: '#60a5fa' }}>{filteredProps.length}</strong> of {properties.length} properties
+        <div style={{ fontSize: '10px', color: '#475569', marginTop: 'auto', paddingTop: '8px', borderTop: '1px solid #1e2d47' }}>
+          <strong style={{ color: '#60a5fa' }}>{filteredProps.length}</strong> of {properties.length}
         </div>
       </div>
 
       {/* Map */}
       <div style={{ flex: 1, position: 'relative' }}>
         {isLoaded ? (
-          <GoogleMap
-            mapContainerStyle={{ width: '100%', height: '100%' }}
-            options={mapOptions}
-            onLoad={onMapLoad}
-          >
+          <GoogleMap mapContainerStyle={{ width: '100%', height: '100%' }} options={mapOptions} onLoad={onMapLoad}>
             {filteredProps.map(prop => (
               prop.lat && prop.lng ? (
                 <Marker key={prop.id} prop={prop} colorMode={colorMode}
-                  onClick={setSelectedProperty}
-                  isSelected={selectedProperty?.id === prop.id} />
+                  onClick={setSelectedProperty} isSelected={selectedProperty?.id === prop.id} />
               ) : null
             ))}
-
-            {/* SD Assessor parcel overlay via WMS */}
-            {showParcelOverlay && window.google && (() => {
-              // Parcel layer as WMS tile overlay
-              return null // rendered via useEffect below
-            })()}
           </GoogleMap>
         ) : (
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: '#475569' }}>
-            Loading map…
-          </div>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: '#475569' }}>Loading map…</div>
         )}
       </div>
 
-      {/* Property Drawer */}
       {selectedProperty && (
         <PropertyDrawer currentUser={currentUser}
           property={properties.find(p => p.id === selectedProperty.id) || selectedProperty}
           onClose={() => setSelectedProperty(null)}
-          updateProperty={updateProperty}
-        />
+          updateProperty={updateProperty} />
       )}
     </div>
   )
