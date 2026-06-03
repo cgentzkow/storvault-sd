@@ -138,7 +138,7 @@ export default function App() {
         {activeTab === 'map' && <MapView properties={properties} currentUser={currentUser} selectedProperty={selectedProperty} setSelectedProperty={setSelectedProperty} updateProperty={updateProperty} />}
         {activeTab === 'properties' && <PropertyList properties={properties} currentUser={currentUser} selectedProperty={selectedProperty} setSelectedProperty={setSelectedProperty} updateProperty={updateProperty} />}
         {activeTab === 'dashboard' && <Dashboard comps={rawComps} properties={properties} />}
-        {activeTab === 'buyers' && <BuyerProfiles />}
+        {activeTab === 'buyers' && <BuyerProfiles currentUser={currentUser} />}
       </main>
     </div>
   )
