@@ -13,7 +13,7 @@ function fmt$(n) {
   return `$${n}`
 }
 
-export default function PropertyList({ properties, selectedProperty, setSelectedProperty, updateProperty }) {
+export default function PropertyList({ properties, selectedProperty, setSelectedProperty, updateProperty, currentUser }) {
   const [search, setSearch] = useState('')
   const [sortBy, setSortBy] = useState('sf')
   const [sortDir, setSortDir] = useState('desc')
@@ -189,7 +189,7 @@ export default function PropertyList({ properties, selectedProperty, setSelected
 
       {/* Property Drawer */}
       {selectedProperty && (
-        <PropertyDrawer
+        <PropertyDrawer currentUser={currentUser}
           property={properties.find(p => p.id === selectedProperty.id) || selectedProperty}
           onClose={() => setSelectedProperty(null)}
           updateProperty={updateProperty}

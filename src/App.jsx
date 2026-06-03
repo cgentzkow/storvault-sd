@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react'
-import { db, auth } from './firebase.js'
+import { db } from './firebase.js'
 import { collection, doc, setDoc, onSnapshot } from 'firebase/firestore'
-import { onAuthStateChanged, signOut } from 'firebase/auth'
 import Login from './components/Login.jsx'
 import MapView from './components/MapView.jsx'
 import PropertyList from './components/PropertyList.jsx'
@@ -17,25 +16,26 @@ const NAV_ITEMS = [
   { id: 'buyers', label: 'BUYERS', icon: '🎯' },
 ]
 
-const USER_PROFILES = {
-  'chris@duhscommercial.com': { name: 'Chris Gentzkow', id: 'CG' },
-  'austin@duhscommercial.com': { name: 'Austin Dias', id: 'AD' },
-}
-
 export default function App() {
-  const [user, setUser] = useState(undefined) // undefined = loading
+  const [currentUser, setCurrentUser] = useState(() => {
+    try { return JSON.parse(sessionStorage.getItem('sv_user')) } catch { return null }
+  })
   const [activeTab, setActiveTab] = useState('map')
   const [properties, setProperties] = useState([])
   const [selectedProperty, setSelectedProperty] = useState(null)
   const [dbReady, setDbReady] = useState(false)
 
-  useEffect(() => {
-    const unsub = onAuthStateChanged(auth, u => setUser(u || null))
-    return () => unsub()
-  }, [])
+  const handleLogin = (user) => {
+    sessionStorage.setItem('sv_user', JSON.stringify(user))
+    setCurrentUser(user)
+  }
+  const handleLogout = () => {
+    sessionStorage.removeItem('sv_user')
+    setCurrentUser(null)
+  }
 
   useEffect(() => {
-    if (!user) return
+    if (!currentUser) return
     const baseProps = rawProperties.map(p => ({
       ...p,
       callStatus: p.callStatus || 'not_called',
@@ -55,7 +55,7 @@ export default function App() {
     }, () => setDbReady(true))
 
     return () => unsub()
-  }, [user])
+  }, [currentUser])
 
   const updateProperty = async (id, updates) => {
     setProperties(prev => prev.map(p => p.id === id ? { ...p, ...updates } : p))
@@ -67,16 +67,7 @@ export default function App() {
     }
   }
 
-  // Loading
-  if (user === undefined) {
-    return <div style={{ height: '100vh', background: '#080d1a', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <div style={{ color: '#475569', fontSize: '13px' }}>Loading…</div>
-    </div>
-  }
-
-  if (!user) return <Login />
-
-  const profile = USER_PROFILES[user.email] || { name: user.email, id: 'U' }
+  if (!currentUser) return <Login onLogin={handleLogin} />
 
   const stats = {
     total: properties.length,
@@ -103,21 +94,16 @@ export default function App() {
           </span>
           {!dbReady && <span style={{ fontSize: '10px', color: '#475569' }}>connecting…</span>}
         </div>
-
         <nav style={{ display: 'flex', gap: '4px' }}>
           {NAV_ITEMS.map(item => (
-            <button key={item.id} onClick={() => setActiveTab(item.id)}
-              style={{
-                padding: '6px 14px', border: 'none', borderRadius: '6px', cursor: 'pointer',
-                fontSize: '11px', fontWeight: 700, letterSpacing: '0.06em',
-                background: activeTab === item.id ? '#f59e0b' : 'transparent',
-                color: activeTab === item.id ? '#000' : '#94a3b8',
-              }}>
-              {item.icon} {item.label}
-            </button>
+            <button key={item.id} onClick={() => setActiveTab(item.id)} style={{
+              padding: '6px 14px', border: 'none', borderRadius: '6px', cursor: 'pointer',
+              fontSize: '11px', fontWeight: 700, letterSpacing: '0.06em',
+              background: activeTab === item.id ? '#f59e0b' : 'transparent',
+              color: activeTab === item.id ? '#000' : '#94a3b8',
+            }}>{item.icon} {item.label}</button>
           ))}
         </nav>
-
         <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
           <div style={{ display: 'flex', gap: '20px', fontSize: '11px' }}>
             {[
@@ -137,10 +123,10 @@ export default function App() {
               width: '28px', height: '28px', borderRadius: '50%', background: '#1e2d47',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               fontSize: '11px', fontWeight: 700, color: '#f59e0b'
-            }}>{profile.id}</div>
+            }}>{currentUser.id}</div>
             <div>
-              <div style={{ fontSize: '11px', color: '#e2e8f0', fontWeight: 600 }}>{profile.name}</div>
-              <button onClick={() => signOut(auth)} style={{
+              <div style={{ fontSize: '11px', color: '#e2e8f0', fontWeight: 600 }}>{currentUser.name}</div>
+              <button onClick={handleLogout} style={{
                 background: 'none', border: 'none', color: '#475569', fontSize: '10px',
                 cursor: 'pointer', padding: 0, textDecoration: 'underline'
               }}>Sign out</button>
@@ -148,16 +134,9 @@ export default function App() {
           </div>
         </div>
       </header>
-
       <main style={{ flex: 1, overflow: 'hidden' }}>
-        {activeTab === 'map' && (
-          <MapView properties={properties} selectedProperty={selectedProperty}
-            setSelectedProperty={setSelectedProperty} updateProperty={updateProperty} />
-        )}
-        {activeTab === 'properties' && (
-          <PropertyList properties={properties} selectedProperty={selectedProperty}
-            setSelectedProperty={setSelectedProperty} updateProperty={updateProperty} />
-        )}
+        {activeTab === 'map' && <MapView properties={properties} currentUser={currentUser} selectedProperty={selectedProperty} setSelectedProperty={setSelectedProperty} updateProperty={updateProperty} />}
+        {activeTab === 'properties' && <PropertyList properties={properties} currentUser={currentUser} selectedProperty={selectedProperty} setSelectedProperty={setSelectedProperty} updateProperty={updateProperty} />}
         {activeTab === 'dashboard' && <Dashboard comps={rawComps} properties={properties} />}
         {activeTab === 'buyers' && <BuyerProfiles />}
       </main>

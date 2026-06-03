@@ -45,7 +45,7 @@ function createSVGIcon(color, sf, forSale) {
   })
 }
 
-export default function MapView({ properties, selectedProperty, setSelectedProperty, updateProperty }) {
+export default function MapView({ properties, selectedProperty, setSelectedProperty, updateProperty, currentUser }) {
   const mapRef = useRef(null)
   const mapInstanceRef = useRef(null)
   const markersRef = useRef({})
@@ -264,7 +264,7 @@ export default function MapView({ properties, selectedProperty, setSelectedPrope
 
       {/* Property Drawer */}
       {selectedProperty && (
-        <PropertyDrawer
+        <PropertyDrawer currentUser={currentUser}
           property={properties.find(p => p.id === selectedProperty.id) || selectedProperty}
           onClose={() => setSelectedProperty(null)}
           updateProperty={updateProperty}

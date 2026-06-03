@@ -1,23 +1,24 @@
 import { useState } from 'react'
-import { auth } from '../firebase.js'
-import { signInWithEmailAndPassword } from 'firebase/auth'
 
-export default function Login() {
+const USERS = {
+  'chris@duhscommercial.com': { password: 'scottandcraig', name: 'Chris Gentzkow', id: 'CG' },
+  'austin@duhscommercial.com': { password: 'scottandcraig', name: 'Austin Dias', id: 'AD' },
+}
+
+export default function Login({ onLogin }) {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
-  const [loading, setLoading] = useState(false)
 
-  const login = async (e) => {
+  const login = (e) => {
     e.preventDefault()
     setError('')
-    setLoading(true)
-    try {
-      await signInWithEmailAndPassword(auth, email, password)
-    } catch(err) {
-      setError(err?.code || err?.message || 'Invalid email or password')
+    const user = USERS[email.toLowerCase().trim()]
+    if (user && user.password === password) {
+      onLogin({ email: email.toLowerCase().trim(), name: user.name, id: user.id })
+    } else {
+      setError('Invalid email or password')
     }
-    setLoading(false)
   }
 
   return (
@@ -42,34 +43,26 @@ export default function Login() {
             <div style={{ fontSize: '11px', color: '#475569' }}>Self-Storage Intelligence</div>
           </div>
         </div>
-
         <form onSubmit={login}>
-          <input
-            type="email" placeholder="Email" value={email}
+          <input type="email" placeholder="Email" value={email}
             onChange={e => setEmail(e.target.value)} required
             style={{
               width: '100%', padding: '10px 12px', marginBottom: '10px',
               background: '#1a2540', border: '1px solid #2d3f5e', borderRadius: '6px',
               color: '#e2e8f0', fontSize: '13px', boxSizing: 'border-box', outline: 'none',
-            }}
-          />
-          <input
-            type="password" placeholder="Password" value={password}
+            }} />
+          <input type="password" placeholder="Password" value={password}
             onChange={e => setPassword(e.target.value)} required
             style={{
               width: '100%', padding: '10px 12px', marginBottom: '16px',
               background: '#1a2540', border: '1px solid #2d3f5e', borderRadius: '6px',
               color: '#e2e8f0', fontSize: '13px', boxSizing: 'border-box', outline: 'none',
-            }}
-          />
+            }} />
           {error && <div style={{ color: '#f87171', fontSize: '12px', marginBottom: '12px' }}>{error}</div>}
-          <button type="submit" disabled={loading} style={{
+          <button type="submit" style={{
             width: '100%', padding: '10px', background: '#f59e0b', border: 'none',
-            borderRadius: '6px', color: '#000', fontWeight: 700, fontSize: '13px',
-            cursor: loading ? 'not-allowed' : 'pointer', opacity: loading ? 0.7 : 1,
-          }}>
-            {loading ? 'Signing in…' : 'Sign In'}
-          </button>
+            borderRadius: '6px', color: '#000', fontWeight: 700, fontSize: '13px', cursor: 'pointer',
+          }}>Sign In</button>
         </form>
       </div>
     </div>
