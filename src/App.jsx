@@ -6,6 +6,7 @@ import MapView from './components/MapView.jsx'
 import PropertyList from './components/PropertyList.jsx'
 import Dashboard from './components/Dashboard.jsx'
 import BuyerProfiles from './components/BuyerProfiles.jsx'
+import BusinessPlan from './components/BusinessPlan.jsx'
 import rawProperties from './data/properties.json'
 import rawComps from './data/comps.json'
 
@@ -14,6 +15,7 @@ const NAV_ITEMS = [
   { id: 'properties', label: 'PROPERTIES', icon: '🏢' },
   { id: 'dashboard', label: 'MARKET', icon: '📊' },
   { id: 'buyers', label: 'BUYERS', icon: '🎯' },
+  { id: 'plan', label: 'BUSINESS PLAN', icon: '📋' },
 ]
 
 export default function App() {
@@ -139,6 +141,7 @@ export default function App() {
         {activeTab === 'properties' && <PropertyList properties={properties} currentUser={currentUser} selectedProperty={selectedProperty} setSelectedProperty={setSelectedProperty} updateProperty={updateProperty} />}
         {activeTab === 'dashboard' && <Dashboard comps={rawComps} properties={properties} />}
         {activeTab === 'buyers' && <BuyerProfiles currentUser={currentUser} />}
+        {activeTab === 'plan' && <BusinessPlan />}
       </main>
     </div>
   )
