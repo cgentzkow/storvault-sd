@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react'
-import { db } from './firebase.js'
+import { db, auth } from './firebase.js'
 import { collection, doc, setDoc, onSnapshot } from 'firebase/firestore'
+import { onAuthStateChanged, signOut } from 'firebase/auth'
+import Login from './components/Login.jsx'
 import MapView from './components/MapView.jsx'
 import PropertyList from './components/PropertyList.jsx'
 import Dashboard from './components/Dashboard.jsx'
@@ -15,26 +17,32 @@ const NAV_ITEMS = [
   { id: 'buyers', label: 'BUYERS', icon: '🎯' },
 ]
 
+const USER_PROFILES = {
+  'chris@duhscommercial.com': { name: 'Chris Gentzkow', id: 'CG' },
+  'austin@duhscommercial.com': { name: 'Austin Dias', id: 'AD' },
+}
+
 export default function App() {
+  const [user, setUser] = useState(undefined) // undefined = loading
   const [activeTab, setActiveTab] = useState('map')
   const [properties, setProperties] = useState([])
   const [selectedProperty, setSelectedProperty] = useState(null)
   const [dbReady, setDbReady] = useState(false)
 
   useEffect(() => {
+    const unsub = onAuthStateChanged(auth, u => setUser(u || null))
+    return () => unsub()
+  }, [])
+
+  useEffect(() => {
+    if (!user) return
     const baseProps = rawProperties.map(p => ({
       ...p,
-      name: p.name === 'nan' ? '' : p.name,
-      ownerContact: p.ownerContact === 'nan' ? '' : p.ownerContact,
-      ownerPhone: p.ownerPhone === 'nan' ? '' : p.ownerPhone,
-      loanMaturity: p.loanMaturity === 'nan' ? '' : p.loanMaturity,
-      parentCompany: p.parentCompany === 'nan' ? '' : p.parentCompany,
       callStatus: p.callStatus || 'not_called',
       callLog: [],
     }))
     setProperties(baseProps)
 
-    // Live sync CRM data from Firestore storvault_properties
     const unsub = onSnapshot(collection(db, 'storvault_properties'), snapshot => {
       const crmMap = {}
       snapshot.forEach(d => { crmMap[d.id] = d.data() })
@@ -47,7 +55,7 @@ export default function App() {
     }, () => setDbReady(true))
 
     return () => unsub()
-  }, [])
+  }, [user])
 
   const updateProperty = async (id, updates) => {
     setProperties(prev => prev.map(p => p.id === id ? { ...p, ...updates } : p))
@@ -58,6 +66,17 @@ export default function App() {
       await setDoc(doc(db, 'storvault_properties', String(id)), crmFields, { merge: true })
     }
   }
+
+  // Loading
+  if (user === undefined) {
+    return <div style={{ height: '100vh', background: '#080d1a', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <div style={{ color: '#475569', fontSize: '13px' }}>Loading…</div>
+    </div>
+  }
+
+  if (!user) return <Login />
+
+  const profile = USER_PROFILES[user.email] || { name: user.email, id: 'U' }
 
   const stats = {
     total: properties.length,
@@ -99,18 +118,34 @@ export default function App() {
           ))}
         </nav>
 
-        <div style={{ display: 'flex', gap: '20px', fontSize: '11px' }}>
-          {[
-            { label: 'PROPERTIES', val: stats.total, color: '#60a5fa' },
-            { label: 'CALLED', val: stats.called, color: '#34d399' },
-            { label: 'INTERESTED', val: stats.interested, color: '#f59e0b' },
-            { label: 'FOR SALE', val: stats.forSale, color: '#f87171' },
-          ].map(s => (
-            <div key={s.label} style={{ textAlign: 'center' }}>
-              <div style={{ color: s.color, fontWeight: 800, fontSize: '15px' }}>{s.val}</div>
-              <div style={{ color: '#475569', letterSpacing: '0.05em' }}>{s.label}</div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+          <div style={{ display: 'flex', gap: '20px', fontSize: '11px' }}>
+            {[
+              { label: 'PROPERTIES', val: stats.total, color: '#60a5fa' },
+              { label: 'CALLED', val: stats.called, color: '#34d399' },
+              { label: 'INTERESTED', val: stats.interested, color: '#f59e0b' },
+              { label: 'FOR SALE', val: stats.forSale, color: '#f87171' },
+            ].map(s => (
+              <div key={s.label} style={{ textAlign: 'center' }}>
+                <div style={{ color: s.color, fontWeight: 800, fontSize: '15px' }}>{s.val}</div>
+                <div style={{ color: '#475569', letterSpacing: '0.05em' }}>{s.label}</div>
+              </div>
+            ))}
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', borderLeft: '1px solid #1e2d47', paddingLeft: '16px' }}>
+            <div style={{
+              width: '28px', height: '28px', borderRadius: '50%', background: '#1e2d47',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontSize: '11px', fontWeight: 700, color: '#f59e0b'
+            }}>{profile.id}</div>
+            <div>
+              <div style={{ fontSize: '11px', color: '#e2e8f0', fontWeight: 600 }}>{profile.name}</div>
+              <button onClick={() => signOut(auth)} style={{
+                background: 'none', border: 'none', color: '#475569', fontSize: '10px',
+                cursor: 'pointer', padding: 0, textDecoration: 'underline'
+              }}>Sign out</button>
             </div>
-          ))}
+          </div>
         </div>
       </header>
 

@@ -1,6 +1,11 @@
 import { useState, useEffect } from 'react'
-import { db } from '../firebase.js'
+import { db, auth } from '../firebase.js'
 import { collection, addDoc, query, where, onSnapshot, deleteDoc, doc } from 'firebase/firestore'
+
+const USER_PROFILES = {
+  'chris@duhscommercial.com': { name: 'Chris Gentzkow', id: 'CG' },
+  'austin@duhscommercial.com': { name: 'Austin Dias', id: 'AD' },
+}
 
 const STATUS_OPTIONS = [
   { value: 'not_called', label: 'Not Called', color: '#60a5fa' },
@@ -72,8 +77,8 @@ export default function PropertyDrawer({ property, onClose, updateProperty }) {
       id: uid(),
       text: note.trim(),
       type: noteType,
-      author: 'Chris Gentzkow',
-      authorId: 'CG',
+      author: USER_PROFILES[auth.currentUser?.email]?.name || auth.currentUser?.email || 'Unknown',
+      authorId: USER_PROFILES[auth.currentUser?.email]?.id || 'U',
       timestamp: new Date().toISOString(),
       source: 'storvault',
       linkedProperties: [propId],
