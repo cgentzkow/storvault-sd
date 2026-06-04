@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useMemo } from 'react'
+import { useState, useEffect, useRef } from 'react'
 
 export const MAP_DARK_STYLE = [
   { elementType: 'geometry', stylers: [{ color: '#0d1526' }] },
@@ -79,12 +79,22 @@ export function useMapOverlays(mapRef, mapType, defaultIndustrial = false) {
     parcelOverlayRef.current = overlay
   }, [showParcel, mapRef.current])
 
-  const mapOptions = useMemo(() => ({
-    mapTypeId: mapType === 'aerial' ? 'satellite' : mapType === 'hybrid' ? 'hybrid' : 'roadmap',
-    styles: mapType === 'dark' ? MAP_DARK_STYLE : (mapType === 'street' ? [] : undefined),
+  // Apply map style imperatively so zoom/pan are never reset
+  useEffect(() => {
+    const map = mapRef.current
+    if (!map || !window.google) return
+    const typeId = mapType === 'aerial' ? 'satellite' : mapType === 'hybrid' ? 'hybrid' : 'roadmap'
+    const styles = mapType === 'dark' ? MAP_DARK_STYLE : []
+    map.setMapTypeId(typeId)
+    map.setOptions({ styles })
+  }, [mapType, mapRef.current])
+
+  // Stable initial options — never changes so GoogleMap never re-initializes
+  const mapOptions = {
+    mapTypeId: 'roadmap',
     mapTypeControl: false, streetViewControl: false, fullscreenControl: false,
     gestureHandling: 'greedy',
-  }), [mapType])
+  }
 
   return { showIndustrial, setShowIndustrial, showParcel, setShowParcel, mapOptions }
 }

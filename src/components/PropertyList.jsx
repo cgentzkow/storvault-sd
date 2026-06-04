@@ -192,10 +192,8 @@ export default function PropertyList({ properties, selectedProperty, setSelected
     return () => { window.removeEventListener('mousemove', onMove); window.removeEventListener('mouseup', onUp) }
   }, [isDragging])
 
-  const fullMapOptions = useMemo(() => ({
-    center: { lat: 32.78, lng: -117.1 }, zoom: 10,
-    ...mapOptions,
-  }), [mapOptions])
+  // Stable initial options — center/zoom only; style applied imperatively in useMapOverlays
+  const fullMapOptions = { center: { lat: 32.78, lng: -117.1 }, zoom: 10, ...mapOptions }
 
   const inpStyle = { background:'#0d1526', border:'1px solid #1e2d47', borderRadius:'6px', color:'#e2e8f0', padding:'6px 10px', fontSize:'12px' }
   const selStyle = { ...inpStyle, cursor:'pointer' }

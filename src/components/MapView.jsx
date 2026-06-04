@@ -301,14 +301,24 @@ export default function MapView({ properties, selectedProperty, setSelectedPrope
     }
   }, [selectedProperty])
 
-  const mapOptions = useMemo(() => ({
+  // Stable initial options — never recreated so map never resets zoom/pan
+  const [mapOptions] = useState({
     center: { lat: 32.78, lng: -117.1 },
     zoom: 10,
-    mapTypeId: mapType === 'aerial' ? 'satellite' : mapType === 'hybrid' ? 'hybrid' : 'roadmap',
-    styles: mapType === 'dark' ? MAP_DARK_STYLE : mapType === 'street' ? [] : undefined,
+    mapTypeId: 'roadmap',
     mapTypeControl: false, streetViewControl: false, fullscreenControl: false,
     gestureHandling: 'greedy',
-  }), [mapType])
+  })
+
+  // Apply map style/type changes imperatively so zoom & pan are preserved
+  useEffect(() => {
+    const map = mapRef.current
+    if (!map || !window.google) return
+    const typeId = mapType === 'aerial' ? 'satellite' : mapType === 'hybrid' ? 'hybrid' : 'roadmap'
+    const styles = mapType === 'dark' ? MAP_DARK_STYLE : []
+    map.setMapTypeId(typeId)
+    map.setOptions({ styles })
+  }, [mapType, mapRef.current])
 
   const btnStyle = (active, accent) => ({
     padding: '5px 9px', border: 'none', borderRadius: '5px', cursor: 'pointer',
