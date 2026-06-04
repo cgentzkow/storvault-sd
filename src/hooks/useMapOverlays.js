@@ -38,6 +38,7 @@ export function useMapOverlays(mapRef, mapType, defaultIndustrial = false) {
   const [industrialData, setIndustrialData] = useState(null)
   const [showParcel, setShowParcel] = useState(false)
   const [showIndustrial, setShowIndustrial] = useState(defaultIndustrial)
+  const [mapReady, setMapReady] = useState(false)
 
   useEffect(() => {
     fetch('/industrial_overlay.geojson').then(r => r.json()).then(setIndustrialData).catch(() => {})
@@ -79,7 +80,7 @@ export function useMapOverlays(mapRef, mapType, defaultIndustrial = false) {
     parcelOverlayRef.current = overlay
   }, [showParcel, mapRef.current])
 
-  // Apply map style imperatively so zoom/pan are never reset
+  // Apply map style imperatively whenever mapType changes (or map becomes ready)
   useEffect(() => {
     const map = mapRef.current
     if (!map || !window.google) return
@@ -87,14 +88,23 @@ export function useMapOverlays(mapRef, mapType, defaultIndustrial = false) {
     const styles = mapType === 'dark' ? MAP_DARK_STYLE : []
     map.setMapTypeId(typeId)
     map.setOptions({ styles })
-  }, [mapType, mapRef.current])
+  }, [mapType, mapReady])
 
-  // Stable initial options — never changes so GoogleMap never re-initializes
-  const mapOptions = {
+  // Stable initial options — NO center/zoom so GoogleMap never resets position
+  const [mapOptions] = useState({
     mapTypeId: 'roadmap',
     mapTypeControl: false, streetViewControl: false, fullscreenControl: false,
     gestureHandling: 'greedy',
+  })
+
+  const onMapReadyCallback = (map) => {
+    mapRef.current = map
+    setMapReady(true)
+    // Apply initial dark style
+    if (window.google) {
+      map.setOptions({ styles: MAP_DARK_STYLE })
+    }
   }
 
-  return { showIndustrial, setShowIndustrial, showParcel, setShowParcel, mapOptions }
+  return { showIndustrial, setShowIndustrial, showParcel, setShowParcel, mapOptions, onMapReadyCallback }
 }

@@ -159,7 +159,7 @@ export default function PropertyList({ properties, selectedProperty, setSelected
   const dragStartX = useRef(0)
   const dragStartWidth = useRef(0)
 
-  const { showIndustrial, setShowIndustrial, showParcel, setShowParcel, mapOptions } = useMapOverlays(mapRef, mapType, false)
+  const { showIndustrial, setShowIndustrial, showParcel, setShowParcel, mapOptions, onMapReadyCallback } = useMapOverlays(mapRef, mapType, false)
 
   const submarkets = useMemo(() => [...new Set(properties.map(p=>p.submarket))].filter(Boolean).sort(), [properties])
 
@@ -183,7 +183,7 @@ export default function PropertyList({ properties, selectedProperty, setSelected
     return arr.sort((a,b)=>(b.sf||0)-(a.sf||0))
   }, [properties, search, filterOwner, filterStatus, filterSubmarket, filterMinSF, filterMaxSF])
 
-  const onMapLoad = useCallback(m=>{ mapRef.current=m }, [])
+  // Map load handled by useMapOverlays (sets mapRef + triggers style effect)
 
   const onDragStart = useCallback((e) => {
     e.preventDefault()
@@ -204,8 +204,8 @@ export default function PropertyList({ properties, selectedProperty, setSelected
     return () => { window.removeEventListener('mousemove', onMove); window.removeEventListener('mouseup', onUp) }
   }, [isDragging])
 
-  // Stable initial options — center/zoom only; style applied imperatively in useMapOverlays
-  const fullMapOptions = { center: { lat: 32.78, lng: -117.1 }, zoom: 10, ...mapOptions }
+  // Stable initial center/zoom — merged once into a useState so GoogleMap never resets position
+  const [fullMapOptions] = useState({ center: { lat: 32.78, lng: -117.1 }, zoom: 10, ...mapOptions })
 
   const inpStyle = { background:'#0d1526', border:'1px solid #1e2d47', borderRadius:'6px', color:'#e2e8f0', padding:'6px 10px', fontSize:'12px' }
   const selStyle = { ...inpStyle, cursor:'pointer' }
@@ -304,7 +304,7 @@ export default function PropertyList({ properties, selectedProperty, setSelected
         {isLoaded ? (
           <GoogleMap mapContainerStyle={{ width:'100%', height:'100%' }}
             options={fullMapOptions}
-            onLoad={onMapLoad}>
+            onLoad={onMapReadyCallback}>
             {filtered.map(prop => prop.lat && prop.lng ? (
               <MapMarker key={prop.id} prop={prop}
                 onClick={p=>{ setSelectedProperty(p); mapRef.current?.panTo({lat:p.lat,lng:p.lng}) }}

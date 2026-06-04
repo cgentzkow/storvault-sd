@@ -219,6 +219,7 @@ export default function MapView({ properties, selectedProperty, setSelectedPrope
   const [filterSubmarket, setFilterSubmarket] = useState('all')
   const [leads, setLeads] = useState([])
   const [detailProp, setDetailProp] = useState(null)
+  const [mapReady, setMapReady] = useState(false)
 
   // Fetch leads from Firestore
   useEffect(() => {
@@ -304,7 +305,11 @@ export default function MapView({ properties, selectedProperty, setSelectedPrope
     parcelOverlayRef.current = overlay
   }, [showParcel, mapRef.current])
 
-  const onMapLoad = useCallback((map) => { mapRef.current = map }, [])
+  const onMapLoad = useCallback((map) => {
+    mapRef.current = map
+    setMapReady(true)
+    if (window.google) map.setOptions({ styles: MAP_DARK_STYLE })
+  }, [])
 
   // Pan to selected WITHOUT changing zoom
   useEffect(() => {
@@ -330,7 +335,7 @@ export default function MapView({ properties, selectedProperty, setSelectedPrope
     const styles = mapType === 'dark' ? MAP_DARK_STYLE : []
     map.setMapTypeId(typeId)
     map.setOptions({ styles })
-  }, [mapType, mapRef.current])
+  }, [mapType, mapReady])
 
   const btnStyle = (active, accent) => ({
     padding: '5px 9px', border: 'none', borderRadius: '5px', cursor: 'pointer',
