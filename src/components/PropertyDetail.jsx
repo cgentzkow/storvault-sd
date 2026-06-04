@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 import { GoogleMap, StreetViewPanorama } from '@react-google-maps/api'
 import { useGoogleMaps } from '../hooks/useGoogleMaps.js'
 import { db } from '../firebase.js'
-import { collection, addDoc, query, where, onSnapshot, deleteDoc, doc } from 'firebase/firestore'
+import { collection, addDoc, query, where, onSnapshot, deleteDoc, doc, updateDoc } from 'firebase/firestore'
 
 const GMAPS_KEY = 'AIzaSyCLnBGWiIGI8OtYlHgLImzn0JY5FVjuQ6k'
 
@@ -41,15 +41,96 @@ function ContactButtons({ phone, email, name }) {
   )
 }
 
+// Photo panel — paste or click to upload, saves to Firestore
+function PhotoPanel({ propId, heroPhoto, onSave }) {
+  const [dragging, setDragging] = useState(false)
+  const fileRef = useRef()
+
+  const processFile = (file) => {
+    if (!file || !file.type.startsWith('image/')) return
+    const reader = new FileReader()
+    reader.onload = (e) => onSave(e.target.result)
+    reader.readAsDataURL(file)
+  }
+
+  // Paste from clipboard (Cmd+V anywhere in panel)
+  const onPaste = useCallback((e) => {
+    const items = e.clipboardData?.items
+    if (!items) return
+    for (const item of items) {
+      if (item.type.startsWith('image/')) {
+        processFile(item.getAsFile())
+        return
+      }
+    }
+  }, [onSave])
+
+  useEffect(() => {
+    window.addEventListener('paste', onPaste)
+    return () => window.removeEventListener('paste', onPaste)
+  }, [onPaste])
+
+  if (heroPhoto) {
+    return (
+      <div style={{ position: 'relative', width: '100%', height: '100%', overflow: 'hidden', background: '#000' }}>
+        <img src={heroPhoto} alt="Property" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+        <div style={{ position: 'absolute', top: '8px', right: '8px', display: 'flex', gap: '6px' }}>
+          <button onClick={() => fileRef.current.click()}
+            style={{ padding: '4px 10px', background: 'rgba(0,0,0,0.7)', border: '1px solid #475569', borderRadius: '5px', color: '#e2e8f0', fontSize: '10px', fontWeight: 600, cursor: 'pointer' }}>
+            📷 Replace
+          </button>
+          <button onClick={() => onSave(null)}
+            style={{ padding: '4px 10px', background: 'rgba(0,0,0,0.7)', border: '1px solid #475569', borderRadius: '5px', color: '#f87171', fontSize: '10px', fontWeight: 600, cursor: 'pointer' }}>
+            ✕ Remove
+          </button>
+        </div>
+        <input ref={fileRef} type="file" accept="image/*" style={{ display: 'none' }}
+          onChange={e => processFile(e.target.files[0])} />
+      </div>
+    )
+  }
+
+  return (
+    <div
+      onDragOver={e => { e.preventDefault(); setDragging(true) }}
+      onDragLeave={() => setDragging(false)}
+      onDrop={e => { e.preventDefault(); setDragging(false); processFile(e.dataTransfer.files[0]) }}
+      onClick={() => fileRef.current.click()}
+      style={{
+        width: '100%', height: '100%', display: 'flex', flexDirection: 'column',
+        alignItems: 'center', justifyContent: 'center', gap: '10px', cursor: 'pointer',
+        background: dragging ? '#1a2d4a' : '#080d1a',
+        border: `2px dashed ${dragging ? '#60a5fa' : '#1e2d47'}`,
+        borderRadius: '4px', transition: 'all 0.15s',
+      }}>
+      <div style={{ fontSize: '32px' }}>📷</div>
+      <div style={{ fontSize: '13px', fontWeight: 600, color: '#64748b' }}>Add a property photo</div>
+      <div style={{ fontSize: '11px', color: '#334155', textAlign: 'center', lineHeight: 1.5 }}>
+        Click to upload · Drag & drop<br/>or <strong style={{ color: '#60a5fa' }}>⌘V</strong> to paste a screenshot
+      </div>
+      <input ref={fileRef} type="file" accept="image/*" style={{ display: 'none' }}
+        onChange={e => processFile(e.target.files[0])} />
+    </div>
+  )
+}
+
 export default function PropertyDetail({ property, onClose, updateProperty, currentUser }) {
   const isLoaded = useGoogleMaps()
-  const [view, setView] = useState('satellite') // satellite | street
+  const [view, setView] = useState('satellite') // satellite | street | photo
   const [note, setNote] = useState('')
   const [noteType, setNoteType] = useState('call')
   const [notes, setNotes] = useState([])
+  const [heroPhoto, setHeroPhoto] = useState(property.heroPhoto || null)
   const p = property
   const propId = String(p.id)
   const statusOpt = STATUS_OPTIONS.find(s => s.value === p.callStatus) || STATUS_OPTIONS[0]
+
+  // Auto-switch to photo tab if photo exists
+  useEffect(() => {
+    if (property.heroPhoto) {
+      setHeroPhoto(property.heroPhoto)
+    }
+  }, [property.heroPhoto])
 
   useEffect(() => {
     const q = query(collection(db, 'gentz_notes'), where('linkedProperties', 'array-contains', propId))
@@ -59,6 +140,18 @@ export default function PropertyDetail({ property, onClose, updateProperty, curr
     })
     return () => unsub()
   }, [propId])
+
+  const savePhoto = async (dataUrl) => {
+    setHeroPhoto(dataUrl)
+    if (dataUrl) setView('photo')
+    // Save to Firestore property document
+    try {
+      await updateDoc(doc(db, 'storvault_properties', propId), { heroPhoto: dataUrl || '' })
+    } catch (e) {
+      // Also update via updateProperty for local state
+    }
+    updateProperty(p.id, { heroPhoto: dataUrl || null })
+  }
 
   const addNote = async () => {
     if (!note.trim()) return
@@ -87,6 +180,15 @@ export default function PropertyDetail({ property, onClose, updateProperty, curr
     </div>
   ) : null
 
+  const tabBtn = (v, label) => (
+    <button key={v} onClick={() => setView(v)} style={{
+      padding: '5px 12px', border: 'none', borderRadius: '5px', cursor: 'pointer',
+      fontSize: '11px', fontWeight: 700,
+      background: view === v ? '#f59e0b' : '#1e2d47',
+      color: view === v ? '#000' : '#94a3b8',
+    }}>{label}</button>
+  )
+
   return (
     <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
       <div style={{ background: '#0d1526', border: '1px solid #1e2d47', borderRadius: '12px', width: '100%', maxWidth: '1100px', maxHeight: '90vh', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
@@ -109,33 +211,36 @@ export default function PropertyDetail({ property, onClose, updateProperty, curr
         {/* Body */}
         <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
 
-          {/* Left: Maps */}
+          {/* Left: Map / Photo */}
           <div style={{ width: '55%', display: 'flex', flexDirection: 'column', borderRight: '1px solid #1e2d47', flexShrink: 0 }}>
-            {/* Map type toggle */}
-            <div style={{ display: 'flex', gap: '6px', padding: '10px 14px', background: '#080d1a', borderBottom: '1px solid #1e2d47' }}>
-              {[['satellite','🛰 Aerial'],['street','🚶 Street View']].map(([v,l]) => (
-                <button key={v} onClick={() => setView(v)} style={{
-                  padding: '5px 12px', border: 'none', borderRadius: '5px', cursor: 'pointer',
-                  fontSize: '11px', fontWeight: 700,
-                  background: view === v ? '#f59e0b' : '#1e2d47',
-                  color: view === v ? '#000' : '#94a3b8',
-                }}>{l}</button>
-              ))}
-              <a href={`https://www.google.com/maps/search/?api=1&query=${p.lat},${p.lng}`} target="_blank" rel="noreferrer"
-                style={{ marginLeft: 'auto', padding: '5px 12px', background: '#1e2d47', border: 'none', borderRadius: '5px', color: '#60a5fa', fontSize: '11px', fontWeight: 700, textDecoration: 'none' }}>
-                🗺 Open in Maps
-              </a>
+            {/* Tab toggle */}
+            <div style={{ display: 'flex', gap: '6px', padding: '10px 14px', background: '#080d1a', borderBottom: '1px solid #1e2d47', alignItems: 'center' }}>
+              {tabBtn('satellite', '🛰 Aerial')}
+              {tabBtn('street', '🚶 Street View')}
+              <button onClick={() => setView('photo')} style={{
+                padding: '5px 12px', border: heroPhoto ? '1px solid #f59e0b44' : 'none',
+                borderRadius: '5px', cursor: 'pointer', fontSize: '11px', fontWeight: 700,
+                background: view === 'photo' ? '#f59e0b' : heroPhoto ? '#1e2d4799' : '#1e2d47',
+                color: view === 'photo' ? '#000' : heroPhoto ? '#f59e0b' : '#94a3b8',
+              }}>
+                {heroPhoto ? '📷 Photo ✓' : '📷 Photo'}
+              </button>
+              {view !== 'photo' && (
+                <a href={`https://www.google.com/maps/search/?api=1&query=${p.lat},${p.lng}`} target="_blank" rel="noreferrer"
+                  style={{ marginLeft: 'auto', padding: '5px 12px', background: '#1e2d47', border: 'none', borderRadius: '5px', color: '#60a5fa', fontSize: '11px', fontWeight: 700, textDecoration: 'none' }}>
+                  🗺 Open in Maps
+                </a>
+              )}
             </div>
 
-            {/* Map */}
+            {/* View area */}
             <div style={{ flex: 1, position: 'relative' }}>
-              {isLoaded && p.lat && p.lng ? (
+              {view === 'photo' ? (
+                <PhotoPanel propId={propId} heroPhoto={heroPhoto} onSave={savePhoto} />
+              ) : isLoaded && p.lat && p.lng ? (
                 view === 'satellite' ? (
-                  <GoogleMap
-                    mapContainerStyle={{ width: '100%', height: '100%' }}
-                    center={position} zoom={17}
-                    options={{ mapTypeId: 'satellite', mapTypeControl: false, streetViewControl: false, fullscreenControl: false, zoomControl: true }}>
-                  </GoogleMap>
+                  <GoogleMap mapContainerStyle={{ width: '100%', height: '100%' }} center={position} zoom={17}
+                    options={{ mapTypeId: 'satellite', mapTypeControl: false, streetViewControl: false, fullscreenControl: false, zoomControl: true }} />
                 ) : (
                   <GoogleMap mapContainerStyle={{ width: '100%', height: '100%' }} center={position} zoom={14}
                     options={{ mapTypeControl: false, streetViewControl: false, fullscreenControl: false }}>
