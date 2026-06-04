@@ -9,6 +9,7 @@ const STATUS_OPTIONS = [
   { value: 'not_interested', label: 'Not Interested', color: '#94a3b8' },
   { value: 'under_nda', label: 'Under NDA', color: '#a78bfa' },
   { value: 'listed', label: 'Listed / Active', color: '#f87171' },
+  { value: 'under_development', label: '🏗 Under Development', color: '#fb923c' },
 ]
 
 const NOTE_TYPES = [

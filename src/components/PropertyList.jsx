@@ -7,7 +7,7 @@ const LIBRARIES = ['visualization']
 
 const STATUS_COLORS = {
   not_called:'#60a5fa', called:'#34d399', interested:'#f59e0b',
-  not_interested:'#94a3b8', under_nda:'#a78bfa', listed:'#f87171',
+  not_interested:'#94a3b8', under_nda:'#a78bfa', listed:'#f87171', under_development:'#fb923c',
 }
 const REITS = ['public storage','extra space','cubesmart','life storage','simply self','national storage','smartstop']
 const UHAUL = ['u-haul','uhaul']
