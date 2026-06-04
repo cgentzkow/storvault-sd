@@ -149,7 +149,7 @@ export default function App() {
         {activeTab==='properties' && <PropertyList properties={properties} selectedProperty={selectedProperty} setSelectedProperty={setSelectedProperty} updateProperty={updateProperty} currentUser={currentUser} />}
         {activeTab==='leads' && <Leads currentUser={currentUser} />}
         {activeTab==='dashboard' && <Dashboard comps={rawComps} properties={properties} />}
-        {activeTab==='buyers' && <BuyerProfiles currentUser={currentUser} />}
+        {activeTab==='buyers' && <BuyerProfiles currentUser={currentUser} properties={properties} onSelectProperty={(p) => { setSelectedProperty(p); setActiveTab('map') }} />}
         {activeTab==='plan' && <BusinessPlan />}
       </main>
     </div>
