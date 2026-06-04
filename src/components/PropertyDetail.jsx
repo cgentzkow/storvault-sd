@@ -1,10 +1,10 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
-import { GoogleMap, useJsApiLoader, StreetViewPanorama } from '@react-google-maps/api'
+import { GoogleMap, StreetViewPanorama } from '@react-google-maps/api'
+import { useGoogleMaps } from '../hooks/useGoogleMaps.js'
 import { db } from '../firebase.js'
 import { collection, addDoc, query, where, onSnapshot, deleteDoc, doc } from 'firebase/firestore'
 
 const GMAPS_KEY = 'AIzaSyCLnBGWiIGI8OtYlHgLImzn0JY5FVjuQ6k'
-const LIBRARIES = ['streetView']
 
 const STATUS_OPTIONS = [
   { value: 'not_called', label: 'Not Called', color: '#60a5fa' },
@@ -42,7 +42,7 @@ function ContactButtons({ phone, email, name }) {
 }
 
 export default function PropertyDetail({ property, onClose, updateProperty, currentUser }) {
-  const { isLoaded } = useJsApiLoader({ googleMapsApiKey: GMAPS_KEY, libraries: LIBRARIES })
+  const isLoaded = useGoogleMaps()
   const [view, setView] = useState('satellite') // satellite | street
   const [note, setNote] = useState('')
   const [noteType, setNoteType] = useState('call')

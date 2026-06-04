@@ -1,9 +1,9 @@
 import { useState, useMemo, useCallback, useRef, useEffect } from 'react'
-import { GoogleMap, useJsApiLoader, OverlayView } from '@react-google-maps/api'
+import { GoogleMap, OverlayView } from '@react-google-maps/api'
+import { useGoogleMaps } from '../hooks/useGoogleMaps.js'
 import PropertyDetail from './PropertyDetail.jsx'
 
 const GMAPS_KEY = 'AIzaSyCLnBGWiIGI8OtYlHgLImzn0JY5FVjuQ6k'
-const LIBRARIES = ['visualization']
 
 const STATUS_COLORS = {
   not_called:'#60a5fa', called:'#34d399', interested:'#f59e0b',
@@ -76,7 +76,7 @@ function exportCSV(props) {
 }
 
 export default function PropertyList({ properties, selectedProperty, setSelectedProperty, updateProperty, currentUser }) {
-  const { isLoaded } = useJsApiLoader({ googleMapsApiKey: GMAPS_KEY, libraries: LIBRARIES })
+  const isLoaded = useGoogleMaps()
   const mapRef = useRef(null)
   const containerRef = useRef(null)
   const [search, setSearch] = useState('')

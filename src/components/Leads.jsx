@@ -1,10 +1,10 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
-import { GoogleMap, useJsApiLoader, OverlayView } from '@react-google-maps/api'
+import { GoogleMap, OverlayView } from '@react-google-maps/api'
+import { useGoogleMaps } from '../hooks/useGoogleMaps.js'
 import { db } from '../firebase.js'
 import { collection, addDoc, onSnapshot, updateDoc, deleteDoc, doc, query, orderBy } from 'firebase/firestore'
 
 const GMAPS_KEY = 'AIzaSyCLnBGWiIGI8OtYlHgLImzn0JY5FVjuQ6k'
-const LIBRARIES = ['places', 'visualization']
 
 function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2,7) }
 
@@ -260,7 +260,7 @@ function LeadDetail({ lead, currentUser, onClose, onUpdate }) {
 }
 
 export default function Leads({ currentUser }) {
-  const { isLoaded } = useJsApiLoader({ googleMapsApiKey: GMAPS_KEY, libraries: LIBRARIES })
+  const isLoaded = useGoogleMaps()
   const mapRef = useRef(null)
   const [leads, setLeads] = useState([])
   const [showAdd, setShowAdd] = useState(false)

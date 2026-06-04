@@ -12,8 +12,6 @@ import GlobalSearch from './components/GlobalSearch.jsx'
 import rawProperties from './data/properties.json'
 import rawComps from './data/comps.json'
 
-const GMAPS_KEY = 'AIzaSyCLnBGWiIGI8OtYlHgLImzn0JY5FVjuQ6k'
-
 const NAV_ITEMS = [
   { id: 'map', label: 'MAP', icon: '🗺' },
   { id: 'properties', label: 'PROPERTIES', icon: '🏢' },
@@ -28,15 +26,7 @@ const USERS = {
   'austin@duhscommercial.com': { name: 'Austin Dias', id: 'AD' },
 }
 
-// Load Google Maps script with Places library
-function loadGoogleMaps(key) {
-  if (window.google) return
-  const script = document.createElement('script')
-  script.src = `https://maps.googleapis.com/maps/api/js?key=${key}&libraries=places,visualization`
-  script.async = true
-  document.head.appendChild(script)
-}
-loadGoogleMaps(GMAPS_KEY)
+// Google Maps loaded via useGoogleMaps hook
 
 export default function App() {
   const [currentUser, setCurrentUser] = useState(() => {
@@ -46,6 +36,18 @@ export default function App() {
   const [properties, setProperties] = useState([])
   const [selectedProperty, setSelectedProperty] = useState(null)
   const [dbReady, setDbReady] = useState(false)
+
+  // Hash-based routing for back button support
+  useEffect(() => {
+    const onHashChange = () => {
+      const tab = window.location.hash.replace('#', '') || 'map'
+      const valid = ['map','properties','leads','dashboard','buyers','plan']
+      if (valid.includes(tab)) setActiveTab(tab)
+    }
+    window.addEventListener('hashchange', onHashChange)
+    onHashChange()
+    return () => window.removeEventListener('hashchange', onHashChange)
+  }, [])
 
   const handleLogin = (user) => { sessionStorage.setItem('sv_user', JSON.stringify(user)); setCurrentUser(user) }
   const handleLogout = () => { sessionStorage.removeItem('sv_user'); setCurrentUser(null) }
@@ -109,7 +111,7 @@ export default function App() {
 
         <nav style={{ display: 'flex', gap: '2px', flexShrink: 0 }}>
           {NAV_ITEMS.map(item => (
-            <button key={item.id} onClick={() => setActiveTab(item.id)} style={{
+            <button key={item.id} onClick={() => { setActiveTab(item.id); window.location.hash = item.id }} style={{
               padding:'5px 10px', border:'none', borderRadius:'5px', cursor:'pointer',
               fontSize:'10px', fontWeight:700, letterSpacing:'0.05em',
               background: activeTab===item.id ? '#f59e0b' : 'transparent',

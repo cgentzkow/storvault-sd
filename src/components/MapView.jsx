@@ -1,9 +1,9 @@
 import { useState, useCallback, useRef, useEffect, useMemo } from 'react'
-import { GoogleMap, useJsApiLoader, OverlayView } from '@react-google-maps/api'
+import { GoogleMap, OverlayView } from '@react-google-maps/api'
+import { useGoogleMaps } from '../hooks/useGoogleMaps.js'
 import PropertyDrawer from './PropertyDrawer.jsx'
 
 const GMAPS_KEY = 'AIzaSyCLnBGWiIGI8OtYlHgLImzn0JY5FVjuQ6k'
-const LIBRARIES = ['visualization']
 
 const PARCEL_URL = 'https://gis-public.sandiegocounty.gov/arcgis/rest/services/Lots/MapServer/export'
 const PARCEL_LAYERS = encodeURIComponent(JSON.stringify([{
@@ -118,7 +118,7 @@ const MAP_DARK_STYLE = [
 ]
 
 export default function MapView({ properties, selectedProperty, setSelectedProperty, updateProperty, currentUser }) {
-  const { isLoaded } = useJsApiLoader({ googleMapsApiKey: GMAPS_KEY, libraries: LIBRARIES })
+  const isLoaded = useGoogleMaps()
   const mapRef = useRef(null)
   const parcelOverlayRef = useRef(null)
   const industrialLayerRef = useRef(null)
