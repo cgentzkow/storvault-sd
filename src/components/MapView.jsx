@@ -1,19 +1,27 @@
 import { useState, useCallback, useRef, useEffect, useMemo } from 'react'
 import { GoogleMap, OverlayView } from '@react-google-maps/api'
 import { useGoogleMaps } from '../hooks/useGoogleMaps.js'
-import { useMapOverlays } from '../hooks/useMapOverlays.js'
+import { MAP_DARK_STYLE, tile2mercBbox } from '../hooks/useMapOverlays.js'
 import MapControls from './MapControls.jsx'
 import PropertyDrawer from './PropertyDrawer.jsx'
 import PropertyDetail from './PropertyDetail.jsx'
 import { db } from '../firebase.js'
 import { collection, onSnapshot } from 'firebase/firestore'
 
+const PARCEL_URL = 'https://gis-public.sandiegocounty.gov/arcgis/rest/services/Lots/MapServer/export'
+const PARCEL_LAYERS = encodeURIComponent(JSON.stringify([{
+  id: 0, source: { type: 'mapLayer', mapLayerId: 0 },
+  drawingInfo: { renderer: { type: 'simple', symbol: {
+    type: 'esriSFS', style: 'esriSFSNull',
+    outline: { type: 'esriSLS', style: 'esriSLSSolid', color: [255, 235, 59, 255], width: 1.5 }
+  }}}
+}]))
+
 const STATUS_COLORS = {
   not_called: '#60a5fa', called: '#34d399', interested: '#f59e0b',
   not_interested: '#94a3b8', under_nda: '#a78bfa', listed: '#f87171',
 }
-
-const REITS = ['public storage','extra space','cubesmart','life storage','simply self','national storage','smartstop','nsa ','stor-quest','storquest','william warren','trojan storage','strategic storage']
+const REITS = ['public storage','extra space','cubesmart','life storage','simply self','national storage','smartstop','william warren','storquest','stor-quest','trojan storage','strategic storage']
 const UHAUL = ['u-haul','uhaul']
 
 function classifyOwner(p) {
@@ -36,7 +44,6 @@ export function getLogoName(p) {
   if (n.includes('william warren') || n.includes('storquest') || n.includes('stor-quest')) return 'StorQuest'
   if (n.includes('trojan storage')) return 'Trojan Storage'
   if (n.includes('insite') || n.includes('securespace')) return 'InSite Property Group'
-  // Fallback: try the raw owner name — logos service returns 404 for unknowns, onError hides it
   return p.parentCompany || p.trueOwner || p.owner || null
 }
 
@@ -92,36 +99,46 @@ function Marker({ prop, colorMode, onClick, isSelected }) {
   )
 }
 
-const LEAD_STATUS_NEON = {
-  active:      '#00ffcc',
-  interested:  '#00ff66',
-  under_nda:   '#cc00ff',
-  loi_sent:    '#ff9900',
-  dead:        '#ff4444',
-  closed:      '#00ff99',
+const LEAD_NEON = {
+  active: '#00ffcc', interested: '#00ff66', under_nda: '#cc00ff',
+  loi_sent: '#ff9900', dead: '#ff4444', closed: '#00ff99',
 }
 
 function LeadDot({ lead, onClick }) {
-  const color = LEAD_STATUS_NEON[lead.status] || '#00ffcc'
+  const color = LEAD_NEON[lead.status] || '#00ffcc'
   if (!lead.lat || !lead.lng) return null
   return (
     <OverlayView position={{ lat: lead.lat, lng: lead.lng }} mapPaneName={OverlayView.OVERLAY_MOUSE_TARGET}>
       <div onClick={() => onClick(lead)} title={`LEAD: ${lead.name}`}
         style={{ cursor: 'pointer', transform: 'translate(-50%,-50%)' }}>
-        <svg width="22" height="22" style={{ overflow: 'visible' }}>
+        <svg width="22" height="22" style={{ overflow: 'visible', filter: `drop-shadow(0 0 4px ${color})` }}>
           <circle cx="11" cy="11" r="9" fill={color} fillOpacity="0.15" stroke={color} strokeWidth="1.5" />
-          <circle cx="11" cy="11" r="5" fill={color} fillOpacity="0.9" />
-          <circle cx="11" cy="11" r="9" fill="none" stroke={color} strokeWidth="0.5" opacity="0.5" />
+          <circle cx="11" cy="11" r="5" fill={color} fillOpacity="0.95" />
         </svg>
       </div>
     </OverlayView>
   )
 }
 
+// Initial map options — stable object, never recreated
+const INITIAL_MAP_OPTIONS = {
+  center: { lat: 32.78, lng: -117.1 },
+  zoom: 10,
+  mapTypeId: 'roadmap',
+  styles: MAP_DARK_STYLE,
+  mapTypeControl: false, streetViewControl: false, fullscreenControl: false,
+  gestureHandling: 'greedy',
+}
+
 export default function MapView({ properties, selectedProperty, setSelectedProperty, updateProperty, currentUser }) {
   const isLoaded = useGoogleMaps()
   const mapRef = useRef(null)
+  const parcelOverlayRef = useRef(null)
+  const industrialLayerRef = useRef(null)
+  const [industrialData, setIndustrialData] = useState(null)
   const [mapType, setMapType] = useState('dark')
+  const [showParcel, setShowParcel] = useState(false)
+  const [showIndustrial, setShowIndustrial] = useState(true)
   const [colorMode, setColorMode] = useState('status')
   const [filterOwner, setFilterOwner] = useState('all')
   const [filterStatus, setFilterStatus] = useState('all')
@@ -129,31 +146,94 @@ export default function MapView({ properties, selectedProperty, setSelectedPrope
   const [leads, setLeads] = useState([])
   const [detailProp, setDetailProp] = useState(null)
 
-  const { showIndustrial, setShowIndustrial, showParcel, setShowParcel, mapOptions } = useMapOverlays(mapRef, mapType, true)
-
-  // Fetch leads + geocode any missing lat/lng
+  // Fetch leads (plain sync)
   useEffect(() => {
-    const unsub = onSnapshot(collection(db, 'storvault_leads'), async snap => {
-      const raw = snap.docs.map(d => ({ _docId: d.id, ...d.data() }))
-      // Geocode any leads missing coordinates
-      const resolved = await Promise.all(raw.map(async lead => {
-        if (lead.lat && lead.lng) return lead
-        if (!lead.address && !lead.name) return lead
-        if (!window.google) return lead
-        return new Promise(resolve => {
-          const q = [lead.address || lead.name, lead.city, 'CA'].filter(Boolean).join(', ')
-          new window.google.maps.Geocoder().geocode({ address: q }, (results, status) => {
-            if (status === 'OK' && results[0]) {
-              const loc = results[0].geometry.location
-              resolve({ ...lead, lat: loc.lat(), lng: loc.lng() })
-            } else resolve(lead)
-          })
-        })
-      }))
-      setLeads(resolved)
+    const unsub = onSnapshot(collection(db, 'storvault_leads'), snap => {
+      setLeads(snap.docs.map(d => ({ _docId: d.id, ...d.data() })))
     })
     return () => unsub()
   }, [])
+
+  // Geocode leads missing lat/lng — runs when leads or isLoaded changes
+  useEffect(() => {
+    if (!isLoaded || !window.google) return
+    const needsGeo = leads.filter(l => !l.lat || !l.lng)
+    if (!needsGeo.length) return
+    const geocoder = new window.google.maps.Geocoder()
+    needsGeo.forEach(lead => {
+      const q = [lead.address || lead.name, lead.city, 'CA'].filter(Boolean).join(', ')
+      if (!q.trim()) return
+      geocoder.geocode({ address: q }, (results, status) => {
+        if (status === 'OK' && results[0]) {
+          const loc = results[0].geometry.location
+          setLeads(prev => prev.map(l =>
+            l._docId === lead._docId ? { ...l, lat: loc.lat(), lng: loc.lng() } : l
+          ))
+        }
+      })
+    })
+  }, [leads.length, isLoaded])
+
+  // Load industrial GeoJSON
+  useEffect(() => {
+    fetch('/industrial_overlay.geojson').then(r => r.json()).then(setIndustrialData).catch(() => {})
+  }, [])
+
+  // Apply mapType changes imperatively — no zoom/center reset
+  useEffect(() => {
+    const map = mapRef.current
+    if (!map) return
+    map.setOptions({
+      mapTypeId: mapType === 'aerial' ? 'satellite' : mapType === 'hybrid' ? 'hybrid' : 'roadmap',
+      styles: mapType === 'dark' ? MAP_DARK_STYLE : (mapType === 'street' ? [] : undefined),
+    })
+  }, [mapType])
+
+  // Industrial overlay
+  useEffect(() => {
+    const map = mapRef.current
+    if (!map || !industrialData || !window.google) return
+    if (industrialLayerRef.current) industrialLayerRef.current.setMap(null)
+    if (!showIndustrial) return
+    const layer = new window.google.maps.Data()
+    layer.addGeoJson(industrialData)
+    layer.setStyle({ fillColor: '#ef4444', fillOpacity: 0.18, strokeColor: '#ef4444', strokeWeight: 1, strokeOpacity: 0.4 })
+    layer.setMap(map)
+    industrialLayerRef.current = layer
+  }, [showIndustrial, industrialData])
+
+  // Parcel overlay
+  useEffect(() => {
+    const map = mapRef.current
+    if (!map || !window.google) return
+    if (parcelOverlayRef.current) {
+      const arr = map.overlayMapTypes.getArray()
+      const idx = arr.indexOf(parcelOverlayRef.current)
+      if (idx > -1) map.overlayMapTypes.removeAt(idx)
+      parcelOverlayRef.current = null
+    }
+    if (!showParcel) return
+    const overlay = new window.google.maps.ImageMapType({
+      name: 'Parcels',
+      tileSize: new window.google.maps.Size(256, 256),
+      maxZoom: 21, minZoom: 14, opacity: 1.0,
+      getTileUrl: (coord, zoom) => {
+        if (zoom < 14) return null
+        const bbox = tile2mercBbox(coord.x, coord.y, zoom)
+        return `${PARCEL_URL}?bbox=${bbox}&size=256,256&imageSR=3857&bboxSR=3857&format=png32&transparent=true&f=image&dynamicLayers=${PARCEL_LAYERS}`
+      }
+    })
+    map.overlayMapTypes.push(overlay)
+    parcelOverlayRef.current = overlay
+  }, [showParcel])
+
+  const onMapLoad = useCallback((map) => { mapRef.current = map }, [])
+
+  useEffect(() => {
+    if (selectedProperty && mapRef.current) {
+      mapRef.current.panTo({ lat: selectedProperty.lat, lng: selectedProperty.lng })
+    }
+  }, [selectedProperty])
 
   const submarkets = useMemo(() => [...new Set(properties.map(p => p.submarket))].filter(Boolean).sort(), [properties])
 
@@ -169,17 +249,6 @@ export default function MapView({ properties, selectedProperty, setSelectedPrope
     return true
   }), [properties, filterStatus, filterSubmarket, filterOwner])
 
-  const onMapLoad = useCallback((map) => { mapRef.current = map; map.setCenter({ lat: 32.78, lng: -117.1 }); map.setZoom(10) }, [])
-
-  useEffect(() => {
-    if (selectedProperty && mapRef.current) {
-      mapRef.current.panTo({ lat: selectedProperty.lat, lng: selectedProperty.lng })
-    }
-  }, [selectedProperty])
-
-  // Initial position — set once in onMapLoad so mapType changes don't reset zoom/pan
-  const fullMapOptions = useMemo(() => ({ ...mapOptions }), [mapOptions])
-
   const btnStyle = (active) => ({
     padding: '5px 9px', border: 'none', borderRadius: '5px', cursor: 'pointer',
     fontSize: '10px', fontWeight: 600,
@@ -190,22 +259,18 @@ export default function MapView({ properties, selectedProperty, setSelectedPrope
 
   return (
     <div style={{ display: 'flex', height: '100%' }}>
-      {/* Sidebar */}
       <div style={{ width: '185px', background: '#0d1526', borderRight: '1px solid #1e2d47', padding: '12px', display: 'flex', flexDirection: 'column', gap: '12px', overflowY: 'auto', flexShrink: 0 }}>
-
         <MapControls
           mapType={mapType} setMapType={setMapType}
           showIndustrial={showIndustrial} setShowIndustrial={setShowIndustrial}
           showParcel={showParcel} setShowParcel={setShowParcel}
         />
-
         <div>
           <div style={{ fontSize: '9px', color: '#475569', letterSpacing: '0.1em', marginBottom: '5px' }}>COLOR BY</div>
           {[['status','Call Status'],['owner','Owner Type'],['size','Building Size']].map(([v,l]) => (
             <button key={v} onClick={() => setColorMode(v)} style={{ ...btnStyle(colorMode===v), display: 'block', width: '100%', textAlign: 'left', marginBottom: '3px', fontSize: '10px' }}>{l}</button>
           ))}
         </div>
-
         <div>
           <div style={{ fontSize: '9px', color: '#475569', letterSpacing: '0.1em', marginBottom: '4px' }}>FILTER OWNER</div>
           <select value={filterOwner} onChange={e => setFilterOwner(e.target.value)} style={selStyle}>
@@ -215,7 +280,6 @@ export default function MapView({ properties, selectedProperty, setSelectedPrope
             <option value="uhaul">U-Haul</option>
           </select>
         </div>
-
         <div>
           <div style={{ fontSize: '9px', color: '#475569', letterSpacing: '0.1em', marginBottom: '4px' }}>FILTER STATUS</div>
           <select value={filterStatus} onChange={e => setFilterStatus(e.target.value)} style={selStyle}>
@@ -223,7 +287,6 @@ export default function MapView({ properties, selectedProperty, setSelectedPrope
             {Object.keys(STATUS_COLORS).map(s => <option key={s} value={s}>{s.replace(/_/g,' ')}</option>)}
           </select>
         </div>
-
         <div>
           <div style={{ fontSize: '9px', color: '#475569', letterSpacing: '0.1em', marginBottom: '4px' }}>SUBMARKET</div>
           <select value={filterSubmarket} onChange={e => setFilterSubmarket(e.target.value)} style={selStyle}>
@@ -231,7 +294,6 @@ export default function MapView({ properties, selectedProperty, setSelectedPrope
             {submarkets.map(s => <option key={s} value={s}>{s}</option>)}
           </select>
         </div>
-
         {colorMode === 'status' && (
           <div>
             <div style={{ fontSize: '9px', color: '#475569', letterSpacing: '0.1em', marginBottom: '5px' }}>LEGEND</div>
@@ -247,23 +309,21 @@ export default function MapView({ properties, selectedProperty, setSelectedPrope
             </div>
           </div>
         )}
-
         <div style={{ fontSize: '10px', color: '#475569', marginTop: 'auto', paddingTop: '8px', borderTop: '1px solid #1e2d47' }}>
           <strong style={{ color: '#60a5fa' }}>{filteredProps.length}</strong> of {properties.length}
         </div>
       </div>
 
-      {/* Map */}
       <div style={{ flex: 1, position: 'relative' }}>
         {isLoaded ? (
-          <GoogleMap mapContainerStyle={{ width: '100%', height: '100%' }} options={fullMapOptions} onLoad={onMapLoad}>
+          <GoogleMap mapContainerStyle={{ width: '100%', height: '100%' }} options={INITIAL_MAP_OPTIONS} onLoad={onMapLoad}>
             {filteredProps.map(prop => (
               prop.lat && prop.lng ? (
                 <Marker key={prop.id} prop={prop} colorMode={colorMode}
                   onClick={setSelectedProperty} isSelected={selectedProperty?.id === prop.id} />
               ) : null
             ))}
-            {leads.map(lead => (
+            {leads.filter(l => l.lat && l.lng).map(lead => (
               <LeadDot key={lead._docId} lead={lead} onClick={() => {}} />
             ))}
           </GoogleMap>
