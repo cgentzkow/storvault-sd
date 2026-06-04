@@ -66,6 +66,38 @@ function getLogoName(p) {
   if (n.includes('encinitas self storage')) return 'Encinitas Self Storage'
   return null
 }
+// Hardcoded direct logo URLs (by Firebase key — no scanning needed)
+const LOGO_URLS = {
+  'Public Storage':             'https://logos.gentz.co/logo/public_storage',
+  'Extra Space Storage':        'https://logos.gentz.co/logo/extra-space-storage',
+  'CubeSmart':                  'https://logos.gentz.co/logo/cubesmart',
+  'Uhaul':                      'https://logos.gentz.co/logo/Uhaul',
+  'National Storage Affiliates':'https://logos.gentz.co/logo/national-storage-affiliates',
+  'SmartStop Self Storage':     'https://logos.gentz.co/logo/smartstop',
+  'Simply Self Storage':        'https://logos.gentz.co/logo/simply-self-storage',
+  'Life Storage':               'https://logos.gentz.co/logo/life-storage',
+  'StorQuest Self Storage':     'https://logos.gentz.co/logo/storquest',
+  'Trojan Storage':             'https://logos.gentz.co/logo/trojan-storage',
+  'InSite Property Group':      'https://logos.gentz.co/logo/insite_property_group',
+  'San Diego Self Storage':     'https://logos.gentz.co/logo/san_diego_self_storage',
+  'Miramar Self Storage':       'https://logos.gentz.co/logo/miramar-self-storage',
+  'The Caster Group':           'https://logos.gentz.co/logo/the_caster_group',
+  'BACO Properties':            'https://logos.gentz.co/logo/baco-properties',
+  'Baranof Holdings':           'https://logos.gentz.co/logo/baranof-holdings',
+  'Tierra Corporation':         'https://logos.gentz.co/logo/tierra-corporation',
+  'Danube Properties':          'https://logos.gentz.co/logo/danube-properties',
+  'The Ezralow Company':        'https://logos.gentz.co/logo/ezralow',
+  'Westport Properties':        'https://logos.gentz.co/logo/westport-properties',
+  'Pacifica Companies':         'https://logos.gentz.co/logo/pacifica-companies',
+  'Price Self Storage':         'https://logos.gentz.co/logo/price_self_storage',
+  'Ares Management Corporation':'https://logos.gentz.co/logo/ares-management',
+  'Artemis Real Estate Partners':'https://logos.gentz.co/logo/artemis-real-estate',
+  'Blue Vista':                 'https://logos.gentz.co/logo/blue-vista',
+  'Clear Sky Capital':          'https://logos.gentz.co/logo/clear-sky-capital',
+  'Prime Group Holdings':       'https://logos.gentz.co/logo/prime_group_holdings',
+  'Merit Hill Capital':         'https://logos.gentz.co/logo/merit_hill_capital',
+  'Encinitas Self Storage':     'https://logos.gentz.co/logo/encinitas_self_storage',
+}
 
 const LEAD_NEON = {
   active: '#00ffcc', interested: '#00ff66', under_nda: '#cc00ff',
@@ -132,7 +164,7 @@ function Marker({ prop, colorMode, onClick, isSelected, logoMap }) {
             boxShadow: isSelected ? '0 0 0 3px white, 0 0 0 5px ' + color : '0 1px 4px rgba(0,0,0,0.5)',
             overflow: 'hidden', padding: '2px',
           }}>
-            <img src={`https://logos.gentz.co/logo/by-name/${encodeURIComponent(logoName)}`}
+            <img src={LOGO_URLS[logoName]}
               style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
           </div>
         ) : (
