@@ -324,6 +324,26 @@ export default function Leads({ currentUser }) {
     return () => { window.removeEventListener('mousemove', onMove); window.removeEventListener('mouseup', onUp) }
   }, [isDragging])
 
+  // Geocode leads missing lat/lng once Google Maps is ready
+  useEffect(() => {
+    if (!isLoaded || !window.google) return
+    const needsGeo = leads.filter(l => !l.lat || !l.lng)
+    if (!needsGeo.length) return
+    const geocoder = new window.google.maps.Geocoder()
+    needsGeo.forEach(lead => {
+      const q = [lead.address || lead.name, lead.city, 'CA'].filter(Boolean).join(', ')
+      if (!q.trim()) return
+      geocoder.geocode({ address: q }, (results, status) => {
+        if (status === 'OK' && results[0]) {
+          const loc = results[0].geometry.location
+          setLeads(prev => prev.map(l =>
+            l._docId === lead._docId ? { ...l, lat: loc.lat(), lng: loc.lng() } : l
+          ))
+        }
+      })
+    })
+  }, [leads.length, isLoaded])
+
   const onMapLoad = useCallback(m => { mapRef.current = m }, [])
 
   const deleteLead = async (docId) => { if (window.confirm('Delete this lead?')) await deleteDoc(doc(db,'storvault_leads',docId)) }
