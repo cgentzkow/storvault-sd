@@ -80,6 +80,34 @@ const TOP_SELLERS = [
   { name:'Claremont Companies', deals:1, vol:25.8, avgPsf:232, note:'New England operator, exiting West.' },
 ]
 
+
+const HOLD_PERIOD_DATA = [
+  { label: '<1 Year',    deals: 57,  vol: 96,  avgPsf: 129, cap: 7.65, note: 'Flips / distressed. Lowest $/SF, highest cap — opportunistic buying.' },
+  { label: '1–2 Years',  deals: 11,  vol: 60,  avgPsf: 208, cap: 6.39, note: '🔑 HIGHEST $/SF — quick value-add exits commanding premium. 2023-24 buyers cashing out now.' },
+  { label: '2–4 Years',  deals: 34,  vol: 380, avgPsf: 179, cap: 5.95, note: '⚠️ BIGGEST VOLUME — 2021-22 pandemic buyers selling NOW. Watch for motivated sellers.' },
+  { label: '4–7 Years',  deals: 32,  vol: 217, avgPsf: 126, cap: 6.89, note: 'Mid-cycle exits. 2019-21 buyers.' },
+  { label: '7–10 Years', deals: 25,  vol: 205, avgPsf: 138, cap: 5.91, note: '2015-18 buyers exiting.' },
+  { label: '10–15 Years',deals: 23,  vol: 164, avgPsf: 157, cap: 6.02, note: 'Long-term operators.' },
+  { label: '15–20 Years',deals: 6,   vol: 79,  avgPsf: 229, cap: 4.80, note: '20+ year holders get highest cap compression — patient capital wins.' },
+]
+
+const SELLER_BUYER_FLOW = [
+  { flow: 'Private → Private',       deals: 114, vol: 670, note: 'Dominant. Mom-and-pop selling to private operators.' },
+  { flow: 'Public → Private Equity', deals: 9,   vol: 166, note: '⚠️ REITs exiting to PE — W.P. Carey pattern. Institutional selling.' },
+  { flow: 'Private → Institutional', deals: 8,   vol: 131, note: 'Private operators selling to institutions at top dollar.' },
+  { flow: 'User → Public',           deals: 10,  vol: 120, note: 'Owner-users selling to REITs. Conversion opportunities.' },
+  { flow: 'Private → Public',        deals: 7,   vol: 105, note: 'Private selling to REITs.' },
+  { flow: 'Private → User',          deals: 8,   vol: 48,  note: 'Off-market, non-investment trades.' },
+]
+
+const QUARTER_DATA = [
+  { q: 'Q2 2025', deals: 27,  vol: 200, avgPsf: 168 },
+  { q: 'Q3 2025', deals: 107, vol: 548, avgPsf: 117, peak: true },
+  { q: 'Q4 2025', deals: 69,  vol: 479, avgPsf: 144 },
+  { q: 'Q1 2026', deals: 58,  vol: 179, avgPsf: 201 },
+  { q: 'Q2 2026', deals: 31,  vol: 204, avgPsf: 127 },
+]
+
 export default function BusinessPlan() {
   const { reitProps, privateProps, uhaulProps, ownerMap, buyerIntel, yearData, maturing } = useMemo(() => {
     const reitProps = propertiesData.filter(p=>classify(p)==='reit')
@@ -374,7 +402,86 @@ export default function BusinessPlan() {
             </table>
           )}
         </div>
+
+        {/* ── SECTION 8: Hold Period Analysis ── */}
+        <div style={cardStyle}>
+          {sectionHd("Hold Period Analysis — When Are Today's Sellers Exiting?', '292 Western US deals — understanding exit cycles tells you who's motivated to sell next')}
+          <table style={{ width:'100%', borderCollapse:'collapse', marginBottom:'16px' }}>
+            <thead><tr>{['Hold Period','Deals','Volume','Avg $/SF','Avg Cap','Insight'].map(h=><th key={h} style={thStyle}>{h}</th>)}</tr></thead>
+            <tbody>
+              {HOLD_PERIOD_DATA.map(b=>(
+                <tr key={b.label} style={{ background: b.label==='2–4 Years'?'rgba(248,113,113,0.06)': b.label==='1–2 Years'?'rgba(245,158,11,0.06)':'transparent' }}>
+                  <td style={{ ...tdStyle, color:'#e2e8f0', fontWeight: (b.label==='2–4 Years'||b.label==='1–2 Years')?700:400 }}>{b.label}</td>
+                  <td style={{ ...tdStyle, color:'#60a5fa' }}>{b.deals}</td>
+                  <td style={{ ...tdStyle, color:'#34d399' }}>${b.vol}M</td>
+                  <td style={{ ...tdStyle, ...highlight(b.avgPsf>=200?'#f59e0b':'#94a3b8') }}>${b.avgPsf}/SF</td>
+                  <td style={{ ...tdStyle, color:'#a78bfa' }}>{b.cap.toFixed(2)}%</td>
+                  <td style={{ ...tdStyle, color:'#64748b', fontSize:'10px' }}>{b.note}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          <div style={{ background:'rgba(245,158,11,0.1)', border:'1px solid rgba(245,158,11,0.3)', borderRadius:'8px', padding:'14px', fontSize:'12px', lineHeight:1.8, color:'#94a3b8' }}>
+            <strong style={{ color:'#f59e0b' }}>Strategic Implication:</strong> The 2–4 year bucket has the most volume ($380M, 34 deals). <strong style={{ color:'#f8fafc' }}>The 2021–2022 pandemic buyers are selling RIGHT NOW.</strong> These were value-add buyers who acquired at inflated prices and are exiting. This creates motivated sellers in your market — watch for properties that sold 2021-22 and are now being listed. Also: <strong style={{ color:'#34d399' }}>portfolio aggregation commands $179/SF vs $142/SF for single assets — a 26% premium.</strong> Owning multiple SD assets before selling dramatically increases exit value.
+          </div>
+        </div>
+
+        {/* ── SECTION 9: Capital Flow ── */}
+        <div style={cardStyle}>
+          {sectionHd("Capital Flow — Who's Selling to Whom', 'Seller type → Buyer type tells you which direction institutional money is moving')}
+          <table style={{ width:'100%', borderCollapse:'collapse', marginBottom:'16px' }}>
+            <thead><tr>{['Capital Flow','Deals','Volume','Signal'].map(h=><th key={h} style={thStyle}>{h}</th>)}</tr></thead>
+            <tbody>
+              {SELLER_BUYER_FLOW.map(f=>(
+                <tr key={f.flow} style={{ background: f.flow.includes('Public → Private Equity')?'rgba(248,113,113,0.06)':'transparent' }}>
+                  <td style={{ ...tdStyle, color:'#e2e8f0', fontWeight:600 }}>{f.flow}</td>
+                  <td style={{ ...tdStyle, color:'#60a5fa' }}>{f.deals}</td>
+                  <td style={{ ...tdStyle, color:'#34d399' }}>${f.vol}M</td>
+                  <td style={{ ...tdStyle, color:'#64748b', fontSize:'10px' }}>{f.note}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'12px' }}>
+            <div style={{ background:'rgba(248,113,113,0.08)', border:'1px solid rgba(248,113,113,0.25)', borderRadius:'8px', padding:'12px' }}>
+              <div style={{ fontSize:'12px', fontWeight:700, color:'#f87171', marginBottom:'6px' }}>⚠️ Bearish Signal</div>
+              <div style={{ fontSize:'11px', color:'#94a3b8', lineHeight:1.7 }}>Public → Private Equity ($166M): Institutional REITs are selling to PE. When smart money sells, pay attention. W.P. Carey dumping 12 properties confirms this.</div>
+            </div>
+            <div style={{ background:'rgba(52,211,153,0.08)', border:'1px solid rgba(52,211,153,0.25)', borderRadius:'8px', padding:'12px' }}>
+              <div style={{ fontSize:'12px', fontWeight:700, color:'#34d399', marginBottom:'6px' }}>✅ Bullish Signal</div>
+              <div style={{ fontSize:'11px', color:'#94a3b8', lineHeight:1.7 }}>Private → Institutional ($131M): Private operators are getting top dollar from institutions. Institutional capital is still buying — they just need the right asset. <strong style={{ color:'#34d399' }}>Build the portfolio, sell to an institution.</strong></div>
+            </div>
+          </div>
+        </div>
+
+        {/* ── SECTION 10: Deal Velocity ── */}
+        <div style={cardStyle}>
+          {sectionHd('📈 Deal Velocity — Quarter by Quarter', 'Is the market speeding up or slowing down?')}
+          <div style={{ display:'flex', flexDirection:'column', gap:'8px', marginBottom:'16px' }}>
+            {QUARTER_DATA.map(q => {
+              const maxDeals = Math.max(...QUARTER_DATA.map(d=>d.deals))
+              const barWidth = (q.deals/maxDeals)*100
+              return (
+                <div key={q.q} style={{ display:'flex', alignItems:'center', gap:'12px' }}>
+                  <div style={{ width:'70px', fontSize:'11px', color: q.peak?'#f59e0b':'#64748b', fontWeight: q.peak?700:400, flexShrink:0 }}>{q.q}</div>
+                  <div style={{ flex:1, background:'#1a2540', borderRadius:'4px', height:'28px', position:'relative', overflow:'hidden' }}>
+                    <div style={{ width:`${barWidth}%`, height:'100%', background: q.peak?'#f59e0b22':'#1e3a5f', borderRight:`2px solid ${q.peak?'#f59e0b':'#2d5a8e'}`, display:'flex', alignItems:'center', paddingLeft:'8px' }}>
+                      <span style={{ fontSize:'11px', color: q.peak?'#f59e0b':'#60a5fa', fontWeight:700 }}>{q.deals} deals</span>
+                    </div>
+                  </div>
+                  <div style={{ width:'60px', fontSize:'11px', color:'#34d399', textAlign:'right', flexShrink:0 }}>${q.vol}M</div>
+                  <div style={{ width:'60px', fontSize:'11px', color:'#f59e0b', textAlign:'right', flexShrink:0 }}>${q.avgPsf}/SF</div>
+                </div>
+              )
+            })}
+          </div>
+          <div style={{ background:'#0a1122', border:'1px solid #1e2d47', borderRadius:'8px', padding:'12px', fontSize:'11px', color:'#94a3b8', lineHeight:1.7 }}>
+            <strong style={{ color:'#f8fafc' }}>Q3 2025 was the peak</strong> (107 deals, $548M) — the largest quarter in this dataset. Activity is moderating in Q4 2025 and Q1 2026, but $/SF is <em>rising</em> in Q1 2026 ($201/SF) despite fewer deals. <strong style={{ color:'#34d399' }}>Fewer deals at higher prices = tightening supply, not demand destruction.</strong> This is a healthy market correction, not a collapse.
+          </div>
+        </div>
+
       </div>
     </div>
   )
 }
+// This file gets the additional sections appended via the main rewrite below
