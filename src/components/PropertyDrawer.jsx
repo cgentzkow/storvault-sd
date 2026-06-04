@@ -41,9 +41,10 @@ function getDrawerLogoName(p) {
   if (n.includes('national storage')) return 'National Storage Affiliates'
   if (n.includes('u-haul') || n.includes('uhaul')) return 'Uhaul'
   if (n.includes('william warren') || n.includes('storquest') || n.includes('stor-quest')) return 'StorQuest'
+  if (n.includes('caster')) return 'The Caster Group'
   if (n.includes('trojan storage')) return 'Trojan Storage'
   if (n.includes('insite') || n.includes('securespace')) return 'InSite Property Group'
-  return p.parentCompany || p.trueOwner || p.owner || null
+  return null
 }
 function LogoImg({ property }) {
   const [err, setErr] = useState(false)
