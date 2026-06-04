@@ -428,7 +428,7 @@ export default function BusinessPlan() {
 
         {/* ── SECTION 9: Capital Flow ── */}
         <div style={cardStyle}>
-          {sectionHd("Capital Flow — Who's Selling to Whom', 'Seller type → Buyer type tells you which direction institutional money is moving')}
+          {sectionHd("Capital Flow — Who Is Selling to Whom", "Seller type to Buyer type: which direction is institutional money moving?")}
           <table style={{ width:'100%', borderCollapse:'collapse', marginBottom:'16px' }}>
             <thead><tr>{['Capital Flow','Deals','Volume','Signal'].map(h=><th key={h} style={thStyle}>{h}</th>)}</tr></thead>
             <tbody>
