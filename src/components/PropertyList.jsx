@@ -44,6 +44,12 @@ function getLogoName(p) {
   if (n.includes('prime group')) return 'Prime Group Holdings'
   if (n.includes('merit hill')) return 'Merit Hill Capital'
   if (n.includes('encinitas self storage')) return 'Encinitas Self Storage'
+  if (n.includes('greens global')) return 'Greens Global'
+  if (n.includes('northwest building')) return 'Northwest Building, LLC'
+  if (n.includes('sentry storage')) return 'Sentry Storage Solutions'
+  if (n.includes('chicago capital funds')) return 'Chicago Capital Funds'
+  if (n.includes('cbre investment')) return 'CBRE Investment Management'
+  if (n.includes('floit')) return 'Dan Floit'
   return null
 }
 // Hardcoded direct logo URLs (by Firebase key — no scanning needed)
@@ -77,6 +83,12 @@ const LOGO_URLS = {
   'Prime Group Holdings':       'https://logos.gentz.co/logo/prime_group_holdings',
   'Merit Hill Capital':         'https://logos.gentz.co/logo/merit_hill_capital',
   'Encinitas Self Storage':     'https://logos.gentz.co/logo/encinitas_self_storage',
+  'Greens Global':              'https://logos.gentz.co/logo/greens_global',
+  'Northwest Building, LLC':    'https://logos.gentz.co/logo/northwest_building',
+  'Sentry Storage Solutions':   'https://logos.gentz.co/logo/sentry_storage',
+  'Chicago Capital Funds':      'https://logos.gentz.co/logo/chicago_capital_funds',
+  'CBRE Investment Management': 'https://logos.gentz.co/logo/cbre_investment',
+  'Dan Floit':                  'https://logos.gentz.co/logo/dan_floit',
 }
 
 function LogoCell({ property }) {
