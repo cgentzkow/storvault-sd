@@ -64,7 +64,7 @@ function AILeadModal({ onClose, onExtracted, currentUser }) {
     try {
       // Call Cloudflare Worker for Claude extraction
       const payload = { text, image }
-      const res = await fetch('https://storvault-ai.gentz.workers.dev/extract-lead', {
+      const res = await fetch('/extract-lead', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
