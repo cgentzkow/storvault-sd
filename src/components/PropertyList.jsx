@@ -14,6 +14,18 @@ const REITS = ['public storage','extra space','cubesmart','life storage','simply
 const UHAUL = ['u-haul','uhaul']
 
 function getLogoName(p) {
+  const n = (p.parentCompany||p.trueOwner||p.owner||'').toLowerCase()
+  if (n.includes('public storage')) return 'Public Storage'
+  if (n.includes('extra space')) return 'Extra Space Storage'
+  if (n.includes('cubesmart')) return 'CubeSmart'
+  if (n.includes('life storage')) return 'Life Storage'
+  if (n.includes('simply self')) return 'Simply Self Storage'
+  if (n.includes('smartstop') || n.includes('strategic storage')) return 'SmartStop Self Storage'
+  if (n.includes('national storage')) return 'National Storage Affiliates'
+  if (n.includes('u-haul')||n.includes('uhaul')) return 'Uhaul'
+  if (n.includes('william warren')||n.includes('storquest')||n.includes('stor-quest')) return 'StorQuest'
+  if (n.includes('trojan storage')) return 'Trojan Storage'
+  if (n.includes('insite')||n.includes('securespace')) return 'InSite Property Group'
   return p.parentCompany || p.trueOwner || p.owner || null
 }
 

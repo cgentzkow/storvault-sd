@@ -24,7 +24,19 @@ function classifyOwner(p) {
 }
 
 export function getLogoName(p) {
-  // Return the best display name for logo lookup — tries parentCompany, trueOwner, owner
+  const n = (p.parentCompany || p.trueOwner || p.owner || '').toLowerCase()
+  if (n.includes('public storage')) return 'Public Storage'
+  if (n.includes('extra space')) return 'Extra Space Storage'
+  if (n.includes('cubesmart')) return 'CubeSmart'
+  if (n.includes('life storage')) return 'Life Storage'
+  if (n.includes('simply self')) return 'Simply Self Storage'
+  if (n.includes('smartstop') || n.includes('strategic storage')) return 'SmartStop Self Storage'
+  if (n.includes('national storage')) return 'National Storage Affiliates'
+  if (n.includes('u-haul') || n.includes('uhaul')) return 'Uhaul'
+  if (n.includes('william warren') || n.includes('storquest') || n.includes('stor-quest')) return 'StorQuest'
+  if (n.includes('trojan storage')) return 'Trojan Storage'
+  if (n.includes('insite') || n.includes('securespace')) return 'InSite Property Group'
+  // Fallback: try the raw owner name — logos service returns 404 for unknowns, onError hides it
   return p.parentCompany || p.trueOwner || p.owner || null
 }
 
@@ -119,10 +131,26 @@ export default function MapView({ properties, selectedProperty, setSelectedPrope
 
   const { showIndustrial, setShowIndustrial, showParcel, setShowParcel, mapOptions } = useMapOverlays(mapRef, mapType, true)
 
-  // Fetch leads for overlay on main map
+  // Fetch leads + geocode any missing lat/lng
   useEffect(() => {
-    const unsub = onSnapshot(collection(db, 'storvault_leads'), snap => {
-      setLeads(snap.docs.map(d => ({ _docId: d.id, ...d.data() })))
+    const unsub = onSnapshot(collection(db, 'storvault_leads'), async snap => {
+      const raw = snap.docs.map(d => ({ _docId: d.id, ...d.data() }))
+      // Geocode any leads missing coordinates
+      const resolved = await Promise.all(raw.map(async lead => {
+        if (lead.lat && lead.lng) return lead
+        if (!lead.address && !lead.name) return lead
+        if (!window.google) return lead
+        return new Promise(resolve => {
+          const q = [lead.address || lead.name, lead.city, 'CA'].filter(Boolean).join(', ')
+          new window.google.maps.Geocoder().geocode({ address: q }, (results, status) => {
+            if (status === 'OK' && results[0]) {
+              const loc = results[0].geometry.location
+              resolve({ ...lead, lat: loc.lat(), lng: loc.lng() })
+            } else resolve(lead)
+          })
+        })
+      }))
+      setLeads(resolved)
     })
     return () => unsub()
   }, [])

@@ -10,6 +10,19 @@ const GMAPS_KEY = 'AIzaSyCLnBGWiIGI8OtYlHgLImzn0JY5FVjuQ6k'
 
 function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2,7) }
 
+async function geocodeAddress(address, city) {
+  const q = [address, city, 'CA'].filter(Boolean).join(', ')
+  if (!q.trim() || !window.google) return {}
+  return new Promise(resolve => {
+    new window.google.maps.Geocoder().geocode({ address: q }, (results, status) => {
+      if (status === 'OK' && results[0]) {
+        const loc = results[0].geometry.location
+        resolve({ lat: loc.lat(), lng: loc.lng() })
+      } else resolve({})
+    })
+  })
+}
+
 const STATUSES = [
   { value:'active',    label:'Researching',    color:'#60a5fa' },
   { value:'interested',label:'Interested 🔥',  color:'#34d399' },
@@ -90,8 +103,10 @@ function AILeadModal({ onClose, onExtracted, currentUser }) {
   }
 
   const saveLead = async (fields) => {
+    const coords = (!fields.lat && !fields.lng) ? await geocodeAddress(fields.address, fields.city) : {}
     await addDoc(collection(db, 'storvault_leads'), {
       ...fields,
+      ...coords,
       notes: fields.notes || [],
       createdAt: new Date().toISOString(),
       createdBy: currentUser?.name || 'Unknown',
