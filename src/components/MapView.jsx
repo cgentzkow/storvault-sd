@@ -6,7 +6,6 @@ import PropertyDetail from './PropertyDetail.jsx'
 import { db } from '../firebase.js'
 import { collection, onSnapshot } from 'firebase/firestore'
 import MapControls from './MapControls.jsx'
-import { useLogoMap } from '../hooks/useLogoMap.js'
 
 const GMAPS_KEY = 'AIzaSyCLnBGWiIGI8OtYlHgLImzn0JY5FVjuQ6k'
 
@@ -36,18 +35,35 @@ function classifyOwner(p) {
 
 function getLogoName(p) {
   const n = (p.parentCompany || p.trueOwner || p.owner || '').toLowerCase()
+  // Major REITs & nationals
   if (n.includes('public storage')) return 'Public Storage'
   if (n.includes('extra space')) return 'Extra Space Storage'
   if (n.includes('cubesmart')) return 'CubeSmart'
-  if (n.includes('life storage')) return 'Life Storage'
-  if (n.includes('simply self')) return 'Simply Self Storage'
+  if (n.includes('u-haul') || n.includes('uhaul')) return 'U-Haul'
+  if (n.includes('national storage affiliates')) return 'National Storage Affiliates'
   if (n.includes('smartstop') || n.includes('strategic storage')) return 'SmartStop Self Storage'
-  if (n.includes('national storage')) return 'National Storage Affiliates'
-  if (n.includes('u-haul') || n.includes('uhaul')) return 'Uhaul'
-  if (n.includes('william warren') || n.includes('storquest') || n.includes('stor-quest')) return 'StorQuest'
-  if (n.includes('caster')) return 'The Caster Group'
+  if (n.includes('simply self')) return 'Simply Self Storage'
+  if (n.includes('life storage')) return 'Life Storage'
+  if (n.includes('william warren') || n.includes('storquest') || n.includes('stor-quest')) return 'StorQuest Self Storage'
   if (n.includes('trojan storage')) return 'Trojan Storage'
   if (n.includes('insite') || n.includes('securespace')) return 'InSite Property Group'
+  // SD-specific operators with logos
+  if (n.includes('san diego self storage')) return 'San Diego Self Storage'
+  if (n.includes('miramar self storage')) return 'Miramar Self Storage'
+  if (n.includes('caster')) return 'The Caster Group'
+  if (n.includes('baco properties')) return 'BACO Properties'
+  if (n.includes('baranof')) return 'Baranof Holdings'
+  if (n.includes('tierra corporation')) return 'Tierra Corporation'
+  if (n.includes('danube properties')) return 'Danube Properties'
+  if (n.includes('ezralow')) return 'The Ezralow Company'
+  if (n.includes('westport properties')) return 'Westport Properties'
+  if (n.includes('pacifica companies')) return 'Pacifica Companies'
+  if (n.includes('price self storage')) return 'Price Self Storage'
+  // Investors/companies with logos
+  if (n.includes('ares management')) return 'Ares Management Corporation'
+  if (n.includes('artemis real estate')) return 'Artemis Real Estate Partners'
+  if (n.includes('blue vista')) return 'Blue Vista'
+  if (n.includes('clear sky capital')) return 'Clear Sky Capital'
   return null
 }
 
@@ -100,10 +116,9 @@ function tile2mercBbox(x, y, z) {
 function Marker({ prop, colorMode, onClick, isSelected, logoMap }) {
   const color = getMarkerColor(prop, colorMode)
   const size = prop.sf > 100000 ? 16 : prop.sf > 60000 ? 13 : prop.sf > 30000 ? 10 : 8
-  const knownLogo = getLogoName(prop)
-  const ownerName = prop.parentCompany || prop.trueOwner || prop.owner || null
-  const logoName = knownLogo || (ownerName && logoMap?.get(ownerName) === true ? ownerName : null)
-  const showLogo = !!logoName
+  const logoName = getLogoName(prop)
+  const [logoErr, setLogoErr] = useState(false)
+  const showLogo = logoName && !logoErr
 
   return (
     <OverlayView position={{ lat: prop.lat, lng: prop.lng }} mapPaneName={OverlayView.OVERLAY_MOUSE_TARGET}>
@@ -160,8 +175,6 @@ export default function MapView({ properties, selectedProperty, setSelectedPrope
   const [filterSubmarket, setFilterSubmarket] = useState('all')
   const [leads, setLeads] = useState([])
   const [detailProp, setDetailProp] = useState(null)
-  const ownerNames = useMemo(() => [...new Set(properties.map(p => p.parentCompany || p.trueOwner || p.owner).filter(Boolean))], [properties.length])
-  const logoMap = useLogoMap(ownerNames)
 
   // Fetch leads from Firestore
   useEffect(() => {
@@ -346,7 +359,7 @@ export default function MapView({ properties, selectedProperty, setSelectedPrope
           <GoogleMap mapContainerStyle={{ width: '100%', height: '100%' }} options={mapOptions} onLoad={onMapLoad}>
             {filteredProps.map(prop => (
               prop.lat && prop.lng ? (
-                <Marker key={prop.id} prop={prop} colorMode={colorMode} logoMap={logoMap}
+                <Marker key={prop.id} prop={prop} colorMode={colorMode}
                   onClick={setSelectedProperty} isSelected={selectedProperty?.id === prop.id} />
               ) : null
             ))}
