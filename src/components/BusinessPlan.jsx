@@ -405,7 +405,7 @@ export default function BusinessPlan() {
 
         {/* ── SECTION 8: Hold Period Analysis ── */}
         <div style={cardStyle}>
-          {sectionHd("Hold Period Analysis — When Are Today's Sellers Exiting?', '292 Western US deals — understanding exit cycles tells you who's motivated to sell next')}
+          {sectionHd("Hold Period Analysis — When Are Sellers Exiting?", "292 Western US deals — exit cycles reveal who is motivated to sell next")}
           <table style={{ width:'100%', borderCollapse:'collapse', marginBottom:'16px' }}>
             <thead><tr>{['Hold Period','Deals','Volume','Avg $/SF','Avg Cap','Insight'].map(h=><th key={h} style={thStyle}>{h}</th>)}</tr></thead>
             <tbody>
