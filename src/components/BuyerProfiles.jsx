@@ -68,7 +68,7 @@ function LogoImg({ company, size = 48 }) {
     const init = company ? company.split(' ').slice(0,2).map(w=>w[0]||'').join('').toUpperCase() : '?'
     return <div style={{ width:`${size}px`,height:`${size}px`,borderRadius:'8px',background:'#1e2d47',display:'flex',alignItems:'center',justifyContent:'center',fontSize:`${size*0.3}px`,fontWeight:700,color:'#f59e0b',flexShrink:0 }}>{init}</div>
   }
-  return <img src={`https://logos.gentz.co/logo/by-name/${encodeURIComponent(company)}`} alt={company} onError={()=>setErr(true)} style={{ width:`${size}px`,height:`${size}px`,objectFit:'contain',borderRadius:'8px',background:'#1e2d47',padding:'4px',flexShrink:0 }} />
+  const logoKey = company.toLowerCase().includes("u-haul") || company.toLowerCase().includes("uhaul") ? "Uhaul" : company; return <img src={`https://logos.gentz.co/logo/by-name/${encodeURIComponent(logoKey)}`} alt={company} onError={()=>setErr(true)} style={{ width:`${size}px`,height:`${size}px`,objectFit:'contain',borderRadius:'8px',background:'#1e2d47',padding:'4px',flexShrink:0 }} />
 }
 
 function ActionNotePopup({ contact, action, buyerName, currentUser, onClose }) {

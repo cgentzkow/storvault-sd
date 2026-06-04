@@ -19,7 +19,7 @@ function getLogoName(p) {
   if (n.includes('cubesmart')) return 'CubeSmart'
   if (n.includes('life storage')) return 'Life Storage'
   if (n.includes('smartstop')) return 'SmartStop Self Storage'
-  if (n.includes('u-haul')||n.includes('uhaul')) return 'U-Haul'
+  if (n.includes('u-haul')||n.includes('uhaul')) return 'Uhaul'
   return null
 }
 

@@ -38,7 +38,7 @@ function getLogoName(p) {
   if (n.includes('simply self')) return 'Simply Self Storage'
   if (n.includes('smartstop')) return 'SmartStop Self Storage'
   if (n.includes('national storage')) return 'National Storage Affiliates'
-  if (n.includes('u-haul') || n.includes('uhaul')) return 'U-Haul'
+  if (n.includes('u-haul') || n.includes('uhaul')) return 'Uhaul'
   return null
 }
 
