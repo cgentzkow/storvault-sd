@@ -4,6 +4,7 @@ import { useGoogleMaps } from '../hooks/useGoogleMaps.js'
 import { useMapOverlays } from '../hooks/useMapOverlays.js'
 import MapControls from './MapControls.jsx'
 import PropertyDrawer from './PropertyDrawer.jsx'
+import PropertyDetail from './PropertyDetail.jsx'
 import { db } from '../firebase.js'
 import { collection, onSnapshot } from 'firebase/firestore'
 
@@ -23,19 +24,8 @@ function classifyOwner(p) {
 }
 
 export function getLogoName(p) {
-  const n = (p.parentCompany || p.trueOwner || p.owner || '').toLowerCase()
-  if (n.includes('public storage')) return 'Public Storage'
-  if (n.includes('extra space')) return 'Extra Space Storage'
-  if (n.includes('cubesmart')) return 'CubeSmart'
-  if (n.includes('life storage')) return 'Life Storage'
-  if (n.includes('simply self')) return 'Simply Self Storage'
-  if (n.includes('smartstop') || n.includes('strategic storage')) return 'SmartStop Self Storage'
-  if (n.includes('national storage')) return 'National Storage Affiliates'
-  if (n.includes('u-haul') || n.includes('uhaul')) return 'Uhaul'
-  if (n.includes('william warren') || n.includes('storquest') || n.includes('stor-quest')) return 'StorQuest'
-  if (n.includes('trojan storage')) return 'Trojan Storage'
-  if (n.includes('insite') || n.includes('securespace')) return 'InSite Property Group'
-  return null
+  // Return the best display name for logo lookup — tries parentCompany, trueOwner, owner
+  return p.parentCompany || p.trueOwner || p.owner || null
 }
 
 function getMarkerColor(prop, colorMode) {
@@ -125,6 +115,7 @@ export default function MapView({ properties, selectedProperty, setSelectedPrope
   const [filterStatus, setFilterStatus] = useState('all')
   const [filterSubmarket, setFilterSubmarket] = useState('all')
   const [leads, setLeads] = useState([])
+  const [detailProp, setDetailProp] = useState(null)
 
   const { showIndustrial, setShowIndustrial, showParcel, setShowParcel, mapOptions } = useMapOverlays(mapRef, mapType, true)
 
@@ -150,7 +141,7 @@ export default function MapView({ properties, selectedProperty, setSelectedPrope
     return true
   }), [properties, filterStatus, filterSubmarket, filterOwner])
 
-  const onMapLoad = useCallback((map) => { mapRef.current = map }, [])
+  const onMapLoad = useCallback((map) => { mapRef.current = map; map.setCenter({ lat: 32.78, lng: -117.1 }); map.setZoom(10) }, [])
 
   useEffect(() => {
     if (selectedProperty && mapRef.current) {
@@ -158,10 +149,8 @@ export default function MapView({ properties, selectedProperty, setSelectedPrope
     }
   }, [selectedProperty])
 
-  const fullMapOptions = useMemo(() => ({
-    center: { lat: 32.78, lng: -117.1 }, zoom: 10,
-    ...mapOptions,
-  }), [mapOptions])
+  // Initial position — set once in onMapLoad so mapType changes don't reset zoom/pan
+  const fullMapOptions = useMemo(() => ({ ...mapOptions }), [mapOptions])
 
   const btnStyle = (active) => ({
     padding: '5px 9px', border: 'none', borderRadius: '5px', cursor: 'pointer',
@@ -259,7 +248,12 @@ export default function MapView({ properties, selectedProperty, setSelectedPrope
         <PropertyDrawer currentUser={currentUser}
           property={properties.find(p => p.id === selectedProperty.id) || selectedProperty}
           onClose={() => setSelectedProperty(null)}
-          updateProperty={updateProperty} />
+          updateProperty={updateProperty}
+          onViewDetail={(prop) => setDetailProp(prop)} />
+      )}
+      {detailProp && (
+        <PropertyDetail property={properties.find(p => p.id === detailProp.id) || detailProp}
+          onClose={() => setDetailProp(null)} updateProperty={updateProperty} currentUser={currentUser} />
       )}
     </div>
   )

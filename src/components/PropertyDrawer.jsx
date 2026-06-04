@@ -29,15 +29,16 @@ function fmt$(n) {
 
 function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 7) }
 
-function LogoImg({ company }) {
+function LogoImg({ property }) {
   const [err, setErr] = useState(false)
-  if (!company || err) return null
-  return <img src={`https://logos.gentz.co/logo/by-name/${encodeURIComponent(company)}`}
-    alt={company} onError={() => setErr(true)}
+  const name = property?.parentCompany || property?.trueOwner || property?.owner || ''
+  if (!name || err) return null
+  return <img src={`https://logos.gentz.co/logo/by-name/${encodeURIComponent(name)}`}
+    alt={name} onError={() => setErr(true)}
     style={{ height: '24px', maxWidth: '80px', objectFit: 'contain', filter: 'brightness(0) invert(1)', opacity: 0.7 }} />
 }
 
-export default function PropertyDrawer({ property, onClose, updateProperty, currentUser }) {
+export default function PropertyDrawer({ property, onClose, updateProperty, currentUser, onViewDetail }) {
   const [note, setNote] = useState('')
   const [noteType, setNoteType] = useState('call')
   const [notes, setNotes] = useState([])
@@ -92,7 +93,7 @@ export default function PropertyDrawer({ property, onClose, updateProperty, curr
           <div style={{ flex: 1, marginRight: '8px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
               <div style={{ fontSize: '13px', fontWeight: 700, color: '#f8fafc', lineHeight: 1.3 }}>{p.name || p.address}</div>
-              <LogoImg company={p.parentCompany} />
+              <LogoImg property={p} />
             </div>
             {p.name && <div style={{ fontSize: '11px', color: '#64748b' }}>{p.address}</div>}
             <div style={{ fontSize: '11px', color: '#475569' }}>{p.city}, CA {p.zip}</div>
@@ -103,6 +104,11 @@ export default function PropertyDrawer({ property, onClose, updateProperty, curr
           style={{ width: '100%', padding: '6px 10px', borderRadius: '6px', border: `1px solid ${statusOpt.color}`, background: `${statusOpt.color}22`, color: statusOpt.color, fontSize: '12px', fontWeight: 600, cursor: 'pointer', marginTop: '4px' }}>
           {STATUS_OPTIONS.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
         </select>
+        {onViewDetail && (
+          <button onClick={() => onViewDetail(p)} style={{ width:'100%', marginTop:'8px', padding:'7px', background:'rgba(245,158,11,0.1)', border:'1px solid rgba(245,158,11,0.3)', borderRadius:'6px', color:'#f59e0b', fontSize:'11px', fontWeight:700, cursor:'pointer' }}>
+            View Full Detail →
+          </button>
+        )}
       </div>
 
       <div style={{ padding: '12px 16px', background: '#0a1122', borderBottom: '1px solid #1e2d47' }}>
@@ -130,7 +136,16 @@ export default function PropertyDrawer({ property, onClose, updateProperty, curr
         {row('True Owner', p.trueOwner, '#f59e0b')}
         {row('Owner', p.owner !== p.trueOwner ? p.owner : null)}
         {row('Contact', p.ownerContact)}
-        {row('Phone', p.ownerPhone)}
+        {p.ownerPhone && (
+          <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', padding:'6px 0', borderBottom:'1px solid #1a2540' }}>
+            <span style={{ color:'#64748b', fontSize:'11px' }}>Phone</span>
+            <div style={{ display:'flex', alignItems:'center', gap:'6px' }}>
+              <span style={{ color:'#e2e8f0', fontSize:'11px' }}>{p.ownerPhone}</span>
+              <a href={`tel:${p.ownerPhone}`} style={{ padding:'2px 7px', background:'rgba(52,211,153,0.15)', border:'1px solid rgba(52,211,153,0.3)', borderRadius:'4px', color:'#34d399', fontSize:'10px', fontWeight:600, textDecoration:'none' }}>📞</a>
+              <a href={`sms:${p.ownerPhone}`} style={{ padding:'2px 7px', background:'rgba(96,165,250,0.15)', border:'1px solid rgba(96,165,250,0.3)', borderRadius:'4px', color:'#60a5fa', fontSize:'10px', fontWeight:600, textDecoration:'none' }}>💬</a>
+            </div>
+          </div>
+        )}
         {row('Address', p.ownerAddress)}
         {row('Submarket', p.submarket)}
         {p.parentCompany && row('Parent Company', p.parentCompany)}
@@ -144,7 +159,7 @@ export default function PropertyDrawer({ property, onClose, updateProperty, curr
         {row('Parcel', p.parcel)}
       </div>
 
-      {(p.lender || p.loanAmount) && (
+      {!!(p.lender || p.loanAmount) && (
         <div style={{ padding: '12px 16px', borderBottom: '1px solid #1e2d47' }}>
           <div style={{ fontSize: '10px', color: '#475569', letterSpacing: '0.1em', marginBottom: '8px' }}>LOAN</div>
           {row('Lender', p.lender)}
@@ -155,9 +170,7 @@ export default function PropertyDrawer({ property, onClose, updateProperty, curr
       )}
 
       <div style={{ padding: '12px 16px', flex: 1 }}>
-        <div style={{ fontSize: '10px', color: '#475569', letterSpacing: '0.1em', marginBottom: '8px' }}>
-          NOTES & ACTIVITY <span style={{ color: '#334155', fontSize: '9px', marginLeft: '6px' }}>synced · Campo · Birdie · Topo</span>
-        </div>
+        <div style={{ fontSize: '10px', color: '#475569', letterSpacing: '0.1em', marginBottom: '8px' }}>NOTES & ACTIVITY</div>
         <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap', marginBottom: '8px' }}>
           {NOTE_TYPES.map(t => (
             <button key={t.id} onClick={() => setNoteType(t.id)} style={{
