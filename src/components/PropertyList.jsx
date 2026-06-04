@@ -1,16 +1,16 @@
 import { useState, useMemo, useCallback, useRef, useEffect } from 'react'
 import { GoogleMap, OverlayView } from '@react-google-maps/api'
 import { useGoogleMaps } from '../hooks/useGoogleMaps.js'
+import { useMapOverlays } from '../hooks/useMapOverlays.js'
+import MapControls from './MapControls.jsx'
 import PropertyDetail from './PropertyDetail.jsx'
-
-const GMAPS_KEY = 'AIzaSyCLnBGWiIGI8OtYlHgLImzn0JY5FVjuQ6k'
 
 const STATUS_COLORS = {
   not_called:'#60a5fa', called:'#34d399', interested:'#f59e0b',
   not_interested:'#94a3b8', under_nda:'#a78bfa', listed:'#f87171', under_development:'#fb923c',
 }
 
-const REITS = ['public storage','extra space','cubesmart','life storage','simply self','national storage','smartstop']
+const REITS = ['public storage','extra space','cubesmart','life storage','simply self','national storage','smartstop','william warren','storquest','stor-quest','trojan storage','strategic storage']
 const UHAUL = ['u-haul','uhaul']
 
 function getLogoName(p) {
@@ -19,8 +19,12 @@ function getLogoName(p) {
   if (n.includes('extra space')) return 'Extra Space Storage'
   if (n.includes('cubesmart')) return 'CubeSmart'
   if (n.includes('life storage')) return 'Life Storage'
-  if (n.includes('smartstop')) return 'SmartStop Self Storage'
+  if (n.includes('simply self')) return 'Simply Self Storage'
+  if (n.includes('smartstop') || n.includes('strategic storage')) return 'SmartStop Self Storage'
+  if (n.includes('national storage')) return 'National Storage Affiliates'
   if (n.includes('u-haul')||n.includes('uhaul')) return 'Uhaul'
+  if (n.includes('william warren')||n.includes('storquest')||n.includes('stor-quest')) return 'StorQuest'
+  if (n.includes('trojan storage')) return 'Trojan Storage'
   if (n.includes('insite')||n.includes('securespace')) return 'InSite Property Group'
   return null
 }
@@ -88,8 +92,12 @@ export default function PropertyList({ properties, selectedProperty, setSelected
   const [listWidth, setListWidth] = useState(680)
   const [isDragging, setIsDragging] = useState(false)
   const [detailProp, setDetailProp] = useState(null)
+  const [showMapControls, setShowMapControls] = useState(false)
+  const [mapType, setMapType] = useState('dark')
   const dragStartX = useRef(0)
   const dragStartWidth = useRef(0)
+
+  const { showIndustrial, setShowIndustrial, showParcel, setShowParcel, mapOptions } = useMapOverlays(mapRef, mapType, false)
 
   const submarkets = useMemo(() => [...new Set(properties.map(p=>p.submarket))].filter(Boolean).sort(), [properties])
 
@@ -115,7 +123,6 @@ export default function PropertyList({ properties, selectedProperty, setSelected
 
   const onMapLoad = useCallback(m=>{ mapRef.current=m }, [])
 
-  // Drag-to-resize — proper useEffect with cleanup
   const onDragStart = useCallback((e) => {
     e.preventDefault()
     dragStartX.current = e.clientX
@@ -135,6 +142,11 @@ export default function PropertyList({ properties, selectedProperty, setSelected
     return () => { window.removeEventListener('mousemove', onMove); window.removeEventListener('mouseup', onUp) }
   }, [isDragging])
 
+  const fullMapOptions = useMemo(() => ({
+    center: { lat: 32.78, lng: -117.1 }, zoom: 10,
+    ...mapOptions,
+  }), [mapOptions])
+
   const inpStyle = { background:'#0d1526', border:'1px solid #1e2d47', borderRadius:'6px', color:'#e2e8f0', padding:'6px 10px', fontSize:'12px' }
   const selStyle = { ...inpStyle, cursor:'pointer' }
 
@@ -143,7 +155,6 @@ export default function PropertyList({ properties, selectedProperty, setSelected
 
       {/* LEFT: Table */}
       <div style={{ width: listWidth, display:'flex', flexDirection:'column', overflow:'hidden', flexShrink:0 }}>
-        {/* Toolbar */}
         <div style={{ padding:'8px 12px', background:'#0d1526', borderBottom:'1px solid #1e2d47', display:'flex', gap:'7px', flexWrap:'wrap', alignItems:'center' }}>
           <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="🔍 Search…" style={{ ...inpStyle, width:'160px' }} />
           <select value={filterOwner} onChange={e=>setFilterOwner(e.target.value)} style={selStyle}>
@@ -168,7 +179,6 @@ export default function PropertyList({ properties, selectedProperty, setSelected
           </div>
         </div>
 
-        {/* Table */}
         <div style={{ flex:1, overflowY:'auto' }}>
           <table style={{ width:'100%', borderCollapse:'collapse', fontSize:'12px' }}>
             <thead style={{ position:'sticky', top:0, background:'#0a0f1e', zIndex:1 }}>
@@ -233,7 +243,7 @@ export default function PropertyList({ properties, selectedProperty, setSelected
       <div style={{ flex:1, position:'relative', minWidth:0 }}>
         {isLoaded ? (
           <GoogleMap mapContainerStyle={{ width:'100%', height:'100%' }}
-            options={{ center:{lat:32.78,lng:-117.1}, zoom:10, mapTypeId:'roadmap', styles:[{featureType:'poi',stylers:[{visibility:'off'}]}], mapTypeControl:false, streetViewControl:false, fullscreenControl:false, gestureHandling:'greedy' }}
+            options={fullMapOptions}
             onLoad={onMapLoad}>
             {filtered.map(prop => prop.lat && prop.lng ? (
               <MapMarker key={prop.id} prop={prop}
@@ -243,7 +253,23 @@ export default function PropertyList({ properties, selectedProperty, setSelected
           </GoogleMap>
         ) : <div style={{ display:'flex', alignItems:'center', justifyContent:'center', height:'100%', color:'#475569' }}>Loading map…</div>}
 
-        {/* Property info card on map when selected */}
+        {/* Floating Map Controls */}
+        <div style={{ position:'absolute', top:'10px', right:'10px', zIndex:10 }}>
+          <button
+            onClick={() => setShowMapControls(v => !v)}
+            style={{ padding:'6px 10px', background:'#0d1526cc', border:'1px solid #1e2d47', borderRadius:'6px', color:'#94a3b8', fontSize:'11px', cursor:'pointer', backdropFilter:'blur(4px)', marginBottom:'4px', display:'block', width:'100%' }}
+          >🗺 Map {showMapControls ? '▲' : '▼'}</button>
+          {showMapControls && (
+            <div style={{ background:'#0d1526ee', border:'1px solid #1e2d47', borderRadius:'8px', padding:'10px', backdropFilter:'blur(4px)', minWidth:'160px' }}>
+              <MapControls
+                mapType={mapType} setMapType={setMapType}
+                showIndustrial={showIndustrial} setShowIndustrial={setShowIndustrial}
+                showParcel={showParcel} setShowParcel={setShowParcel}
+              />
+            </div>
+          )}
+        </div>
+
         {selectedProperty && (
           <div style={{ position:'absolute', bottom:'16px', left:'50%', transform:'translateX(-50%)', background:'#0d1526', border:'1px solid #1e2d47', borderRadius:'10px', padding:'12px 16px', minWidth:'280px', maxWidth:'380px', zIndex:10, boxShadow:'0 4px 20px rgba(0,0,0,0.5)' }}>
             <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom:'8px' }}>
@@ -265,7 +291,6 @@ export default function PropertyList({ properties, selectedProperty, setSelected
         )}
       </div>
 
-      {/* Property Detail Modal */}
       {detailProp && (
         <PropertyDetail property={properties.find(p=>p.id===detailProp.id)||detailProp}
           onClose={()=>setDetailProp(null)} updateProperty={updateProperty} currentUser={currentUser} />

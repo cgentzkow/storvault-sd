@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { GoogleMap, OverlayView } from '@react-google-maps/api'
 import { useGoogleMaps } from '../hooks/useGoogleMaps.js'
+import { useMapOverlays } from '../hooks/useMapOverlays.js'
+import MapControls from './MapControls.jsx'
 import { db } from '../firebase.js'
 import { collection, addDoc, onSnapshot, updateDoc, deleteDoc, doc, query, orderBy } from 'firebase/firestore'
 
@@ -17,16 +19,25 @@ const STATUSES = [
   { value:'closed',    label:'Closed',          color:'#34d399' },
 ]
 
+const LEAD_NEON = {
+  active:      '#00ffcc',
+  interested:  '#00ff66',
+  under_nda:   '#cc00ff',
+  loi_sent:    '#ff9900',
+  dead:        '#ff4444',
+  closed:      '#00ff99',
+}
+
 function LeadMarker({ lead, onClick, isSelected }) {
-  const status = STATUSES.find(s=>s.value===lead.status)||STATUSES[0]
   if (!lead.lat || !lead.lng) return null
+  const neon = LEAD_NEON[lead.status] || '#00ffcc'
   return (
     <OverlayView position={{ lat: lead.lat, lng: lead.lng }} mapPaneName={OverlayView.OVERLAY_MOUSE_TARGET}>
       <div onClick={()=>onClick(lead)} title={lead.name} style={{ cursor:'pointer', transform:'translate(-50%,-50%)' }}>
-        <svg width="24" height="24" style={{ overflow:'visible' }}>
-          {isSelected && <circle cx="12" cy="12" r="11" fill="none" stroke="#f59e0b" strokeWidth="2"/>}
-          <circle cx="12" cy="12" r="8" fill={status.color} fillOpacity="0.9" stroke="#fff" strokeWidth="1.5"/>
-          <text x="12" y="16" textAnchor="middle" fontSize="9" fill="#000" fontWeight="bold">L</text>
+        <svg width="26" height="26" style={{ overflow:'visible', filter:`drop-shadow(0 0 4px ${neon})` }}>
+          {isSelected && <circle cx="13" cy="13" r="13" fill="none" stroke="#f59e0b" strokeWidth="2"/>}
+          <circle cx="13" cy="13" r="10" fill={neon} fillOpacity="0.15" stroke={neon} strokeWidth="1.5"/>
+          <circle cx="13" cy="13" r="5" fill={neon} fillOpacity="0.95"/>
         </svg>
       </div>
     </OverlayView>
@@ -269,6 +280,10 @@ export default function Leads({ currentUser }) {
   const [detailLead, setDetailLead] = useState(null)
   const [listWidth, setListWidth] = useState(580)
   const [isDragging, setIsDragging] = useState(false)
+  const [mapType, setMapType] = useState('dark')
+  const [showMapControls, setShowMapControls] = useState(false)
+
+  const { showIndustrial, setShowIndustrial, showParcel, setShowParcel, mapOptions } = useMapOverlays(mapRef, mapType, false)
   const dragStartX = useRef(0)
   const dragStartWidth = useRef(0)
 
@@ -391,11 +406,28 @@ export default function Leads({ currentUser }) {
       <div style={{ flex:1, position:'relative', minWidth:0 }}>
         {isLoaded ? (
           <GoogleMap mapContainerStyle={{ width:'100%', height:'100%' }}
-            options={{ center:{lat:32.78,lng:-117.1}, zoom:10, mapTypeId:'roadmap', styles:[{featureType:'poi',stylers:[{visibility:'off'}]}], mapTypeControl:false, streetViewControl:false, fullscreenControl:false, gestureHandling:'greedy' }}
+            options={{ center:{lat:32.78,lng:-117.1}, zoom:10, ...mapOptions }}
             onLoad={onMapLoad}>
             {filtered.map(lead => <LeadMarker key={lead._docId} lead={lead} onClick={l=>{setSelectedLead(l);mapRef.current?.panTo({lat:l.lat,lng:l.lng})}} isSelected={selectedLead?._docId===lead._docId} />)}
           </GoogleMap>
         ) : <div style={{ display:'flex', alignItems:'center', justifyContent:'center', height:'100%', color:'#475569' }}>Loading map…</div>}
+
+        {/* Floating Map Controls */}
+        <div style={{ position:'absolute', top:'10px', right:'10px', zIndex:10 }}>
+          <button
+            onClick={() => setShowMapControls(v => !v)}
+            style={{ padding:'6px 10px', background:'#0d1526cc', border:'1px solid #1e2d47', borderRadius:'6px', color:'#94a3b8', fontSize:'11px', cursor:'pointer', backdropFilter:'blur(4px)', marginBottom:'4px', display:'block', width:'100%' }}
+          >🗺 Map {showMapControls ? '▲' : '▼'}</button>
+          {showMapControls && (
+            <div style={{ background:'#0d1526ee', border:'1px solid #1e2d47', borderRadius:'8px', padding:'10px', backdropFilter:'blur(4px)', minWidth:'160px' }}>
+              <MapControls
+                mapType={mapType} setMapType={setMapType}
+                showIndustrial={showIndustrial} setShowIndustrial={setShowIndustrial}
+                showParcel={showParcel} setShowParcel={setShowParcel}
+              />
+            </div>
+          )}
+        </div>
 
         {selectedLead && (
           <div style={{ position:'absolute', bottom:'16px', left:'50%', transform:'translateX(-50%)', background:'#0d1526', border:'1px solid #1e2d47', borderRadius:'10px', padding:'12px 16px', minWidth:'260px', maxWidth:'360px', zIndex:10, boxShadow:'0 4px 20px rgba(0,0,0,0.5)' }}>

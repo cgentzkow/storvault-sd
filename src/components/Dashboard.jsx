@@ -205,7 +205,7 @@ export default function Dashboard({ comps, properties }) {
             <div key={b.name} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
               <span style={{ fontSize: '11px', color: '#94a3b8', flex: 1, marginRight: '8px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{b.name}</span>
               <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <div style={{ height: '6px', borderRadius: '3px', background: COLORS[i%COLORS.length], width: `${(b.count/topBuyers[0].count)*80}px` }} />
+                <div style={{ height: '6px', borderRadius: '3px', background: COLORS[i%COLORS.length], width: `${topBuyers.length > 0 ? (b.count/topBuyers[0].count)*80 : 0}px` }} />
                 <span style={{ fontSize: '11px', color: '#e2e8f0', fontWeight: 700, width: '16px', textAlign: 'right' }}>{b.count}</span>
               </div>
             </div>
