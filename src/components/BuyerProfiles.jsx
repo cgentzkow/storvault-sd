@@ -62,13 +62,90 @@ function buildBuyers() {
 
 const BUYERS = buildBuyers()
 
+
+// Hardcoded direct logo URLs — no scanning needed
+const LOGO_URLS = {
+  'Public Storage':             'https://logos.gentz.co/logo/public_storage',
+  'Extra Space Storage':        'https://logos.gentz.co/logo/extra-space-storage',
+  'CubeSmart':                  'https://logos.gentz.co/logo/cubesmart',
+  'Uhaul':                      'https://logos.gentz.co/logo/Uhaul',
+  'National Storage Affiliates':'https://logos.gentz.co/logo/national-storage-affiliates',
+  'SmartStop Self Storage':     'https://logos.gentz.co/logo/smartstop',
+  'Simply Self Storage':        'https://logos.gentz.co/logo/simply-self-storage',
+  'Life Storage':               'https://logos.gentz.co/logo/life-storage',
+  'StorQuest Self Storage':     'https://logos.gentz.co/logo/storquest',
+  'Trojan Storage':             'https://logos.gentz.co/logo/trojan-storage',
+  'InSite Property Group':      'https://logos.gentz.co/logo/insite_property_group',
+  'San Diego Self Storage':     'https://logos.gentz.co/logo/san_diego_self_storage',
+  'Miramar Self Storage':       'https://logos.gentz.co/logo/miramar-self-storage',
+  'The Caster Group':           'https://logos.gentz.co/logo/the_caster_group',
+  'BACO Properties':            'https://logos.gentz.co/logo/baco-properties',
+  'Baranof Holdings':           'https://logos.gentz.co/logo/baranof-holdings',
+  'Tierra Corporation':         'https://logos.gentz.co/logo/tierra-corporation',
+  'Danube Properties':          'https://logos.gentz.co/logo/danube-properties',
+  'The Ezralow Company':        'https://logos.gentz.co/logo/ezralow',
+  'Westport Properties':        'https://logos.gentz.co/logo/westport-properties',
+  'Pacifica Companies':         'https://logos.gentz.co/logo/pacifica-companies',
+  'Price Self Storage':         'https://logos.gentz.co/logo/price_self_storage',
+  'Ares Management Corporation':'https://logos.gentz.co/logo/ares-management',
+  'Artemis Real Estate Partners':'https://logos.gentz.co/logo/artemis-real-estate',
+  'Blue Vista':                 'https://logos.gentz.co/logo/blue-vista',
+  'Clear Sky Capital':          'https://logos.gentz.co/logo/clear-sky-capital',
+  'Prime Group Holdings':       'https://logos.gentz.co/logo/prime_group_holdings',
+  'Merit Hill Capital':         'https://logos.gentz.co/logo/merit_hill_capital',
+  'Encinitas Self Storage':     'https://logos.gentz.co/logo/encinitas_self_storage',
+  'Greens Global':              'https://logos.gentz.co/logo/greens_global',
+  'Northwest Building, LLC':    'https://logos.gentz.co/logo/northwest_building',
+  'Sentry Storage Solutions':   'https://logos.gentz.co/logo/sentry_storage',
+  'Chicago Capital Funds':      'https://logos.gentz.co/logo/chicago_capital_funds',
+  'CBRE Investment Management': 'https://logos.gentz.co/logo/cbre_investment',
+  'Dan Floit':                  'https://logos.gentz.co/logo/dan_floit',
+}
+function getLogoUrl(company) {
+  if (!company) return null
+  const n = company.toLowerCase()
+  if (LOGO_URLS[company]) return LOGO_URLS[company]
+  // keyword fallback for buyer names that may differ slightly
+  if (n.includes('public storage')) return LOGO_URLS['Public Storage']
+  if (n.includes('extra space')) return LOGO_URLS['Extra Space Storage']
+  if (n.includes('cubesmart')) return LOGO_URLS['CubeSmart']
+  if (n.includes('u-haul') || n.includes('uhaul')) return LOGO_URLS['Uhaul']
+  if (n.includes('national storage affiliates')) return LOGO_URLS['National Storage Affiliates']
+  if (n.includes('smartstop') || n.includes('strategic storage')) return LOGO_URLS['SmartStop Self Storage']
+  if (n.includes('simply self')) return LOGO_URLS['Simply Self Storage']
+  if (n.includes('life storage')) return LOGO_URLS['Life Storage']
+  if (n.includes('william warren') || n.includes('storquest') || n.includes('stor-quest')) return LOGO_URLS['StorQuest Self Storage']
+  if (n.includes('trojan storage')) return LOGO_URLS['Trojan Storage']
+  if (n.includes('insite') || n.includes('securespace')) return LOGO_URLS['InSite Property Group']
+  if (n.includes('san diego self storage')) return LOGO_URLS['San Diego Self Storage']
+  if (n.includes('miramar self storage')) return LOGO_URLS['Miramar Self Storage']
+  if (n.includes('caster') || n.includes('a-1 self storage')) return LOGO_URLS['The Caster Group']
+  if (n.includes('baco properties')) return LOGO_URLS['BACO Properties']
+  if (n.includes('baranof')) return LOGO_URLS['Baranof Holdings']
+  if (n.includes('tierra corporation')) return LOGO_URLS['Tierra Corporation']
+  if (n.includes('westport properties')) return LOGO_URLS['Westport Properties']
+  if (n.includes('price self storage')) return LOGO_URLS['Price Self Storage']
+  if (n.includes('ares management')) return LOGO_URLS['Ares Management Corporation']
+  if (n.includes('blue vista')) return LOGO_URLS['Blue Vista']
+  if (n.includes('prime group')) return LOGO_URLS['Prime Group Holdings']
+  if (n.includes('merit hill')) return LOGO_URLS['Merit Hill Capital']
+  if (n.includes('greens global')) return LOGO_URLS['Greens Global']
+  if (n.includes('northwest building')) return LOGO_URLS['Northwest Building, LLC']
+  if (n.includes('sentry storage')) return LOGO_URLS['Sentry Storage Solutions']
+  if (n.includes('chicago capital')) return LOGO_URLS['Chicago Capital Funds']
+  if (n.includes('cbre')) return LOGO_URLS['CBRE Investment Management']
+  if (n.includes('floit')) return LOGO_URLS['Dan Floit']
+  return null
+}
+
 function LogoImg({ company, size = 48 }) {
   const [err, setErr] = useState(false)
-  if (!company || err) {
-    const init = company ? company.split(' ').slice(0,2).map(w=>w[0]||'').join('').toUpperCase() : '?'
+  const url = getLogoUrl(company)
+  const init = company ? company.split(' ').slice(0,2).map(w=>w[0]||'').join('').toUpperCase() : '?'
+  if (!url || err) {
     return <div style={{ width:`${size}px`,height:`${size}px`,borderRadius:'8px',background:'#1e2d47',display:'flex',alignItems:'center',justifyContent:'center',fontSize:`${size*0.3}px`,fontWeight:700,color:'#f59e0b',flexShrink:0 }}>{init}</div>
   }
-  const logoKey = company.toLowerCase().includes("u-haul") || company.toLowerCase().includes("uhaul") ? "Uhaul" : company; return <img src={`https://logos.gentz.co/logo/by-name/${encodeURIComponent(logoKey)}`} alt={company} onError={()=>setErr(true)} style={{ width:`${size}px`,height:`${size}px`,objectFit:'contain',borderRadius:'8px',background:'#1e2d47',padding:'4px',flexShrink:0 }} />
+  return <img src={url} alt={company} onError={()=>setErr(true)} style={{ width:`${size}px`,height:`${size}px`,objectFit:'contain',borderRadius:'8px',background:'#fff',padding:'4px',flexShrink:0 }} />
 }
 
 function ActionNotePopup({ contact, action, buyerName, currentUser, onClose }) {

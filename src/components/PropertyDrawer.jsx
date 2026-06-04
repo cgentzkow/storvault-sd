@@ -113,7 +113,7 @@ function LogoImg({ property }) {
   if (!name || err) return null
   return <img src={LOGO_URLS[name]}
     alt={name} onError={() => setErr(true)}
-    style={{ height: '24px', maxWidth: '80px', objectFit: 'contain', filter: 'brightness(0) invert(1)', opacity: 0.7 }} />
+    style={{ height: '28px', maxWidth: '90px', objectFit: 'contain', background: '#fff', borderRadius: '4px', padding: '2px 4px' }} />
 }
 
 export default function PropertyDrawer({ property, onClose, updateProperty, currentUser, onViewDetail }) {
