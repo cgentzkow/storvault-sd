@@ -6,6 +6,7 @@ import PropertyDetail from './PropertyDetail.jsx'
 import { db } from '../firebase.js'
 import { collection, onSnapshot } from 'firebase/firestore'
 import MapControls from './MapControls.jsx'
+import { useLogoMap } from '../hooks/useLogoMap.js'
 
 const GMAPS_KEY = 'AIzaSyCLnBGWiIGI8OtYlHgLImzn0JY5FVjuQ6k'
 
@@ -96,12 +97,13 @@ function tile2mercBbox(x, y, z) {
   return `${w},${s},${e},${nn}`
 }
 
-function Marker({ prop, colorMode, onClick, isSelected }) {
+function Marker({ prop, colorMode, onClick, isSelected, logoMap }) {
   const color = getMarkerColor(prop, colorMode)
   const size = prop.sf > 100000 ? 16 : prop.sf > 60000 ? 13 : prop.sf > 30000 ? 10 : 8
-  const logoName = getLogoName(prop)
-  const [logoErr, setLogoErr] = useState(false)
-  const showLogo = logoName && !logoErr
+  const knownLogo = getLogoName(prop)
+  const ownerName = prop.parentCompany || prop.trueOwner || prop.owner || null
+  const logoName = knownLogo || (ownerName && logoMap?.get(ownerName) === true ? ownerName : null)
+  const showLogo = !!logoName
 
   return (
     <OverlayView position={{ lat: prop.lat, lng: prop.lng }} mapPaneName={OverlayView.OVERLAY_MOUSE_TARGET}>
@@ -116,7 +118,6 @@ function Marker({ prop, colorMode, onClick, isSelected }) {
             overflow: 'hidden', padding: '2px',
           }}>
             <img src={`https://logos.gentz.co/logo/by-name/${encodeURIComponent(logoName)}`}
-              onError={() => setLogoErr(true)}
               style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
           </div>
         ) : (
@@ -159,6 +160,8 @@ export default function MapView({ properties, selectedProperty, setSelectedPrope
   const [filterSubmarket, setFilterSubmarket] = useState('all')
   const [leads, setLeads] = useState([])
   const [detailProp, setDetailProp] = useState(null)
+  const ownerNames = useMemo(() => [...new Set(properties.map(p => p.parentCompany || p.trueOwner || p.owner).filter(Boolean))], [properties.length])
+  const logoMap = useLogoMap(ownerNames)
 
   // Fetch leads from Firestore
   useEffect(() => {
@@ -343,7 +346,7 @@ export default function MapView({ properties, selectedProperty, setSelectedPrope
           <GoogleMap mapContainerStyle={{ width: '100%', height: '100%' }} options={mapOptions} onLoad={onMapLoad}>
             {filteredProps.map(prop => (
               prop.lat && prop.lng ? (
-                <Marker key={prop.id} prop={prop} colorMode={colorMode}
+                <Marker key={prop.id} prop={prop} colorMode={colorMode} logoMap={logoMap}
                   onClick={setSelectedProperty} isSelected={selectedProperty?.id === prop.id} />
               ) : null
             ))}

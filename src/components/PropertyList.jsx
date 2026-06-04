@@ -4,6 +4,7 @@ import { useGoogleMaps } from '../hooks/useGoogleMaps.js'
 import { useMapOverlays } from '../hooks/useMapOverlays.js'
 import MapControls from './MapControls.jsx'
 import PropertyDetail from './PropertyDetail.jsx'
+import { useLogoMap } from '../hooks/useLogoMap.js'
 
 const STATUS_COLORS = {
   not_called:'#60a5fa', called:'#34d399', interested:'#f59e0b',
@@ -30,27 +31,28 @@ function getLogoName(p) {
   return null
 }
 
-function LogoCell({ property }) {
-  const [err, setErr] = useState(false)
-  const logoName = getLogoName(property)
-  if (!logoName || err) return null
+function LogoCell({ property, logoMap }) {
+  const knownLogo = getLogoName(property)
+  const ownerName = property.parentCompany || property.trueOwner || property.owner || null
+  const logoName = knownLogo || (ownerName && logoMap?.get(ownerName) === true ? ownerName : null)
+  if (!logoName) return null
   return <img src={`https://logos.gentz.co/logo/by-name/${encodeURIComponent(logoName)}`}
-    onError={()=>setErr(true)} alt={logoName}
+    alt={logoName}
     style={{ height:'20px', maxWidth:'64px', objectFit:'contain', verticalAlign:'middle', marginLeft:'6px', flexShrink:0 }} />
 }
 
-function MapMarker({ prop, onClick, isSelected }) {
-  const [logoErr, setLogoErr] = useState(false)
+function MapMarker({ prop, onClick, isSelected, logoMap }) {
   const color = STATUS_COLORS[prop.callStatus]||'#60a5fa'
   const size = prop.sf > 100000 ? 14 : prop.sf > 60000 ? 11 : prop.sf > 30000 ? 9 : 7
-  const logoName = getLogoName(prop)
-  const showLogo = logoName && !logoErr
+  const knownLogo = getLogoName(prop)
+  const ownerName = prop.parentCompany || prop.trueOwner || prop.owner || null
+  const logoName = knownLogo || (ownerName && logoMap?.get(ownerName) === true ? ownerName : null)
   return (
     <OverlayView position={{ lat: prop.lat, lng: prop.lng }} mapPaneName={OverlayView.OVERLAY_MOUSE_TARGET}>
       <div onClick={() => onClick(prop)} title={prop.name||prop.address} style={{ cursor:'pointer', transform:'translate(-50%,-50%)' }}>
-        {showLogo ? (
+        {logoName ? (
           <div style={{ width:`${size*2+8}px`, height:`${size*2+8}px`, borderRadius:'5px', background:'#fff', border:`2px solid ${isSelected?'#f59e0b':color}`, display:'flex', alignItems:'center', justifyContent:'center', overflow:'hidden', padding:'2px', boxShadow: isSelected?'0 0 0 2px #f59e0b':'0 1px 3px rgba(0,0,0,0.5)' }}>
-            <img src={`https://logos.gentz.co/logo/by-name/${encodeURIComponent(logoName)}`} onError={()=>setLogoErr(true)} style={{ width:'100%', height:'100%', objectFit:'contain' }} />
+            <img src={`https://logos.gentz.co/logo/by-name/${encodeURIComponent(logoName)}`} style={{ width:'100%', height:'100%', objectFit:'contain' }} />
           </div>
         ) : (
           <svg width={size*2+4} height={size*2+4} style={{ overflow:'visible' }}>
@@ -122,6 +124,8 @@ export default function PropertyList({ properties, selectedProperty, setSelected
     return arr.sort((a,b)=>(b.sf||0)-(a.sf||0))
   }, [properties, search, filterOwner, filterStatus, filterSubmarket, filterMinSF, filterMaxSF])
 
+  const ownerNames = useMemo(() => [...new Set(properties.map(p => p.parentCompany || p.trueOwner || p.owner).filter(Boolean))], [properties.length])
+  const logoMap = useLogoMap(ownerNames)
   const onMapLoad = useCallback(m=>{ mapRef.current=m }, [])
 
   const onDragStart = useCallback((e) => {
@@ -215,7 +219,7 @@ export default function PropertyList({ properties, selectedProperty, setSelected
                     <td style={{ padding:'7px 10px', maxWidth:'160px' }}>
                       <div style={{ display:'flex', alignItems:'center', gap:'4px' }}>
                         <span style={{ color:'#f59e0b', fontSize:'11px', fontWeight:600, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap', flex:1 }}>{p.trueOwner||p.owner||'—'}</span>
-                        <LogoCell property={p} />
+                        <LogoCell property={p} logoMap={logoMap} />
                       </div>
                     </td>
                     <td style={{ padding:'7px 10px', color:'#94a3b8', whiteSpace:'nowrap' }}>{p.sf>0?p.sf.toLocaleString():'—'}</td>
@@ -247,7 +251,7 @@ export default function PropertyList({ properties, selectedProperty, setSelected
             options={fullMapOptions}
             onLoad={onMapLoad}>
             {filtered.map(prop => prop.lat && prop.lng ? (
-              <MapMarker key={prop.id} prop={prop}
+              <MapMarker key={prop.id} prop={prop} logoMap={logoMap}
                 onClick={p=>{ setSelectedProperty(p); mapRef.current?.panTo({lat:p.lat,lng:p.lng}) }}
                 isSelected={selectedProperty?.id===prop.id} />
             ) : null)}
