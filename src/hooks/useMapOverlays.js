@@ -32,29 +32,58 @@ export function tile2mercBbox(x, y, z) {
   return `${w},${s},${e},${nn}`
 }
 
-export function useMapOverlays(mapRef, mapType, defaultIndustrial = false) {
-  const parcelOverlayRef = useRef(null)
-  const industrialLayerRef = useRef(null)
-  const [industrialData, setIndustrialData] = useState(null)
-  const [showParcel, setShowParcel] = useState(false)
-  const [showIndustrial, setShowIndustrial] = useState(defaultIndustrial)
-  const [mapReady, setMapReady] = useState(false)
+// Layer configs: [file, fillColor, strokeColor, fillOpacity, strokeOpacity]
+const LAYER_CONFIGS = {
+  green:  { file: '/green_overlay.geojson',  fill: '#22c55e', stroke: '#16a34a', fillOp: 0.30, strokeOp: 0.8 },
+  red:    { file: '/industrial_overlay.geojson', fill: '#ef4444', stroke: '#dc2626', fillOp: 0.32, strokeOp: 0.7 },
+  ip:     { file: '/ip_zones.geojson',        fill: '#ef4444', stroke: '#dc2626', fillOp: 0.32, strokeOp: 0.7 },
+  orange: { file: '/orange_overlay.geojson',  fill: '#f97316', stroke: '#ea580c', fillOp: 0.30, strokeOp: 0.7 },
+}
+
+function useDataLayer(mapRef, mapReady, show, config) {
+  const layerRef = useRef(null)
+  const dataRef = useRef(null)
 
   useEffect(() => {
-    fetch('/industrial_overlay.geojson').then(r => r.json()).then(setIndustrialData).catch(() => {})
+    fetch(config.file).then(r => r.json()).then(d => { dataRef.current = d }).catch(() => {})
   }, [])
 
   useEffect(() => {
     const map = mapRef.current
-    if (!map || !industrialData || !window.google) return
-    if (industrialLayerRef.current) industrialLayerRef.current.setMap(null)
-    if (!showIndustrial) return
+    if (!map || !window.google) return
+    if (layerRef.current) { layerRef.current.setMap(null); layerRef.current = null }
+    if (!show || !dataRef.current) return
     const layer = new window.google.maps.Data()
-    layer.addGeoJson(industrialData)
-    layer.setStyle({ fillColor: '#ef4444', fillOpacity: 0.18, strokeColor: '#ef4444', strokeWeight: 1, strokeOpacity: 0.4 })
+    layer.addGeoJson(dataRef.current)
+    layer.setStyle({
+      fillColor: config.fill,
+      fillOpacity: config.fillOp,
+      strokeColor: config.stroke,
+      strokeWeight: 1.5,
+      strokeOpacity: config.strokeOp,
+    })
     layer.setMap(map)
-    industrialLayerRef.current = layer
-  }, [showIndustrial, industrialData, mapRef.current])
+    layerRef.current = layer
+    return () => { if (layerRef.current) { layerRef.current.setMap(null); layerRef.current = null } }
+  }, [show, mapReady])
+}
+
+export function useMapOverlays(mapRef, mapType, defaultIndustrial = false) {
+  const parcelOverlayRef = useRef(null)
+  const [showParcel, setShowParcel] = useState(false)
+  const [showGreen, setShowGreen] = useState(false)
+  const [showRed, setShowRed] = useState(defaultIndustrial)
+  const [showOrange, setShowOrange] = useState(false)
+  const [mapReady, setMapReady] = useState(false)
+
+  // Legacy: keep showIndustrial wired to showRed for any existing callers
+  const showIndustrial = showRed
+  const setShowIndustrial = setShowRed
+
+  useDataLayer(mapRef, mapReady, showGreen, LAYER_CONFIGS.green)
+  useDataLayer(mapRef, mapReady, showRed, LAYER_CONFIGS.red)
+  useDataLayer(mapRef, mapReady, showRed, LAYER_CONFIGS.ip)
+  useDataLayer(mapRef, mapReady, showOrange, LAYER_CONFIGS.orange)
 
   useEffect(() => {
     const map = mapRef.current
@@ -78,9 +107,8 @@ export function useMapOverlays(mapRef, mapType, defaultIndustrial = false) {
     })
     map.overlayMapTypes.push(overlay)
     parcelOverlayRef.current = overlay
-  }, [showParcel, mapRef.current])
+  }, [showParcel, mapReady])
 
-  // Apply map style imperatively whenever mapType changes (or map becomes ready)
   useEffect(() => {
     const map = mapRef.current
     if (!map || !window.google) return
@@ -90,7 +118,6 @@ export function useMapOverlays(mapRef, mapType, defaultIndustrial = false) {
     map.setOptions({ styles })
   }, [mapType, mapReady])
 
-  // Stable initial options — NO center/zoom so GoogleMap never resets position
   const [mapOptions] = useState({
     mapTypeId: 'roadmap',
     mapTypeControl: false, streetViewControl: false, fullscreenControl: false,
@@ -100,11 +127,15 @@ export function useMapOverlays(mapRef, mapType, defaultIndustrial = false) {
   const onMapReadyCallback = (map) => {
     mapRef.current = map
     setMapReady(true)
-    // Apply initial dark style
-    if (window.google) {
-      map.setOptions({ styles: MAP_DARK_STYLE })
-    }
+    if (window.google) map.setOptions({ styles: MAP_DARK_STYLE })
   }
 
-  return { showIndustrial, setShowIndustrial, showParcel, setShowParcel, mapOptions, onMapReadyCallback }
+  return {
+    showIndustrial, setShowIndustrial,
+    showGreen, setShowGreen,
+    showRed, setShowRed,
+    showOrange, setShowOrange,
+    showParcel, setShowParcel,
+    mapOptions, onMapReadyCallback
+  }
 }
