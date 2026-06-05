@@ -303,11 +303,11 @@ export default function MapView({ properties, selectedProperty, setSelectedPrope
   }
 
   useEffect(() => { renderLayer(greenLayerRef, greenData, showGreen, '#22c55e', '#16a34a', 0.30) }, [showGreen, greenData, mapReady])
-  useEffect(() => { renderLayer(cupLayerRef, cupData, showCup, '#86efac', '#4ade80', 0.30) }, [showCup, cupData, mapReady])
+  useEffect(() => { renderLayer(cupLayerRef, cupData, showCup, '#f97316', '#ea580c', 0.28) }, [showCup, cupData, mapReady])
   useEffect(() => { renderLayer(redLayerRef, redData, showRed, '#ef4444', '#dc2626', 0.32) }, [showRed, redData, mapReady])
-  useEffect(() => { renderLayer(zoneBannedLayerRef, zoneBannedData, showZoneBanned, '#9f1239', '#881337', 0.32) }, [showZoneBanned, zoneBannedData, mapReady])
+  useEffect(() => { renderLayer(zoneBannedLayerRef, zoneBannedData, showRed, '#ef4444', '#dc2626', 0.28) }, [showRed, zoneBannedData, mapReady])
   useEffect(() => { renderLayer(ipLayerRef, ipData, showRed, '#ef4444', '#dc2626', 0.32) }, [showRed, ipData, mapReady])
-  useEffect(() => { renderLayer(orangeLayerRef, orangeData, showOrange, '#f97316', '#ea580c', 0.30) }, [showOrange, orangeData, mapReady])
+  useEffect(() => { renderLayer(orangeLayerRef, orangeData, showOrange, '#f472b6', '#ec4899', 0.30) }, [showOrange, orangeData, mapReady])
 
   // Parcel overlay — using SD County ArcGIS exactly like Atlas
   useEffect(() => {
