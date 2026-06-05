@@ -225,6 +225,7 @@ export default function MapView({ properties, selectedProperty, setSelectedPrope
   const [showGreen, setShowGreen] = useState(false)
   const [showCup, setShowCup] = useState(false)
   const [showRed, setShowRed] = useState(true)
+  const [showPIL, setShowPIL] = useState(true)
   const [showZoneBanned, setShowZoneBanned] = useState(false)
   const [showOrange, setShowOrange] = useState(false)
   const showIndustrial = showRed
@@ -306,7 +307,7 @@ export default function MapView({ properties, selectedProperty, setSelectedPrope
   useEffect(() => { renderLayer(cupLayerRef, cupData, showCup, '#f97316', '#ea580c', 0.28) }, [showCup, cupData, mapReady])
   useEffect(() => { renderLayer(redLayerRef, redData, showRed, '#ef4444', '#dc2626', 0.32) }, [showRed, redData, mapReady])
   useEffect(() => { renderLayer(zoneBannedLayerRef, zoneBannedData, showRed, '#ef4444', '#dc2626', 0.28) }, [showRed, zoneBannedData, mapReady])
-  useEffect(() => { renderLayer(ipLayerRef, ipData, showRed, '#ef4444', '#dc2626', 0.32) }, [showRed, ipData, mapReady])
+  useEffect(() => { renderLayer(ipLayerRef, ipData, showPIL, '#b91c1c', '#991b1b', 0.35) }, [showPIL, ipData, mapReady])
   useEffect(() => { renderLayer(orangeLayerRef, orangeData, showOrange, '#f472b6', '#ec4899', 0.30) }, [showOrange, orangeData, mapReady])
 
   // Parcel overlay — using SD County ArcGIS exactly like Atlas
@@ -386,6 +387,7 @@ export default function MapView({ properties, selectedProperty, setSelectedPrope
           showRed={showRed} setShowRed={setShowRed}
           showZoneBanned={showZoneBanned} setShowZoneBanned={setShowZoneBanned}
           showOrange={showOrange} setShowOrange={setShowOrange}
+          showPIL={showPIL} setShowPIL={setShowPIL}
           showParcel={showParcel} setShowParcel={setShowParcel}
           showIndustrial={showIndustrial} setShowIndustrial={setShowIndustrial}
         />

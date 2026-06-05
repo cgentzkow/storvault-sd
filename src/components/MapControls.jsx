@@ -1,6 +1,4 @@
-export default function MapControls({ mapType, setMapType, showParcel, setShowParcel, showGreen, setShowGreen, showCup, setShowCup, showRed, setShowRed, showOrange, setShowOrange, showIndustrial, setShowIndustrial }) {
-  const redOn = showRed !== undefined ? showRed : showIndustrial
-  const setRedOn = setShowRed || setShowIndustrial
+export default function MapControls({ mapType, setMapType, showParcel, setShowParcel, showGreen, setShowGreen, showCup, setShowCup, showRed, setShowRed, showOrange, setShowOrange, showPIL, setShowPIL }) {
   const mapBtn = (v) => ({ padding:'5px 9px',border:'none',borderRadius:'5px',cursor:'pointer',fontSize:'10px',fontWeight:600,background:mapType===v?'#f59e0b':'#1e2d47',color:mapType===v?'#000':'#94a3b8'})
   const btn = (active,hex,r,g,b) => ({padding:'5px 9px',borderRadius:'5px',cursor:'pointer',fontSize:'10px',fontWeight:600,textAlign:'left',width:'100%',background:active?`rgba(${r},${g},${b},0.20)`:'#1e2d47',color:active?hex:'#94a3b8',border:active?`1px solid rgba(${r},${g},${b},0.40)`:'1px solid transparent'})
   return (
@@ -22,11 +20,14 @@ export default function MapControls({ mapType, setMapType, showParcel, setShowPa
           <button onClick={()=>setShowCup&&setShowCup(v=>!v)} style={btn(showCup,'#fb923c',249,115,22)}>
             🟠 CUP Required
           </button>
-          <button onClick={()=>setRedOn(v=>!v)} style={btn(redOn,'#f87171',239,68,68)}>
-            🔴 Zoning Prohibits / Prime Ind.
+          <button onClick={()=>setShowRed&&setShowRed(v=>!v)} style={btn(showRed,'#f87171',239,68,68)}>
+            🔴 Zoning Prohibits
+          </button>
+          <button onClick={()=>setShowPIL&&setShowPIL(v=>!v)} style={btn(showPIL,'#fca5a5',185,28,28)}>
+            🔻 Prime Industrial Overlay
           </button>
           <button onClick={()=>setShowOrange&&setShowOrange(v=>!v)} style={btn(showOrange,'#f9a8d4',244,114,182)}>
-            🩷 Soon to be Banned (2026)
+            <span style={{color: showOrange ? '#f9a8d4' : '#94a3b8', marginRight: 4}}>●</span> Soon to be Banned (2026)
           </button>
           <button onClick={()=>setShowParcel(v=>!v)} style={btn(showParcel,'#fde047',255,235,59)}>
             🟡 SD Parcels{showParcel?' (zoom 14+)':''}
@@ -36,8 +37,9 @@ export default function MapControls({ mapType, setMapType, showParcel, setShowPa
       <div style={{fontSize:'8px',color:'#475569',lineHeight:1.65,paddingTop:2,borderTop:'1px solid #1e2d47',marginTop:2}}>
         <div style={{color:'#4ade80',marginBottom:1}}>🟢 <b>By-Right</b> — City SD · County · Chula Vista</div>
         <div style={{color:'#fb923c',marginBottom:1}}>🟠 <b>CUP</b> — Escondido M-1</div>
-        <div style={{color:'#f87171',marginBottom:1}}>🔴 <b>Banned</b> — Zone prohibits or Prime Industrial overlay</div>
-        <div style={{color:'#f9a8d4'}}>🩷 <b>Pending</b> — El Cajon Blvd / University Ave (2026)</div>
+        <div style={{color:'#f87171',marginBottom:1}}>🔴 <b>Banned</b> — Zone prohibits self-storage</div>
+        <div style={{color:'#fca5a5',marginBottom:1}}>🔻 <b>PIL</b> — Prime Industrial Overlay</div>
+        <div style={{color:'#f9a8d4'}}>● <b>Pending</b> — El Cajon Blvd / University Ave (2026)</div>
       </div>
     </div>
   )
