@@ -209,19 +209,16 @@ export default function MapView({ properties, selectedProperty, setSelectedPrope
   const mapRef = useRef(null)
   const parcelOverlayRef = useRef(null)
   const greenLayerRef = useRef(null)
-  const cupLayerRef = useRef(null)
   const redLayerRef = useRef(null)
   const ipLayerRef = useRef(null)
   const orangeLayerRef = useRef(null)
   const [greenData, setGreenData] = useState(null)
-  const [cupData, setCupData] = useState(null)
   const [redData, setRedData] = useState(null)
   const [ipData, setIpData] = useState(null)
   const [orangeData, setOrangeData] = useState(null)
   const [mapType, setMapType] = useState('dark')
   const [showParcel, setShowParcel] = useState(false)
   const [showGreen, setShowGreen] = useState(false)
-  const [showCup, setShowCup] = useState(false)
   const [showRed, setShowRed] = useState(true)
   const [showOrange, setShowOrange] = useState(false)
   const showIndustrial = showRed
@@ -279,7 +276,6 @@ export default function MapView({ properties, selectedProperty, setSelectedPrope
   // Load all overlay data
   useEffect(() => {
     fetch('/green_overlay.geojson').then(r => r.json()).then(setGreenData).catch(() => {})
-    fetch('/green_cup.geojson').then(r => r.json()).then(setCupData).catch(() => {})
     fetch('/industrial_overlay.geojson').then(r => r.json()).then(setRedData).catch(() => {})
     fetch('/ip_zones.geojson').then(r => r.json()).then(setIpData).catch(() => {})
     fetch('/orange_overlay.geojson').then(r => r.json()).then(setOrangeData).catch(() => {})
@@ -299,7 +295,6 @@ export default function MapView({ properties, selectedProperty, setSelectedPrope
   }
 
   useEffect(() => { renderLayer(greenLayerRef, greenData, showGreen, '#22c55e', '#16a34a', 0.30) }, [showGreen, greenData, mapReady])
-  useEffect(() => { renderLayer(cupLayerRef, cupData, showCup, '#86efac', '#4ade80', 0.30) }, [showCup, cupData, mapReady])
   useEffect(() => { renderLayer(redLayerRef, redData, showRed, '#ef4444', '#dc2626', 0.32) }, [showRed, redData, mapReady])
   useEffect(() => { renderLayer(ipLayerRef, ipData, showRed, '#ef4444', '#dc2626', 0.32) }, [showRed, ipData, mapReady])
   useEffect(() => { renderLayer(orangeLayerRef, orangeData, showOrange, '#f97316', '#ea580c', 0.30) }, [showOrange, orangeData, mapReady])
@@ -377,7 +372,6 @@ export default function MapView({ properties, selectedProperty, setSelectedPrope
         <MapControls
           mapType={mapType} setMapType={setMapType}
           showGreen={showGreen} setShowGreen={setShowGreen}
-          showCup={showCup} setShowCup={setShowCup}
           showRed={showRed} setShowRed={setShowRed}
           showOrange={showOrange} setShowOrange={setShowOrange}
           showParcel={showParcel} setShowParcel={setShowParcel}
