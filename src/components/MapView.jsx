@@ -208,11 +208,21 @@ export default function MapView({ properties, selectedProperty, setSelectedPrope
   const isLoaded = useGoogleMaps()
   const mapRef = useRef(null)
   const parcelOverlayRef = useRef(null)
-  const industrialLayerRef = useRef(null)
-  const [industrialData, setIndustrialData] = useState(null)
+  const greenLayerRef = useRef(null)
+  const redLayerRef = useRef(null)
+  const ipLayerRef = useRef(null)
+  const orangeLayerRef = useRef(null)
+  const [greenData, setGreenData] = useState(null)
+  const [redData, setRedData] = useState(null)
+  const [ipData, setIpData] = useState(null)
+  const [orangeData, setOrangeData] = useState(null)
   const [mapType, setMapType] = useState('dark')
   const [showParcel, setShowParcel] = useState(false)
-  const [showIndustrial, setShowIndustrial] = useState(true)
+  const [showGreen, setShowGreen] = useState(false)
+  const [showRed, setShowRed] = useState(true)
+  const [showOrange, setShowOrange] = useState(false)
+  const showIndustrial = showRed
+  const setShowIndustrial = setShowRed
   const [colorMode, setColorMode] = useState('status')
   const [filterOwner, setFilterOwner] = useState('all')
   const [filterStatus, setFilterStatus] = useState('all')
@@ -263,22 +273,31 @@ export default function MapView({ properties, selectedProperty, setSelectedPrope
     return true
   }), [properties, filterStatus, filterSubmarket, filterOwner])
 
+  // Load all overlay data
   useEffect(() => {
-    fetch('/industrial_overlay.geojson').then(r => r.json()).then(setIndustrialData).catch(() => {})
+    fetch('/green_overlay.geojson').then(r => r.json()).then(setGreenData).catch(() => {})
+    fetch('/industrial_overlay.geojson').then(r => r.json()).then(setRedData).catch(() => {})
+    fetch('/ip_zones.geojson').then(r => r.json()).then(setIpData).catch(() => {})
+    fetch('/orange_overlay.geojson').then(r => r.json()).then(setOrangeData).catch(() => {})
   }, [])
 
-  // Industrial overlay
-  useEffect(() => {
+  // Helper to render a data layer
+  function renderLayer(layerRef, data, show, fill, stroke, fillOp) {
     const map = mapRef.current
-    if (!map || !industrialData || !window.google) return
-    if (industrialLayerRef.current) industrialLayerRef.current.setMap(null)
-    if (!showIndustrial) return
+    if (!map || !window.google) return
+    if (layerRef.current) { layerRef.current.setMap(null); layerRef.current = null }
+    if (!show || !data) return
     const layer = new window.google.maps.Data()
-    layer.addGeoJson(industrialData)
-    layer.setStyle({ fillColor: '#ef4444', fillOpacity: 0.18, strokeColor: '#ef4444', strokeWeight: 1, strokeOpacity: 0.4 })
+    layer.addGeoJson(data)
+    layer.setStyle({ fillColor: fill, fillOpacity: fillOp, strokeColor: stroke, strokeWeight: 1.5, strokeOpacity: 0.75 })
     layer.setMap(map)
-    industrialLayerRef.current = layer
-  }, [showIndustrial, industrialData, mapRef.current])
+    layerRef.current = layer
+  }
+
+  useEffect(() => { renderLayer(greenLayerRef, greenData, showGreen, '#22c55e', '#16a34a', 0.30) }, [showGreen, greenData, mapReady])
+  useEffect(() => { renderLayer(redLayerRef, redData, showRed, '#ef4444', '#dc2626', 0.32) }, [showRed, redData, mapReady])
+  useEffect(() => { renderLayer(ipLayerRef, ipData, showRed, '#ef4444', '#dc2626', 0.32) }, [showRed, ipData, mapReady])
+  useEffect(() => { renderLayer(orangeLayerRef, orangeData, showOrange, '#f97316', '#ea580c', 0.30) }, [showOrange, orangeData, mapReady])
 
   // Parcel overlay — using SD County ArcGIS exactly like Atlas
   useEffect(() => {
@@ -352,8 +371,11 @@ export default function MapView({ properties, selectedProperty, setSelectedPrope
 
         <MapControls
           mapType={mapType} setMapType={setMapType}
-          showIndustrial={showIndustrial} setShowIndustrial={setShowIndustrial}
+          showGreen={showGreen} setShowGreen={setShowGreen}
+          showRed={showRed} setShowRed={setShowRed}
+          showOrange={showOrange} setShowOrange={setShowOrange}
           showParcel={showParcel} setShowParcel={setShowParcel}
+          showIndustrial={showIndustrial} setShowIndustrial={setShowIndustrial}
         />
 
         <div>
