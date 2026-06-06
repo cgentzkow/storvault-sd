@@ -221,6 +221,8 @@ export default function MapView({ properties, selectedProperty, setSelectedPrope
   const oceansideGreenLayerRef = useRef(null)
   const oceansideCupLayerRef = useRef(null)
   const oceansideRedLayerRef = useRef(null)
+  const vistaGreenLayerRef = useRef(null)
+  const vistaRedLayerRef = useRef(null)
   const [greenData, setGreenData] = useState(null)
   const [cupData, setCupData] = useState(null)
   const [redData, setRedData] = useState(null)
@@ -234,6 +236,8 @@ export default function MapView({ properties, selectedProperty, setSelectedPrope
   const [oceansideGreenData, setOceansideGreenData] = useState(null)
   const [oceansideCupData, setOceansideCupData] = useState(null)
   const [oceansideRedData, setOceansideRedData] = useState(null)
+  const [vistaGreenData, setVistaGreenData] = useState(null)
+  const [vistaRedData, setVistaRedData] = useState(null)
   const [mapType, setMapType] = useState('dark')
   const [showParcel, setShowParcel] = useState(false)
   const [showGreen, setShowGreen] = useState(false)
@@ -249,6 +253,8 @@ export default function MapView({ properties, selectedProperty, setSelectedPrope
   const [showOceansideGreen, setShowOceansideGreen] = useState(false)
   const [showOceansideCup, setShowOceansideCup] = useState(false)
   const [showOceansideRed, setShowOceansideRed] = useState(false)
+  const [showVistaGreen, setShowVistaGreen] = useState(false)
+  const [showVistaRed, setShowVistaRed] = useState(false)
   const showIndustrial = showRed
   const setShowIndustrial = setShowRed
   const [colorMode, setColorMode] = useState('status')
@@ -316,6 +322,8 @@ export default function MapView({ properties, selectedProperty, setSelectedPrope
     fetch('/oceanside_green.geojson').then(r => r.json()).then(setOceansideGreenData).catch(() => {})
     fetch('/oceanside_cup.geojson').then(r => r.json()).then(setOceansideCupData).catch(() => {})
     fetch('/oceanside_red.geojson').then(r => r.json()).then(setOceansideRedData).catch(() => {})
+    fetch('/vista_green.geojson').then(r => r.json()).then(setVistaGreenData).catch(() => {})
+    fetch('/vista_red.geojson').then(r => r.json()).then(setVistaRedData).catch(() => {})
   }, [])
 
   // Helper to render a data layer
@@ -344,6 +352,8 @@ export default function MapView({ properties, selectedProperty, setSelectedPrope
   useEffect(() => { renderLayer(oceansideGreenLayerRef, oceansideGreenData, showOceansideGreen, '#22c55e', '#16a34a', 0.30) }, [showOceansideGreen, oceansideGreenData, mapReady])
   useEffect(() => { renderLayer(oceansideCupLayerRef, oceansideCupData, showOceansideCup, '#f97316', '#ea580c', 0.28) }, [showOceansideCup, oceansideCupData, mapReady])
   useEffect(() => { renderLayer(oceansideRedLayerRef, oceansideRedData, showOceansideRed, '#ef4444', '#dc2626', 0.32) }, [showOceansideRed, oceansideRedData, mapReady])
+  useEffect(() => { renderLayer(vistaGreenLayerRef, vistaGreenData, showVistaGreen, '#22c55e', '#16a34a', 0.30) }, [showVistaGreen, vistaGreenData, mapReady])
+  useEffect(() => { renderLayer(vistaRedLayerRef, vistaRedData, showVistaRed, '#ef4444', '#dc2626', 0.32) }, [showVistaRed, vistaRedData, mapReady])
 
   // Parcel overlay — using SD County ArcGIS exactly like Atlas
   useEffect(() => {
@@ -432,6 +442,8 @@ export default function MapView({ properties, selectedProperty, setSelectedPrope
           showOceansideGreen={showOceansideGreen} setShowOceansideGreen={setShowOceansideGreen}
           showOceansideCup={showOceansideCup} setShowOceansideCup={setShowOceansideCup}
           showOceansideRed={showOceansideRed} setShowOceansideRed={setShowOceansideRed}
+          showVistaGreen={showVistaGreen} setShowVistaGreen={setShowVistaGreen}
+          showVistaRed={showVistaRed} setShowVistaRed={setShowVistaRed}
         />
 
         <div>
