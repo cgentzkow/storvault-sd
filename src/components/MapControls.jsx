@@ -1,4 +1,4 @@
-export default function MapControls({ mapType, setMapType, showParcel, setShowParcel, showGreen, setShowGreen, showCup, setShowCup, showRed, setShowRed, showOrange, setShowOrange, showPIL, setShowPIL, showElCajonCup, setShowElCajonCup, showElCajonRed, setShowElCajonRed, showCarlsbadCup, setShowCarlsbadCup, showCarlsbadRed, setShowCarlsbadRed }) {
+export default function MapControls({ mapType, setMapType, showParcel, setShowParcel, showGreen, setShowGreen, showCup, setShowCup, showRed, setShowRed, showOrange, setShowOrange, showPIL, setShowPIL, showElCajonCup, setShowElCajonCup, showElCajonRed, setShowElCajonRed, showCarlsbadCup, setShowCarlsbadCup, showCarlsbadRed, setShowCarlsbadRed, showOceansideGreen, setShowOceansideGreen, showOceansideCup, setShowOceansideCup, showOceansideRed, setShowOceansideRed }) {
   const mapBtn = (v) => ({ padding:'5px 9px',border:'none',borderRadius:'5px',cursor:'pointer',fontSize:'10px',fontWeight:600,background:mapType===v?'#f59e0b':'#1e2d47',color:mapType===v?'#000':'#94a3b8'})
   const btn = (active,hex,r,g,b) => ({padding:'5px 9px',borderRadius:'5px',cursor:'pointer',fontSize:'10px',fontWeight:600,textAlign:'left',width:'100%',background:active?`rgba(${r},${g},${b},0.20)`:'#1e2d47',color:active?hex:'#94a3b8',border:active?`1px solid rgba(${r},${g},${b},0.40)`:'1px solid transparent'})
   return (
@@ -41,6 +41,15 @@ export default function MapControls({ mapType, setMapType, showParcel, setShowPa
           <button onClick={()=>setShowCarlsbadRed&&setShowCarlsbadRed(v=>!v)} style={btn(showCarlsbadRed,'#f87171',239,68,68)}>
             🔴 Carlsbad — Banned Zones
           </button>
+          <button onClick={()=>setShowOceansideGreen&&setShowOceansideGreen(v=>!v)} style={btn(showOceansideGreen,'#4ade80',34,197,94)}>
+            🟢 Oceanside — CG (By-Right)
+          </button>
+          <button onClick={()=>setShowOceansideCup&&setShowOceansideCup(v=>!v)} style={btn(showOceansideCup,'#fb923c',249,115,22)}>
+            🟠 Oceanside — IL / IG (CUP)
+          </button>
+          <button onClick={()=>setShowOceansideRed&&setShowOceansideRed(v=>!v)} style={btn(showOceansideRed,'#f87171',239,68,68)}>
+            🔴 Oceanside — Banned Zones
+          </button>
           <button onClick={()=>setShowParcel(v=>!v)} style={btn(showParcel,'#fde047',255,235,59)}>
             🟡 SD Parcels{showParcel?' (zoom 14+)':''}
           </button>
@@ -55,7 +64,10 @@ export default function MapControls({ mapType, setMapType, showParcel, setShowPa
         <div style={{color:'#fb923c',marginBottom:1}}>🟠 <b>El Cajon M / C-M</b> — CUP Required</div>
         <div style={{color:'#f87171',marginBottom:1}}>🔴 <b>El Cajon Other</b> — Self-storage banned</div>
         <div style={{color:'#fb923c',marginBottom:1}}>🟠 <b>Carlsbad M</b> — CUP required (M zone only)</div>
-        <div style={{color:'#f87171'}}>🔴 <b>Carlsbad Other</b> — P-M, C-M, commercial banned</div>
+        <div style={{color:'#f87171',marginBottom:1}}>🔴 <b>Carlsbad Other</b> — P-M, C-M, commercial banned</div>
+        <div style={{color:'#4ade80',marginBottom:1}}>🟢 <b>Oceanside CG</b> — By-right (Art. 11, L-9)</div>
+        <div style={{color:'#fb923c',marginBottom:1}}>🟠 <b>Oceanside IL/IG</b> — Use Permit (CUP) required</div>
+        <div style={{color:'#f87171'}}>🔴 <b>Oceanside Other</b> — Self-storage prohibited</div>
       </div>
     </div>
   )

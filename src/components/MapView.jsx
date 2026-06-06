@@ -218,6 +218,9 @@ export default function MapView({ properties, selectedProperty, setSelectedPrope
   const elcajonRedLayerRef = useRef(null)
   const carlsbadCupLayerRef = useRef(null)
   const carlsbadRedLayerRef = useRef(null)
+  const oceansideGreenLayerRef = useRef(null)
+  const oceansideCupLayerRef = useRef(null)
+  const oceansideRedLayerRef = useRef(null)
   const [greenData, setGreenData] = useState(null)
   const [cupData, setCupData] = useState(null)
   const [redData, setRedData] = useState(null)
@@ -228,6 +231,9 @@ export default function MapView({ properties, selectedProperty, setSelectedPrope
   const [elcajonRedData, setElcajonRedData] = useState(null)
   const [carlsbadCupData, setCarlsbadCupData] = useState(null)
   const [carlsbadRedData, setCarlsbadRedData] = useState(null)
+  const [oceansideGreenData, setOceansideGreenData] = useState(null)
+  const [oceansideCupData, setOceansideCupData] = useState(null)
+  const [oceansideRedData, setOceansideRedData] = useState(null)
   const [mapType, setMapType] = useState('dark')
   const [showParcel, setShowParcel] = useState(false)
   const [showGreen, setShowGreen] = useState(false)
@@ -240,6 +246,9 @@ export default function MapView({ properties, selectedProperty, setSelectedPrope
   const [showElCajonRed, setShowElCajonRed] = useState(false)
   const [showCarlsbadCup, setShowCarlsbadCup] = useState(false)
   const [showCarlsbadRed, setShowCarlsbadRed] = useState(false)
+  const [showOceansideGreen, setShowOceansideGreen] = useState(false)
+  const [showOceansideCup, setShowOceansideCup] = useState(false)
+  const [showOceansideRed, setShowOceansideRed] = useState(false)
   const showIndustrial = showRed
   const setShowIndustrial = setShowRed
   const [colorMode, setColorMode] = useState('status')
@@ -304,6 +313,9 @@ export default function MapView({ properties, selectedProperty, setSelectedPrope
     fetch('/elcajon_red.geojson').then(r => r.json()).then(setElcajonRedData).catch(() => {})
     fetch('/carlsbad_cup.geojson').then(r => r.json()).then(setCarlsbadCupData).catch(() => {})
     fetch('/carlsbad_red.geojson').then(r => r.json()).then(setCarlsbadRedData).catch(() => {})
+    fetch('/oceanside_green.geojson').then(r => r.json()).then(setOceansideGreenData).catch(() => {})
+    fetch('/oceanside_cup.geojson').then(r => r.json()).then(setOceansideCupData).catch(() => {})
+    fetch('/oceanside_red.geojson').then(r => r.json()).then(setOceansideRedData).catch(() => {})
   }, [])
 
   // Helper to render a data layer
@@ -329,6 +341,9 @@ export default function MapView({ properties, selectedProperty, setSelectedPrope
   useEffect(() => { renderLayer(elcajonRedLayerRef, elcajonRedData, showElCajonRed, '#ef4444', '#dc2626', 0.32) }, [showElCajonRed, elcajonRedData, mapReady])
   useEffect(() => { renderLayer(carlsbadCupLayerRef, carlsbadCupData, showCarlsbadCup, '#f97316', '#ea580c', 0.28) }, [showCarlsbadCup, carlsbadCupData, mapReady])
   useEffect(() => { renderLayer(carlsbadRedLayerRef, carlsbadRedData, showCarlsbadRed, '#ef4444', '#dc2626', 0.32) }, [showCarlsbadRed, carlsbadRedData, mapReady])
+  useEffect(() => { renderLayer(oceansideGreenLayerRef, oceansideGreenData, showOceansideGreen, '#22c55e', '#16a34a', 0.30) }, [showOceansideGreen, oceansideGreenData, mapReady])
+  useEffect(() => { renderLayer(oceansideCupLayerRef, oceansideCupData, showOceansideCup, '#f97316', '#ea580c', 0.28) }, [showOceansideCup, oceansideCupData, mapReady])
+  useEffect(() => { renderLayer(oceansideRedLayerRef, oceansideRedData, showOceansideRed, '#ef4444', '#dc2626', 0.32) }, [showOceansideRed, oceansideRedData, mapReady])
 
   // Parcel overlay — using SD County ArcGIS exactly like Atlas
   useEffect(() => {
@@ -414,6 +429,9 @@ export default function MapView({ properties, selectedProperty, setSelectedPrope
           showElCajonRed={showElCajonRed} setShowElCajonRed={setShowElCajonRed}
           showCarlsbadCup={showCarlsbadCup} setShowCarlsbadCup={setShowCarlsbadCup}
           showCarlsbadRed={showCarlsbadRed} setShowCarlsbadRed={setShowCarlsbadRed}
+          showOceansideGreen={showOceansideGreen} setShowOceansideGreen={setShowOceansideGreen}
+          showOceansideCup={showOceansideCup} setShowOceansideCup={setShowOceansideCup}
+          showOceansideRed={showOceansideRed} setShowOceansideRed={setShowOceansideRed}
         />
 
         <div>
