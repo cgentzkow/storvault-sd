@@ -1,4 +1,4 @@
-export default function MapControls({ mapType, setMapType, showParcel, setShowParcel, showGreen, setShowGreen, showCup, setShowCup, showRed, setShowRed, showOrange, setShowOrange, showPIL, setShowPIL }) {
+export default function MapControls({ mapType, setMapType, showParcel, setShowParcel, showGreen, setShowGreen, showCup, setShowCup, showRed, setShowRed, showOrange, setShowOrange, showPIL, setShowPIL, showElCajonGreen, setShowElCajonGreen, showElCajonRed, setShowElCajonRed }) {
   const mapBtn = (v) => ({ padding:'5px 9px',border:'none',borderRadius:'5px',cursor:'pointer',fontSize:'10px',fontWeight:600,background:mapType===v?'#f59e0b':'#1e2d47',color:mapType===v?'#000':'#94a3b8'})
   const btn = (active,hex,r,g,b) => ({padding:'5px 9px',borderRadius:'5px',cursor:'pointer',fontSize:'10px',fontWeight:600,textAlign:'left',width:'100%',background:active?`rgba(${r},${g},${b},0.20)`:'#1e2d47',color:active?hex:'#94a3b8',border:active?`1px solid rgba(${r},${g},${b},0.40)`:'1px solid transparent'})
   return (
@@ -29,6 +29,12 @@ export default function MapControls({ mapType, setMapType, showParcel, setShowPa
           <button onClick={()=>setShowOrange&&setShowOrange(v=>!v)} style={btn(showOrange,'#f9a8d4',244,114,182)}>
             <span style={{color: showOrange ? '#f9a8d4' : '#94a3b8', marginRight: 4}}>●</span> Soon to be Banned (2026)
           </button>
+          <button onClick={()=>setShowElCajonGreen&&setShowElCajonGreen(v=>!v)} style={btn(showElCajonGreen,'#4ade80',34,197,94)}>
+            🟢 El Cajon — M Zone (By-Right)
+          </button>
+          <button onClick={()=>setShowElCajonRed&&setShowElCajonRed(v=>!v)} style={btn(showElCajonRed,'#f87171',239,68,68)}>
+            🔴 El Cajon — Banned Zones
+          </button>
           <button onClick={()=>setShowParcel(v=>!v)} style={btn(showParcel,'#fde047',255,235,59)}>
             🟡 SD Parcels{showParcel?' (zoom 14+)':''}
           </button>
@@ -40,6 +46,8 @@ export default function MapControls({ mapType, setMapType, showParcel, setShowPa
         <div style={{color:'#f87171',marginBottom:1}}>🔴 <b>Banned</b> — Zone prohibits self-storage</div>
         <div style={{color:'#fca5a5',marginBottom:1}}>🔻 <b>PIL</b> — Prime Industrial Overlay</div>
         <div style={{color:'#f9a8d4'}}>● <b>Pending</b> — El Cajon Blvd / University Ave (2026)</div>
+        <div style={{color:'#4ade80',marginBottom:1}}>🟢 <b>El Cajon M</b> — Manufacturing (by-right)</div>
+        <div style={{color:'#f87171'}}>🔴 <b>El Cajon Other</b> — Self-storage banned</div>
       </div>
     </div>
   )

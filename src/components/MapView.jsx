@@ -214,12 +214,16 @@ export default function MapView({ properties, selectedProperty, setSelectedPrope
   const zoneBannedLayerRef = useRef(null)
   const ipLayerRef = useRef(null)
   const orangeLayerRef = useRef(null)
+  const elcajonGreenLayerRef = useRef(null)
+  const elcajonRedLayerRef = useRef(null)
   const [greenData, setGreenData] = useState(null)
   const [cupData, setCupData] = useState(null)
   const [redData, setRedData] = useState(null)
   const [zoneBannedData, setZoneBannedData] = useState(null)
   const [ipData, setIpData] = useState(null)
   const [orangeData, setOrangeData] = useState(null)
+  const [elcajonGreenData, setElcajonGreenData] = useState(null)
+  const [elcajonRedData, setElcajonRedData] = useState(null)
   const [mapType, setMapType] = useState('dark')
   const [showParcel, setShowParcel] = useState(false)
   const [showGreen, setShowGreen] = useState(false)
@@ -228,6 +232,8 @@ export default function MapView({ properties, selectedProperty, setSelectedPrope
   const [showPIL, setShowPIL] = useState(true)
   const [showZoneBanned, setShowZoneBanned] = useState(false)
   const [showOrange, setShowOrange] = useState(false)
+  const [showElCajonGreen, setShowElCajonGreen] = useState(false)
+  const [showElCajonRed, setShowElCajonRed] = useState(false)
   const showIndustrial = showRed
   const setShowIndustrial = setShowRed
   const [colorMode, setColorMode] = useState('status')
@@ -288,6 +294,8 @@ export default function MapView({ properties, selectedProperty, setSelectedPrope
     fetch('/red_zonebanned.geojson').then(r => r.json()).then(setZoneBannedData).catch(() => {})
     fetch('/ip_zones.geojson').then(r => r.json()).then(setIpData).catch(() => {})
     fetch('/orange_overlay.geojson').then(r => r.json()).then(setOrangeData).catch(() => {})
+    fetch('/elcajon_green.geojson').then(r => r.json()).then(setElcajonGreenData).catch(() => {})
+    fetch('/elcajon_red.geojson').then(r => r.json()).then(setElcajonRedData).catch(() => {})
   }, [])
 
   // Helper to render a data layer
@@ -309,6 +317,8 @@ export default function MapView({ properties, selectedProperty, setSelectedPrope
   useEffect(() => { renderLayer(zoneBannedLayerRef, zoneBannedData, showRed, '#ef4444', '#dc2626', 0.28) }, [showRed, zoneBannedData, mapReady])
   useEffect(() => { renderLayer(ipLayerRef, ipData, showPIL, '#b91c1c', '#991b1b', 0.35) }, [showPIL, ipData, mapReady])
   useEffect(() => { renderLayer(orangeLayerRef, orangeData, showOrange, '#f472b6', '#ec4899', 0.30) }, [showOrange, orangeData, mapReady])
+  useEffect(() => { renderLayer(elcajonGreenLayerRef, elcajonGreenData, showElCajonGreen, '#22c55e', '#16a34a', 0.30) }, [showElCajonGreen, elcajonGreenData, mapReady])
+  useEffect(() => { renderLayer(elcajonRedLayerRef, elcajonRedData, showElCajonRed, '#ef4444', '#dc2626', 0.32) }, [showElCajonRed, elcajonRedData, mapReady])
 
   // Parcel overlay — using SD County ArcGIS exactly like Atlas
   useEffect(() => {
@@ -390,6 +400,8 @@ export default function MapView({ properties, selectedProperty, setSelectedPrope
           showPIL={showPIL} setShowPIL={setShowPIL}
           showParcel={showParcel} setShowParcel={setShowParcel}
           showIndustrial={showIndustrial} setShowIndustrial={setShowIndustrial}
+          showElCajonGreen={showElCajonGreen} setShowElCajonGreen={setShowElCajonGreen}
+          showElCajonRed={showElCajonRed} setShowElCajonRed={setShowElCajonRed}
         />
 
         <div>
