@@ -330,6 +330,8 @@ export default function MapView({ properties, selectedProperty, setSelectedPrope
     fetch('/oceanside_red.geojson').then(r => r.json()).then(setOceansideRedData).catch(() => {})
     fetch('/vista_green.geojson').then(r => r.json()).then(setVistaGreenData).catch(() => {})
     fetch('/vista_red.geojson').then(r => r.json()).then(setVistaRedData).catch(() => {})
+    fetch('/san_marcos_cup.geojson').then(r => r.json()).then(setSanMarcosCupData).catch(() => {})
+    fetch('/san_marcos_banned.geojson').then(r => r.json()).then(setSanMarcosBannedData).catch(() => {})
   }, [])
 
   // Helper to render a data layer
@@ -452,6 +454,8 @@ export default function MapView({ properties, selectedProperty, setSelectedPrope
           showOceansideRed={showOceansideRed} setShowOceansideRed={setShowOceansideRed}
           showVistaGreen={showVistaGreen} setShowVistaGreen={setShowVistaGreen}
           showVistaRed={showVistaRed} setShowVistaRed={setShowVistaRed}
+          showSanMarcosCup={showSanMarcosCup} setShowSanMarcosCup={setShowSanMarcosCup}
+          showSanMarcosBanned={showSanMarcosBanned} setShowSanMarcosBanned={setShowSanMarcosBanned}
         />
 
         <div>
