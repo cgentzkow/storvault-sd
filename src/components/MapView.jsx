@@ -160,6 +160,16 @@ const ZONE_INFO = {
   'PC-8': { label: 'Poway Road Corridor (PC-8)', status: 'banned', detail: 'City of Poway — self-storage not permitted' },
   'CB': { label: 'Community Business (CB)', status: 'banned', detail: 'City of Poway — self-storage not permitted' },
   'AGC': { label: 'Automotive General Commercial (AGC)', status: 'banned', detail: 'City of Poway — self-storage not permitted' },
+  // Solana Beach
+  'LI': { label: 'Light Industrial (LI)', status: 'cup', detail: 'City of Solana Beach — CUP required. SBMC 17.24.010-D explicitly names "personal storage" as a permitted use type in LI. Mini-warehouses/personal storage appear in use matrix as conditional use. Truck rental allowed as accessory use to self-storage. Only a small LI corridor east of I-5 near Via de la Valle.' },
+  'Solana Beach': { label: 'City of Solana Beach', status: 'banned', detail: 'City of Solana Beach — self-storage not permitted outside the LI zone. Commercial zones (C, LC, OP) all prohibit mini-warehouses per SBMC Table 17.12.020-A.' },
+  // Imperial Beach
+  'M-1': { label: 'Light Industrial (M-1)', status: 'cup', detail: 'City of Imperial Beach — Small industrial pocket near Hollister St/Bay Blvd. Existing A-1 Self Storage at 845 Hollister St confirms use is established. Governed by older LCP ordinance (Title 18/19). Very limited footprint (~2 blocks).' },
+  'Imperial Beach': { label: 'City of Imperial Beach', status: 'banned', detail: 'City of Imperial Beach — C/MU-1, C/MU-2, C/MU-3 commercial zones: self-storage not listed = prohibited per IB code §19.23. Only the small Hollister St M-1 industrial pocket allows storage.' },
+  // Del Mar — confirmed no industrial zone
+  'Del Mar': { label: 'City of Del Mar', status: 'banned', detail: 'City of Del Mar — No industrial zone exists. Zoning code (Title 30) contains only residential and small commercial zones (RC, Central Commercial, Beach Commercial, North Commercial, Professional Commercial, Visitor Commercial, FR). Self-storage is not a permitted use in any Del Mar zone. Confirmed via Del Mar Municipal Code Ch. 30.' },
+  // Coronado — confirmed no industrial zone
+  'Coronado': { label: 'City of Coronado', status: 'banned', detail: 'City of Coronado — No industrial zone exists. Zones are entirely residential (R-1A, R-1B, R-3 through R-5), commercial (C), commercial recreation (C-R), hotel-motel (H-M), civic use (C-U), open space (OS), and MZ (Military Zone/Navy base). Self-storage not a permitted or conditional use in any zone. Confirmed via Coronado Municipal Code §86.' },'''
   // Lemon Grove
   'Light Industrial': { label: 'Light Industrial (LI)', status: 'cup', detail: 'City of Lemon Grove — CUP required for self-storage' },
   'Retail Manufacturing': { label: 'Retail Manufacturing (ReM)', status: 'cup', detail: 'City of Lemon Grove — CUP required for self-storage' },
@@ -197,6 +207,7 @@ const STATUS_BADGE = {
   pending_ban: { color: '#f472b6', bg: 'rgba(244,114,182,0.15)', text: '⏳ Pending Ban (2026)' },
   pil:         { color: '#b91c1c', bg: 'rgba(185,28,28,0.15)',   text: '🔻 Prime Industrial — Not Permitted' },
   unknown:     { color: '#94a3b8', bg: 'rgba(148,163,184,0.15)', text: '❓ No Data' },
+  city_banned: { color: '#dc2626', bg: 'rgba(220,38,38,0.12)', text: '🚫 No Storage Zones in This City' },
 }
 
 // ── OWNER / LOGO ─────────────────────────────────────────────────────────────
@@ -439,6 +450,7 @@ export default function MapView({properties,selectedProperty,setSelectedProperty
   const orangeLayerRef=useRef(null)
 
   const [greenData,setGreenData]=useState(null)
+  const [cityBannedData,setCityBannedData]=useState(null)
   const [pureGreenData,setPureGreenData]=useState(null)
   const [cupData,setCupData]=useState(null)
   const [redData,setRedData]=useState(null)
@@ -502,6 +514,7 @@ export default function MapView({properties,selectedProperty,setSelectedProperty
 
   useEffect(()=>{
     fetch('/green_all.geojson').then(r=>r.json()).then(setGreenData).catch(()=>{})
+    fetch('/city_banned.geojson').then(r=>r.json()).then(setCityBannedData).catch(()=>{})
     fetch('/green_pure.geojson').then(r=>r.json()).then(setPureGreenData).catch(()=>{})
     fetch('/cup_all.geojson').then(r=>r.json()).then(setCupData).catch(()=>{})
     fetch('/red_all.geojson').then(r=>r.json()).then(setRedData).catch(()=>{})
@@ -528,6 +541,7 @@ export default function MapView({properties,selectedProperty,setSelectedProperty
     layerRef.current=layer
   }
 
+  useEffect(()=>{renderLayer(cityBannedLayerRef,cityBannedData,true,'#7f1d1d','#dc2626',0.12)},[ cityBannedData,mapReady])
   useEffect(()=>{renderLayer(greenLayerRef,greenData,showGreen,'#22c55e','#16a34a',0.30)},[showGreen,greenData,mapReady])
   useEffect(()=>{renderLayer(pureGreenLayerRef,pureGreenData,showPureGreen,'#00ff88','#00cc44',0.45)},[showPureGreen,pureGreenData,mapReady])
   useEffect(()=>{renderLayer(cupLayerRef,cupData,showCup,'#f97316','#ea580c',0.28)},[showCup,cupData,mapReady])
