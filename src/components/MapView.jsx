@@ -732,35 +732,33 @@ export default function MapView({properties,selectedProperty,setSelectedProperty
             {showLocations&&leads.filter(l=>l.lat&&l.lng).map(lead=>(
               <LeadDot key={lead._docId} lead={lead}/>
             ))}
+            {parcelPopup&&(
+              <OverlayView position={{lat:parcelPopup.lat,lng:parcelPopup.lng}} mapPaneName={OverlayView.OVERLAY_MOUSE_TARGET}>
+                <div style={{background:'#0d1526',border:'1px solid #2d3f5e',borderRadius:'8px',padding:'10px 12px',minWidth:'210px',boxShadow:'0 4px 20px rgba(0,0,0,0.6)',transform:'translate(-50%,-110%)'}}>
+                  <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:'6px'}}>
+                    <div style={{fontSize:'10px',color:'#60a5fa',fontWeight:700,letterSpacing:'0.05em'}}>PARCEL INFO</div>
+                    <button onClick={()=>setParcelPopup(null)} style={{background:'none',border:'none',color:'#475569',cursor:'pointer',fontSize:'16px',lineHeight:1,padding:0}}>×</button>
+                  </div>
+                  {parcelPopup.address&&(
+                    <div style={{fontSize:'11px',color:'#e2e8f0',marginBottom:'4px',lineHeight:1.3}}>{parcelPopup.address.replace(', USA','')}</div>
+                  )}
+                  {parcelPopup.lotNo&&(
+                    <div style={{fontSize:'10px',color:'#94a3b8',marginBottom:'6px'}}>Lot No: {parcelPopup.lotNo}</div>
+                  )}
+                  <div style={{fontSize:'9px',color:'#475569',marginBottom:'8px',lineHeight:1.4}}>APN • Owner • Land size available via County Assessor</div>
+                  <a href={'https://arcc.sdcounty.ca.gov/pages/property-search.aspx'+(parcelPopup.address?'?q='+encodeURIComponent(parcelPopup.address):'')}
+                    target='_blank' rel='noreferrer'
+                    style={{display:'block',textAlign:'center',padding:'6px',background:'rgba(96,165,250,0.12)',border:'1px solid rgba(96,165,250,0.3)',borderRadius:'5px',color:'#60a5fa',fontSize:'10px',textDecoration:'none',fontWeight:600}}>
+                    View in County Assessor →
+                  </a>
+                </div>
+              </OverlayView>
+            )}
           </GoogleMap>
         ):(
           <div style={{display:'flex',alignItems:'center',justifyContent:'center',height:'100%',color:'#475569'}}>Loading map…</div>
         )}
         <ZonePopup info={zonePopup} onClose={()=>setZonePopup(null)}/>
-        {parcelPopup&&(
-          <div style={{position:'absolute',top:0,left:0,right:0,bottom:0,pointerEvents:'none'}}>
-            <OverlayView position={{lat:parcelPopup.lat,lng:parcelPopup.lng}} mapPaneName={OverlayView.OVERLAY_MOUSE_TARGET}>
-              <div style={{pointerEvents:'all',background:'#0d1526',border:'1px solid #2d3f5e',borderRadius:'8px',padding:'10px 12px',minWidth:'210px',boxShadow:'0 4px 20px rgba(0,0,0,0.6)',transform:'translate(-50%,-110%)'}}>
-                <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:'6px'}}>
-                  <div style={{fontSize:'10px',color:'#60a5fa',fontWeight:700,letterSpacing:'0.05em'}}>PARCEL INFO</div>
-                  <button onClick={()=>setParcelPopup(null)} style={{background:'none',border:'none',color:'#475569',cursor:'pointer',fontSize:'16px',lineHeight:1,padding:0}}>×</button>
-                </div>
-                {parcelPopup.address&&(
-                  <div style={{fontSize:'11px',color:'#e2e8f0',marginBottom:'4px',lineHeight:1.3}}>{parcelPopup.address.replace(', USA','')}</div>
-                )}
-                {parcelPopup.lotNo&&(
-                  <div style={{fontSize:'10px',color:'#94a3b8',marginBottom:'6px'}}>Lot No: {parcelPopup.lotNo}</div>
-                )}
-                <div style={{fontSize:'9px',color:'#475569',marginBottom:'8px',lineHeight:1.4}}>APN • Owner • Land size available via County Assessor</div>
-                <a href={'https://arcc.sdcounty.ca.gov/pages/property-search.aspx'+(parcelPopup.address?'?q='+encodeURIComponent(parcelPopup.address):'')}
-                  target='_blank' rel='noreferrer'
-                  style={{display:'block',textAlign:'center',padding:'6px',background:'rgba(96,165,250,0.12)',border:'1px solid rgba(96,165,250,0.3)',borderRadius:'5px',color:'#60a5fa',fontSize:'10px',textDecoration:'none',fontWeight:600}}>
-                  View in County Assessor →
-                </a>
-              </div>
-            </OverlayView>
-          </div>
-        )}
       </div>
 
       {selectedProperty&&(
