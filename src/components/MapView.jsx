@@ -169,7 +169,7 @@ const ZONE_INFO = {
   // Del Mar — confirmed no industrial zone
   'Del Mar': { label: 'City of Del Mar', status: 'banned', detail: 'City of Del Mar — No industrial zone exists. Zoning code (Title 30) contains only residential and small commercial zones (RC, Central Commercial, Beach Commercial, North Commercial, Professional Commercial, Visitor Commercial, FR). Self-storage is not a permitted use in any Del Mar zone. Confirmed via Del Mar Municipal Code Ch. 30.' },
   // Coronado — confirmed no industrial zone
-  'Coronado': { label: 'City of Coronado', status: 'banned', detail: 'City of Coronado — No industrial zone exists. Zones are entirely residential (R-1A, R-1B, R-3 through R-5), commercial (C), commercial recreation (C-R), hotel-motel (H-M), civic use (C-U), open space (OS), and MZ (Military Zone/Navy base). Self-storage not a permitted or conditional use in any zone. Confirmed via Coronado Municipal Code §86.' },'''
+  'Coronado': { label: 'City of Coronado', status: 'banned', detail: 'City of Coronado — No industrial zone exists. Zones are entirely residential (R-1A, R-1B, R-3 through R-5), commercial (C), commercial recreation (C-R), hotel-motel (H-M), civic use (C-U), open space (OS), and MZ (Military Zone/Navy base). Self-storage not a permitted or conditional use in any zone. Confirmed via Coronado Municipal Code §86.' },
   // Lemon Grove
   'Light Industrial': { label: 'Light Industrial (LI)', status: 'cup', detail: 'City of Lemon Grove — CUP required for self-storage' },
   'Retail Manufacturing': { label: 'Retail Manufacturing (ReM)', status: 'cup', detail: 'City of Lemon Grove — CUP required for self-storage' },
@@ -468,6 +468,7 @@ export default function MapView({properties,selectedProperty,setSelectedProperty
   const [showOrange,setShowOrange]=useState(false)
   const [showLocations,setShowLocations]=useState(true)   // Feature 2
   const [filterCompanies,setFilterCompanies]=useState(new Set())  // Feature 4
+  const [parcelPopup,setParcelPopup]=useState(null)
   const [filterStatus,setFilterStatus]=useState('all')
   const [filterSubmarket,setFilterSubmarket]=useState('all')
   const [colorMode,setColorMode]=useState('status')
@@ -637,20 +638,26 @@ export default function MapView({properties,selectedProperty,setSelectedProperty
               <button onClick={()=>setFilterCompanies(new Set())} style={{fontSize:'8px',color:'#60a5fa',background:'none',border:'none',cursor:'pointer',padding:0}}>Show All</button>
             )}
           </div>
-          <div style={{maxHeight:'130px',overflowY:'auto',display:'flex',flexDirection:'column',gap:'1px'}}>
+          <div style={{maxHeight:'160px',overflowY:'auto',display:'grid',gridTemplateColumns:'1fr 1fr',gap:'3px',paddingRight:'2px'}}>
             {COMPANIES.map(co=>{
               const active=filterCompanies.has(co)
+              const logoUrl=LOGO_URLS[co]
               return (
                 <button key={co} onClick={()=>{
                   setFilterCompanies(prev=>{const next=new Set(prev);active?next.delete(co):next.add(co);return next})
-                }} style={{
-                  padding:'3px 6px',borderRadius:'4px',cursor:'pointer',textAlign:'left',
-                  fontSize:'9px',fontWeight:active?700:400,
-                  background:active?'rgba(96,165,250,0.18)':'transparent',
-                  color:active?'#60a5fa':'#64748b',
-                  border:active?'1px solid rgba(96,165,250,0.35)':'1px solid transparent',
-                  whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis',
-                }}>{co}</button>
+                }} title={co} style={{
+                  padding:'4px 3px',borderRadius:'5px',cursor:'pointer',
+                  background:active?'rgba(96,165,250,0.18)':'#111827',
+                  border:active?'1px solid rgba(96,165,250,0.5)':'1px solid #1e2d47',
+                  display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',
+                  minHeight:'32px',overflow:'hidden',
+                }}>
+                  {logoUrl?(
+                    <img src={logoUrl} style={{width:'100%',height:'22px',objectFit:'contain',opacity:active?1:0.65}} />
+                  ):(
+                    <span style={{fontSize:'7px',color:active?'#60a5fa':'#475569',textAlign:'center',lineHeight:1.2,wordBreak:'break-word',padding:'0 2px'}}>{co}</span>
+                  )}
+                </button>
               )
             })}
           </div>
@@ -698,7 +705,24 @@ export default function MapView({properties,selectedProperty,setSelectedProperty
 
       <div style={{flex:1,position:'relative'}}>
         {isLoaded?(
-          <GoogleMap mapContainerStyle={{width:'100%',height:'100%'}} options={mapOptions} onLoad={onMapLoad}>
+          <GoogleMap mapContainerStyle={{width:'100%',height:'100%'}} options={mapOptions} onLoad={onMapLoad}
+            onClick={(e)=>{
+              if (!showParcel) { setParcelPopup(null); return }
+              const zoom=mapRef.current?.getZoom()
+              if (zoom<14) { setParcelPopup(null); return }
+              const lat=e.latLng.lat(),lng=e.latLng.lng()
+              fetch('https://gis-public.sandiegocounty.gov/arcgis/rest/services/Lots/MapServer/0/query?geometry='+lng+','+lat+'&geometryType=esriGeometryPoint&inSR=4326&spatialRel=esriSpatialRelIntersects&outFields=*&returnGeometry=false&f=json')
+                .then(r=>r.json())
+                .then(d=>{
+                  const lotNo=d.features?.[0]?.attributes?.LOTNO||null
+                  const geocoder=new window.google.maps.Geocoder()
+                  geocoder.geocode({location:{lat,lng}},(results,status)=>{
+                    const address=status==='OK'?results[0]?.formatted_address:null
+                    setParcelPopup({lat,lng,lotNo,address})
+                  })
+                })
+                .catch(()=>setParcelPopup({lat,lng,lotNo:null,address:null}))
+            }}>
             {showLocations&&filteredProps.map(prop=>(
               prop.lat&&prop.lng?(
                 <Marker key={prop.id} prop={prop} colorMode={colorMode}
@@ -713,6 +737,30 @@ export default function MapView({properties,selectedProperty,setSelectedProperty
           <div style={{display:'flex',alignItems:'center',justifyContent:'center',height:'100%',color:'#475569'}}>Loading map…</div>
         )}
         <ZonePopup info={zonePopup} onClose={()=>setZonePopup(null)}/>
+        {parcelPopup&&(
+          <div style={{position:'absolute',top:0,left:0,right:0,bottom:0,pointerEvents:'none'}}>
+            <OverlayView position={{lat:parcelPopup.lat,lng:parcelPopup.lng}} mapPaneName={OverlayView.OVERLAY_MOUSE_TARGET}>
+              <div style={{pointerEvents:'all',background:'#0d1526',border:'1px solid #2d3f5e',borderRadius:'8px',padding:'10px 12px',minWidth:'210px',boxShadow:'0 4px 20px rgba(0,0,0,0.6)',transform:'translate(-50%,-110%)'}}>
+                <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:'6px'}}>
+                  <div style={{fontSize:'10px',color:'#60a5fa',fontWeight:700,letterSpacing:'0.05em'}}>PARCEL INFO</div>
+                  <button onClick={()=>setParcelPopup(null)} style={{background:'none',border:'none',color:'#475569',cursor:'pointer',fontSize:'16px',lineHeight:1,padding:0}}>×</button>
+                </div>
+                {parcelPopup.address&&(
+                  <div style={{fontSize:'11px',color:'#e2e8f0',marginBottom:'4px',lineHeight:1.3}}>{parcelPopup.address.replace(', USA','')}</div>
+                )}
+                {parcelPopup.lotNo&&(
+                  <div style={{fontSize:'10px',color:'#94a3b8',marginBottom:'6px'}}>Lot No: {parcelPopup.lotNo}</div>
+                )}
+                <div style={{fontSize:'9px',color:'#475569',marginBottom:'8px',lineHeight:1.4}}>APN • Owner • Land size available via County Assessor</div>
+                <a href={'https://arcc.sdcounty.ca.gov/pages/property-search.aspx'+(parcelPopup.address?'?q='+encodeURIComponent(parcelPopup.address):'')}
+                  target='_blank' rel='noreferrer'
+                  style={{display:'block',textAlign:'center',padding:'6px',background:'rgba(96,165,250,0.12)',border:'1px solid rgba(96,165,250,0.3)',borderRadius:'5px',color:'#60a5fa',fontSize:'10px',textDecoration:'none',fontWeight:600}}>
+                  View in County Assessor →
+                </a>
+              </div>
+            </OverlayView>
+          </div>
+        )}
       </div>
 
       {selectedProperty&&(
