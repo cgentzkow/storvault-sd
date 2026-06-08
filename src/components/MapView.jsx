@@ -127,6 +127,13 @@ const ZONE_INFO = {
   'CUPD-CT-3-3': { label: 'Corridor Transit (CT-3)', status: 'pending_ban', detail: 'Storage grandfathered — new CUP required; ban expected 2026' },
   'CUPD-CT-5-4': { label: 'Corridor Transit (CT-5)', status: 'pending_ban', detail: 'Storage grandfathered — new CUP required; ban expected 2026' },
   'Industrial Employment': { label: 'Prime Industrial Land Overlay', status: 'pil', detail: 'Self-storage is a competing use — not permitted in PIL zones' },
+  // Centre City Planned District (Downtown SD)
+  'CCPD-MC': { label: 'Centre City Mixed Commercial', status: 'by_right', detail: 'Downtown SD — Moving & Storage Facilities permitted by right (CCPDO Table 0308-A). 2401 Pacific Hwy is active example.' },
+  'CCPD-I':  { label: 'Centre City Industrial', status: 'by_right', detail: 'Downtown SD — Moving & Storage Facilities permitted by right (CCPDO Table 0308-A).' },
+  'CCPD-T':  { label: 'Centre City Transition', status: 'by_right', detail: 'Downtown SD — Moving & Storage Facilities permitted by right (CCPDO Table 0308-A).' },
+  'CCPD-BP': { label: 'Centre City Ballpark Mixed-Use', status: 'cup', detail: 'Downtown SD — Storage limited to 20% gross floor area above grade (CCPDO footnote 5). Not viable for pure storage play.' },
+  'CCPD-ER': { label: 'Centre City East Village Retail', status: 'cup', detail: 'Downtown SD — Storage limited to 20% gross floor area above grade (CCPDO footnote 5). Not viable for pure storage play.' },
+  'CCPD-CORE': { label: 'Centre City Core', status: 'cup', detail: 'Downtown SD — Storage limited to 20% gross floor area above grade (CCPDO footnote 5). Not viable for pure storage play.' },
   // Santee
   'IL': { label: 'Industrial Light (IL)', status: 'cup', detail: 'City of Santee — CUP required for self-storage' },
   'IG': { label: 'Industrial General (IG)', status: 'cup', detail: 'City of Santee — CUP required for self-storage' },
