@@ -448,6 +448,7 @@ export default function MapView({properties,selectedProperty,setSelectedProperty
   const ipLayerRef=useRef(null)
   const pilLayerRef=useRef(null)
   const orangeLayerRef=useRef(null)
+  const cityBannedLayerRef=useRef(null)
 
   const [greenData,setGreenData]=useState(null)
   const [cityBannedData,setCityBannedData]=useState(null)
