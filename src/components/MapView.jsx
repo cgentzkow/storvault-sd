@@ -160,6 +160,27 @@ const ZONE_INFO = {
   'PC-8': { label: 'Poway Road Corridor (PC-8)', status: 'banned', detail: 'City of Poway — self-storage not permitted' },
   'CB': { label: 'Community Business (CB)', status: 'banned', detail: 'City of Poway — self-storage not permitted' },
   'AGC': { label: 'Automotive General Commercial (AGC)', status: 'banned', detail: 'City of Poway — self-storage not permitted' },
+  // Lemon Grove
+  'Light Industrial': { label: 'Light Industrial (LI)', status: 'cup', detail: 'City of Lemon Grove — CUP required for self-storage' },
+  'Retail Manufacturing': { label: 'Retail Manufacturing (ReM)', status: 'cup', detail: 'City of Lemon Grove — CUP required for self-storage' },
+  'Light Industrial (LI)': { label: 'Light Industrial (LI)', status: 'cup', detail: 'City of Lemon Grove — CUP required for self-storage' },
+  'Retail Manufacturing (ReM)': { label: 'Retail Manufacturing (ReM)', status: 'cup', detail: 'City of Lemon Grove — CUP required for self-storage' },
+  'General Commercial': { label: 'General Commercial (GC)', status: 'banned', detail: 'Self-storage not permitted' },
+  'Central Commercial': { label: 'Central Commercial (CC)', status: 'banned', detail: 'Self-storage not permitted' },
+  'Heavy Commercial': { label: 'Heavy Commercial (HC)', status: 'banned', detail: 'Self-storage not permitted' },
+  'Limited Commercial': { label: 'Limited Commercial (LC)', status: 'banned', detail: 'Self-storage not permitted' },
+  // Encinitas
+  'LI': { label: 'Light Industrial (LI)', status: 'cup', detail: 'City of Encinitas — CUP required for self-storage' },
+  'BP': { label: 'Business Park (BP)', status: 'cup', detail: 'City of Encinitas — CUP required for self-storage' },
+  'GC-PCD': { label: 'General Commercial PCD', status: 'cup', detail: 'City of Encinitas — CUP required; planned commercial development' },
+  'GC': { label: 'General Commercial (GC)', status: 'banned', detail: 'City of Encinitas — self-storage not permitted' },
+  'LC': { label: 'Limited Commercial (LC)', status: 'banned', detail: 'Self-storage not permitted' },
+  'D-CC': { label: 'Downtown Civic Core (CC)', status: 'banned', detail: 'City of Encinitas Downtown — self-storage not permitted' },
+  'D-CM-1': { label: 'Downtown Commercial Mixed 1 (CM-1)', status: 'banned', detail: 'City of Encinitas Downtown — self-storage not permitted' },
+  'D-CM-2': { label: 'Downtown Commercial Mixed 2 (CM-2)', status: 'banned', detail: 'City of Encinitas Downtown — self-storage not permitted' },
+  'N-CM-1': { label: 'North 101 Commercial Mixed 1', status: 'banned', detail: 'City of Encinitas North 101 — self-storage not permitted' },
+  'N-CM-2': { label: 'North 101 Commercial Mixed 2', status: 'banned', detail: 'City of Encinitas North 101 — self-storage not permitted' },
+  'N-CM-3': { label: 'North 101 Commercial Mixed 3', status: 'banned', detail: 'City of Encinitas North 101 — self-storage not permitted' },
 }
 
 function getZoneInfo(props) {
