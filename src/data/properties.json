@@ -9461,8 +9461,8 @@
     "name": "U-Haul Storage - Vista Pacific",
     "city": "Oceanside",
     "zip": "92056",
-    "lat": 33.2127833,
-    "lng": -117.2647516,
+    "lat": 33.212444,
+    "lng": -117.265834,
     "sf": 49538,
     "acres": 2.56,
     "yearBuilt": 2026,
@@ -9485,6 +9485,7 @@
     "capRate": 0,
     "buildingClass": "B",
     "callStatus": "not_called",
-    "notes": "Under construction. Delivers Sep 2026. 3-star industrial warehouse, 1 story, 5 ext docks, 32ft clear height, ESFR sprinklers. Zoned I-7. AMERCO (U-Haul parent) is true owner/developer."
+    "notes": "Under construction. Delivers Sep 2026. 3-star industrial warehouse, 1 story, 5 ext docks, 32ft clear height, ESFR sprinklers. Zoned IL-MP-2-81 (Oceanside Light Industrial, Master Plan overlay). CUP required for self-storage. AMERCO (U-Haul parent) is true owner/developer. Parcel 161-470-46.",
+    "zoning": "IL-MP-2-81"
   }
 ]
