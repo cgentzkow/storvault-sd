@@ -127,6 +127,39 @@ const ZONE_INFO = {
   'CUPD-CT-3-3': { label: 'Corridor Transit (CT-3)', status: 'pending_ban', detail: 'Storage grandfathered — new CUP required; ban expected 2026' },
   'CUPD-CT-5-4': { label: 'Corridor Transit (CT-5)', status: 'pending_ban', detail: 'Storage grandfathered — new CUP required; ban expected 2026' },
   'Industrial Employment': { label: 'Prime Industrial Land Overlay', status: 'pil', detail: 'Self-storage is a competing use — not permitted in PIL zones' },
+  // Santee
+  'IL': { label: 'Industrial Light (IL)', status: 'cup', detail: 'City of Santee — CUP required for self-storage' },
+  'IG': { label: 'Industrial General (IG)', status: 'cup', detail: 'City of Santee — CUP required for self-storage' },
+  'IL/GC': { label: 'Industrial Light / General Commercial', status: 'cup', detail: 'City of Santee — CUP required for self-storage' },
+  'IL/R-B': { label: 'Industrial Light / Retail Business', status: 'cup', detail: 'City of Santee — CUP required for self-storage' },
+  'GC': { label: 'General Commercial (GC)', status: 'cup', detail: 'City of Santee — CUP required for self-storage' },
+  'NC': { label: 'Neighborhood Commercial (NC)', status: 'banned', detail: 'City of Santee — self-storage not permitted' },
+  'NC/R14': { label: 'Neighborhood Commercial / R-14', status: 'banned', detail: 'City of Santee — self-storage not permitted' },
+  'NC/R7': { label: 'Neighborhood Commercial / R-7', status: 'banned', detail: 'City of Santee — self-storage not permitted' },
+  'OP': { label: 'Office Professional (OP)', status: 'banned', detail: 'City of Santee — self-storage not permitted' },
+  'TC': { label: 'Town Center (TC)', status: 'banned', detail: 'Self-storage not permitted in Town Center zones' },
+  // National City
+  'I': { label: 'Industrial General (I)', status: 'cup', detail: 'City of National City — CUP required for self-storage' },
+  'IC': { label: 'Industrial-Commercial (IC)', status: 'cup', detail: 'City of National City — CUP required for self-storage' },
+  'IH': { label: 'Industrial Heavy (IH)', status: 'cup', detail: 'City of National City — CUP required for self-storage' },
+  'IM': { label: 'Industrial-Marine (IM)', status: 'banned', detail: 'City of National City — marine/port zone, self-storage not permitted' },
+  'CS': { label: 'Commercial Shopping (CS)', status: 'banned', detail: 'City of National City — self-storage not permitted' },
+  'CA': { label: 'Commercial Automotive (CA)', status: 'banned', detail: 'City of National City — self-storage not permitted' },
+  'MCR-1': { label: 'Mixed-Use Commercial-Residential 1', status: 'banned', detail: 'City of National City — self-storage not permitted' },
+  'MCR-2': { label: 'Mixed-Use Commercial-Residential 2', status: 'banned', detail: 'City of National City — self-storage not permitted' },
+  'MXC-1': { label: 'Mixed-Use Commercial 1', status: 'banned', detail: 'City of National City — self-storage not permitted' },
+  'MXC-2': { label: 'Mixed-Use Commercial 2', status: 'banned', detail: 'City of National City — self-storage not permitted' },
+  'MXD-1': { label: 'Mixed-Use Downtown 1', status: 'banned', detail: 'City of National City — self-storage not permitted' },
+  'MXD-2': { label: 'Mixed-Use Downtown 2', status: 'banned', detail: 'City of National City — self-storage not permitted' },
+  // La Mesa
+  'CM': { label: 'Light Industrial & Commercial Service (CM)', status: 'cup', detail: 'City of La Mesa — CUP required for self-storage' },
+  'CD': { label: 'Downtown Commercial (CD)', status: 'banned', detail: 'City of La Mesa — self-storage not permitted' },
+  'RB': { label: 'Residential Business (RB)', status: 'banned', detail: 'City of La Mesa — self-storage not permitted' },
+  // Poway
+  'PC-7': { label: 'South Poway Business Park (PC-7)', status: 'cup', detail: 'City of Poway — CUP required for self-storage in business park' },
+  'PC-8': { label: 'Poway Road Corridor (PC-8)', status: 'banned', detail: 'City of Poway — self-storage not permitted' },
+  'CB': { label: 'Community Business (CB)', status: 'banned', detail: 'City of Poway — self-storage not permitted' },
+  'AGC': { label: 'Automotive General Commercial (AGC)', status: 'banned', detail: 'City of Poway — self-storage not permitted' },
 }
 
 function getZoneInfo(props) {

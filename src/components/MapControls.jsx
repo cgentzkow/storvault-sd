@@ -62,7 +62,7 @@ export default function MapControls({
       <div style={{fontSize:'8px',color:'#475569',lineHeight:1.65,paddingTop:2,borderTop:'1px solid #1e2d47',marginTop:2}}>
         <div style={{color:'#4ade80',marginBottom:1}}>🟢 <b>By-Right</b> — SD · County · CV · Oceanside · Vista</div>
         <div style={{color:'#00ff88',marginBottom:1}}>✨ <b>Pure Green</b> — No red/PIL overlay on top</div>
-        <div style={{color:'#fb923c',marginBottom:1}}>🟠 <b>CUP</b> — Escondido · El Cajon · Carlsbad · Oceanside · San Marcos</div>
+        <div style={{color:'#fb923c',marginBottom:1}}>🟠 <b>CUP</b> — Escondido · El Cajon · Carlsbad · Oceanside · San Marcos · Santee · Nat City · La Mesa · Poway</div>
         <div style={{color:'#f87171',marginBottom:1}}>🔴 <b>Banned</b> — Zone prohibits self-storage</div>
         <div style={{color:'#fca5a5',marginBottom:1}}>🔻 <b>PIL</b> — Prime Industrial Land Overlay</div>
         <div style={{color:'#f9a8d4'}}>● <b>Pending</b> — El Cajon Blvd / University Ave (2026)</div>
