@@ -453,17 +453,14 @@ export default function MapView({properties,selectedProperty,setSelectedProperty
   const mapRef=useRef(null)
   const parcelOverlayRef=useRef(null)
   const greenLayerRef=useRef(null)
-  const pureGreenLayerRef=useRef(null)
   const cupLayerRef=useRef(null)
   const redLayerRef=useRef(null)
   const ipLayerRef=useRef(null)
-  const pilLayerRef=useRef(null)
   const orangeLayerRef=useRef(null)
   const cityBannedLayerRef=useRef(null)
 
   const [greenData,setGreenData]=useState(null)
   const [cityBannedData,setCityBannedData]=useState(null)
-  const [pureGreenData,setPureGreenData]=useState(null)
   const [cupData,setCupData]=useState(null)
   const [redData,setRedData]=useState(null)
   const [ipData,setIpData]=useState(null)
@@ -473,7 +470,6 @@ export default function MapView({properties,selectedProperty,setSelectedProperty
   const [mapType,setMapType]=useState('dark')
   const [showParcel,setShowParcel]=useState(false)
   const [showGreen,setShowGreen]=useState(false)
-  const [showPureGreen,setShowPureGreen]=useState(false)
   const [showCup,setShowCup]=useState(false)
   const [showRed,setShowRed]=useState(true)
   const [showPIL,setShowPIL]=useState(true)
@@ -528,7 +524,6 @@ export default function MapView({properties,selectedProperty,setSelectedProperty
   useEffect(()=>{
     fetch('/green_all.geojson').then(r=>r.json()).then(setGreenData).catch(()=>{})
     fetch('/city_banned.geojson').then(r=>r.json()).then(setCityBannedData).catch(()=>{})
-    fetch('/green_pure.geojson').then(r=>r.json()).then(setPureGreenData).catch(()=>{})
     fetch('/cup_all.geojson').then(r=>r.json()).then(setCupData).catch(()=>{})
     fetch('/red_all.geojson').then(r=>r.json()).then(setRedData).catch(()=>{})
     fetch('/ip_zones.geojson').then(r=>r.json()).then(setIpData).catch(()=>{})
@@ -556,11 +551,76 @@ export default function MapView({properties,selectedProperty,setSelectedProperty
 
   useEffect(()=>{renderLayer(cityBannedLayerRef,cityBannedData,true,'#7f1d1d','#dc2626',0.12)},[ cityBannedData,mapReady])
   useEffect(()=>{renderLayer(greenLayerRef,greenData,showGreen,'#22c55e','#16a34a',0.30)},[showGreen,greenData,mapReady])
-  useEffect(()=>{renderLayer(pureGreenLayerRef,pureGreenData,showPureGreen,'#00ff88','#00cc44',0.45)},[showPureGreen,pureGreenData,mapReady])
-  useEffect(()=>{renderLayer(cupLayerRef,cupData,showCup,'#f97316','#ea580c',0.28)},[showCup,cupData,mapReady])
+  useEffect(()=>{renderLayer(cupLayerRef,cupData,showCup,'#f59e0b','#d97706',0.28)},[showCup,cupData,mapReady])
   useEffect(()=>{renderLayer(redLayerRef,redData,showRed,'#ef4444','#dc2626',0.30)},[showRed,redData,mapReady])
   useEffect(()=>{renderLayer(ipLayerRef,ipData,showRed,'#ef4444','#dc2626',0.26)},[showRed,ipData,mapReady])
-  useEffect(()=>{renderLayer(pilLayerRef,pilData,showPIL,'#b91c1c','#991b1b',0.35)},[showPIL,pilData,mapReady])
+  // PIL Crosshatch overlay
+  const pilOverlayRef=useRef(null)
+  useEffect(()=>{
+    const map=mapRef.current
+    if (!map||!window.google||!pilData) return
+    if (pilOverlayRef.current) { pilOverlayRef.current.setMap(null); pilOverlayRef.current=null }
+    if (!showPIL) return
+    class CrosshatchOverlay extends window.google.maps.OverlayView {
+      constructor(data){super();this.data=data;this.canvas=null;this.div=null}
+      onAdd(){
+        this.div=document.createElement('div')
+        this.div.style.cssText='position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;'
+        this.canvas=document.createElement('canvas')
+        this.canvas.style.cssText='position:absolute;pointer-events:none;'
+        this.div.appendChild(this.canvas)
+        this.getPanes().overlayLayer.appendChild(this.div)
+      }
+      draw(){
+        if(!this.canvas)return
+        const proj=this.getProjection()
+        if(!proj)return
+        const bounds=this.getMap().getBounds()
+        if(!bounds)return
+        const ne=proj.fromLatLngToDivPixel(bounds.getNorthEast())
+        const sw=proj.fromLatLngToDivPixel(bounds.getSouthWest())
+        const left=Math.round(sw.x),top2=Math.round(ne.y)
+        const width=Math.round(ne.x-sw.x),height=Math.round(sw.y-ne.y)
+        this.canvas.style.left=left+'px';this.canvas.style.top=top2+'px'
+        this.canvas.width=width;this.canvas.height=height
+        const ctx=this.canvas.getContext('2d')
+        ctx.clearRect(0,0,width,height)
+        const pc=document.createElement('canvas');pc.width=10;pc.height=10
+        const pctx=pc.getContext('2d')
+        pctx.strokeStyle='rgba(220,38,38,0.85)';pctx.lineWidth=2
+        pctx.beginPath()
+        pctx.moveTo(0,10);pctx.lineTo(10,0)
+        pctx.moveTo(-1,1);pctx.lineTo(1,-1)
+        pctx.moveTo(9,11);pctx.lineTo(11,9)
+        pctx.stroke()
+        const pattern=ctx.createPattern(pc,'repeat')
+        this.data.features.forEach(feature=>{
+          const geom=feature.geometry
+          const polys=geom.type==='Polygon'?[geom.coordinates]:geom.coordinates
+          polys.forEach(coords=>{
+            ctx.beginPath()
+            coords.forEach((ring)=>{
+              ring.forEach((pt,pi)=>{
+                const px=proj.fromLatLngToDivPixel(new window.google.maps.LatLng(pt[1],pt[0]))
+                const x=px.x-left,y=px.y-top2
+                pi===0?ctx.moveTo(x,y):ctx.lineTo(x,y)
+              })
+              ctx.closePath()
+            })
+            ctx.fillStyle=pattern;ctx.globalAlpha=0.65;ctx.fill('evenodd')
+            ctx.globalAlpha=1;ctx.strokeStyle='#dc2626';ctx.lineWidth=1.5;ctx.stroke()
+          })
+        })
+      }
+      onRemove(){
+        if(this.div&&this.div.parentNode)this.div.parentNode.removeChild(this.div)
+        this.div=null;this.canvas=null
+      }
+    }
+    const overlay=new CrosshatchOverlay(pilData)
+    overlay.setMap(map)
+    pilOverlayRef.current=overlay
+  },[showPIL,pilData,mapReady])
   useEffect(()=>{renderLayer(orangeLayerRef,orangeData,showOrange,'#f472b6','#ec4899',0.30)},[showOrange,orangeData,mapReady])
 
   useEffect(()=>{
@@ -626,7 +686,6 @@ export default function MapView({properties,selectedProperty,setSelectedProperty
         <MapControls
           mapType={mapType} setMapType={setMapType}
           showGreen={showGreen} setShowGreen={setShowGreen}
-          showPureGreen={showPureGreen} setShowPureGreen={setShowPureGreen}
           showCup={showCup} setShowCup={setShowCup}
           showRed={showRed} setShowRed={setShowRed}
           showOrange={showOrange} setShowOrange={setShowOrange}
