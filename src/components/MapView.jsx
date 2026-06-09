@@ -31,6 +31,7 @@ const ZONE_INFO = {
   'IH-1-1': { label: 'Industrial Heavy', status: 'by_right', detail: 'Storage allowed by right' },
   'IH-2-1': { label: 'Industrial Heavy', status: 'by_right', detail: 'Storage allowed by right' },
   'IBT-1-1': { label: 'Industrial Business & Technology', status: 'by_right', detail: 'Storage allowed by right' },
+  'IS-1-1': { label: 'Industrial Small Lot Zone', status: 'by_right', detail: 'Moving & Storage Facilities permitted by right per SDMC Table 131-06B §P(23). Not in Prime Industrial Lands — self-storage fully viable.' },
   'IG': { label: 'Industrial General', status: 'by_right', detail: 'Storage allowed by right' },
   'IP': { label: 'Industrial Park', status: 'by_right', detail: 'Storage allowed by right' },
   'ILP': { label: 'Industrial Light Park', status: 'by_right', detail: 'Storage allowed by right' },
