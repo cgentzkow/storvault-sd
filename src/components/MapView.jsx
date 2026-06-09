@@ -134,6 +134,10 @@ const ZONE_INFO = {
   'CCPD-BP': { label: 'Centre City Ballpark Mixed-Use', status: 'cup', detail: 'Downtown SD — Storage limited to 20% gross floor area above grade (CCPDO footnote 5). Not viable for pure storage play.' },
   'CCPD-ER': { label: 'Centre City East Village Retail', status: 'cup', detail: 'Downtown SD — Storage limited to 20% gross floor area above grade (CCPDO footnote 5). Not viable for pure storage play.' },
   'CCPD-CORE': { label: 'Centre City Core', status: 'cup', detail: 'Downtown SD — Storage limited to 20% gross floor area above grade (CCPDO footnote 5). Not viable for pure storage play.' },
+  'CCPD-NC': { label: 'Centre City Neighborhood Commercial', status: 'banned', detail: 'Downtown SD — Self-storage not permitted. Researched per CCPDO Table 0308-A. No path forward for storage in this zone.' },
+  'CCPD-RE': { label: 'Centre City Residential', status: 'banned', detail: 'Downtown SD — Residential zone. Self-storage not permitted per CCPDO Table 0308-A. No path forward for storage in this zone.' },
+  'CCPD-OS': { label: 'Centre City Open Space', status: 'banned', detail: 'Downtown SD — Open Space zone. Self-storage not permitted per CCPDO Table 0308-A. No path forward for storage in this zone.' },
+  'CCPD-PC': { label: 'Centre City Park/Civic', status: 'banned', detail: 'Downtown SD — Park/Civic zone. Self-storage not permitted per CCPDO Table 0308-A. No path forward for storage in this zone.' },
   // Santee
   'IL': { label: 'Industrial Light (IL)', status: 'cup', detail: 'City of Santee — CUP required for self-storage' },
   'IG': { label: 'Industrial General (IG)', status: 'cup', detail: 'City of Santee — CUP required for self-storage' },
