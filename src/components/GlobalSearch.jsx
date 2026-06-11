@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 
-const GMAPS_KEY = 'AIzaSyCLnBGWiIGI8OtYlHgLImzn0JY5FVjuQ6k'
+const GMAPS_KEY = 'AIzaSyDL-wZEWHToMMlbCF2YybG4CC-20X3tpn4'
 
 export default function GlobalSearch({ properties, onSelectProperty, onNavigate }) {
   const [query, setQuery] = useState('')

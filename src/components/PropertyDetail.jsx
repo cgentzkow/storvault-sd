@@ -4,7 +4,7 @@ import { useGoogleMaps } from '../hooks/useGoogleMaps.js'
 import { db } from '../firebase.js'
 import { collection, addDoc, query, where, onSnapshot, deleteDoc, doc, updateDoc } from 'firebase/firestore'
 
-const GMAPS_KEY = 'AIzaSyCLnBGWiIGI8OtYlHgLImzn0JY5FVjuQ6k'
+const GMAPS_KEY = 'AIzaSyDL-wZEWHToMMlbCF2YybG4CC-20X3tpn4'
 
 const STATUS_OPTIONS = [
   { value: 'not_called', label: 'Not Called', color: '#60a5fa' },

@@ -10,7 +10,7 @@ function ensureMapsLoaded() {
   }
   if (document.querySelector('script[src*="maps.googleapis.com"]')) return
   const script = document.createElement('script')
-  script.src = `https://maps.googleapis.com/maps/api/js?key=AIzaSyCLnBGWiIGI8OtYlHgLImzn0JY5FVjuQ6k&libraries=places,visualization`
+  script.src = `https://maps.googleapis.com/maps/api/js?key=AIzaSyDL-wZEWHToMMlbCF2YybG4CC-20X3tpn4&libraries=places,visualization`
   script.async = true
   script.onload = () => {
     mapsLoaded = true

@@ -6,7 +6,7 @@ import MapControls from './MapControls.jsx'
 import { db } from '../firebase.js'
 import { collection, addDoc, onSnapshot, updateDoc, deleteDoc, doc, query, orderBy } from 'firebase/firestore'
 
-const GMAPS_KEY = 'AIzaSyCLnBGWiIGI8OtYlHgLImzn0JY5FVjuQ6k'
+const GMAPS_KEY = 'AIzaSyDL-wZEWHToMMlbCF2YybG4CC-20X3tpn4'
 
 function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2,7) }
 

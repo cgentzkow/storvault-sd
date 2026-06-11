@@ -7,7 +7,7 @@ import { db } from '../firebase.js'
 import { collection, onSnapshot } from 'firebase/firestore'
 import MapControls from './MapControls.jsx'
 
-const GMAPS_KEY = 'AIzaSyCLnBGWiIGI8OtYlHgLImzn0JY5FVjuQ6k'
+const GMAPS_KEY = 'AIzaSyDL-wZEWHToMMlbCF2YybG4CC-20X3tpn4'
 const PARCEL_URL = 'https://gis-public.sandiegocounty.gov/arcgis/rest/services/Lots/MapServer/export'
 const PARCEL_LAYERS = encodeURIComponent(JSON.stringify([{
   id: 0, source: { type: 'mapLayer', mapLayerId: 0 },
