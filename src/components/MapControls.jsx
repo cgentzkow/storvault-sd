@@ -14,6 +14,8 @@ export default function MapControls({
   showMorenoValleyGreen, setShowMorenoValleyGreen,
   showMorenoValleyCup, setShowMorenoValleyCup,
   showMorenoValleyRed, setShowMorenoValleyRed,
+  showCoronaCup, setShowCoronaCup,
+  showCoronaRed, setShowCoronaRed,
 }) {
   const mapBtn=(v)=>({padding:'5px 9px',border:'none',borderRadius:'5px',cursor:'pointer',fontSize:'10px',fontWeight:600,background:mapType===v?'#f59e0b':'#1e2d47',color:mapType===v?'#000':'#94a3b8'})
 
@@ -108,6 +110,18 @@ export default function MapControls({
           </button>
           <button onClick={()=>setShowMorenoValleyRed(v=>!v)} style={btn(showMorenoValleyRed,'#f87171',239,68,68)}>
             {swatch('#ef4444')} NC, VC, OC, O, P, LI, BP, BPX, OS (Not Permitted)
+          </button>
+        </div>
+      </div>
+
+      <div>
+        <div style={{fontSize:'9px',color:'#475569',letterSpacing:'0.1em',marginBottom:'5px'}}>CORONA</div>
+        <div style={{display:'flex',flexDirection:'column',gap:'3px'}}>
+          <button onClick={()=>setShowCoronaCup(v=>!v)} style={btn(showCoronaCup,'#f97316',249,115,22)}>
+            {swatch('#f97316')} M-1 Light Manufacturing — CUP
+          </button>
+          <button onClick={()=>setShowCoronaRed(v=>!v)} style={btn(showCoronaRed,'#f87171',239,68,68)}>
+            {swatch('#ef4444')} M-2, M-3, M-4, C-P, O-P, C-2, C-3 (Not Permitted)
           </button>
         </div>
       </div>

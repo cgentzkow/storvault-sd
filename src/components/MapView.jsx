@@ -228,6 +228,17 @@ const ZONE_INFO = {
   'MV-BP': { label: 'Business Park (BP)', status: 'banned', detail: 'City of Moreno Valley — Storage Lots and Mini-Warehouses not listed as a permitted use in this zone (Table 9.02.020-1); not permitted' },
   'MV-BPX': { label: 'Business Park-Mixed Use (BPX)', status: 'banned', detail: 'City of Moreno Valley — Storage Lots and Mini-Warehouses not listed as a permitted use in this zone (Table 9.02.020-1); not permitted' },
   'MV-OS': { label: 'Open Space (OS)', status: 'banned', detail: 'City of Moreno Valley — Storage Lots and Mini-Warehouses not listed as a permitted use in this zone (Table 9.02.020-1); not permitted' },
+  // City of Corona — Title 17 Zoning, Chapter 17.44 (Industrial, Table 1) & Chapter 17.33 (Commercial/Office, Table 1-17.33)
+  'M1': { label: 'Light Manufacturing (M-1)', status: 'cup', detail: 'City of Corona — Storage facility, self storage requires a Conditional Use Permit (Chapter 17.44, Table 1)' },
+  'M2': { label: 'General Manufacturing (M-2)', status: 'banned', detail: 'City of Corona — Storage facility, self storage not permitted (Chapter 17.44, Table 1)' },
+  'M2/O': { label: 'General Manufacturing / Office Overlay (M-2/O)', status: 'banned', detail: 'City of Corona — Storage facility, self storage not permitted in M-2 base zone (Chapter 17.44, Table 1)' },
+  'M3': { label: 'Heavy Manufacturing (M-3)', status: 'banned', detail: 'City of Corona — Storage facility, self storage not permitted (Chapter 17.44, Table 1)' },
+  'M3/MR': { label: 'Heavy Manufacturing / Mineral Resources Overlay (M-3/MR)', status: 'banned', detail: 'City of Corona — Storage facility, self storage not permitted in M-3 base zone (Chapter 17.44, Table 1)' },
+  'M4': { label: 'Industrial Park (M-4)', status: 'banned', detail: 'City of Corona — Storage facility, self storage not permitted (Chapter 17.44, Table 1)' },
+  'CP': { label: 'Professional and Office (C-P)', status: 'banned', detail: 'City of Corona — Self storage / mini-warehouse not listed as a permitted use (Chapter 17.33, Table 1-17.33)' },
+  'OP': { label: 'Office Professional (O-P)', status: 'banned', detail: 'City of Corona — Self storage / mini-warehouse not listed as a permitted use (Chapter 17.33, Table 1-17.33)' },
+  'C2': { label: 'Restricted Commercial (C-2)', status: 'banned', detail: 'City of Corona — Self storage / mini-warehouse not listed as a permitted use (Chapter 17.33, Table 1-17.33)' },
+  'C3': { label: 'General Commercial (C-3)', status: 'banned', detail: 'City of Corona — Self storage / mini-warehouse not listed as a permitted use (Chapter 17.33, Table 1-17.33)' },
 }
 
 function getZoneInfo(props) {
@@ -493,6 +504,8 @@ export default function MapView({properties,selectedProperty,setSelectedProperty
   const morenoValleyGreenLayerRef=useRef(null)
   const morenoValleyCupLayerRef=useRef(null)
   const morenoValleyRedLayerRef=useRef(null)
+  const coronaCupLayerRef=useRef(null)
+  const coronaRedLayerRef=useRef(null)
 
   const [greenData,setGreenData]=useState(null)
   const [cityBannedData,setCityBannedData]=useState(null)
@@ -508,6 +521,8 @@ export default function MapView({properties,selectedProperty,setSelectedProperty
   const [morenoValleyGreenData,setMorenoValleyGreenData]=useState(null)
   const [morenoValleyCupData,setMorenoValleyCupData]=useState(null)
   const [morenoValleyRedData,setMorenoValleyRedData]=useState(null)
+  const [coronaCupData,setCoronaCupData]=useState(null)
+  const [coronaRedData,setCoronaRedData]=useState(null)
 
   const [mapType,setMapType]=useState('dark')
   const [showParcel,setShowParcel]=useState(false)
@@ -523,6 +538,8 @@ export default function MapView({properties,selectedProperty,setSelectedProperty
   const [showMorenoValleyGreen,setShowMorenoValleyGreen]=useState(false)
   const [showMorenoValleyCup,setShowMorenoValleyCup]=useState(false)
   const [showMorenoValleyRed,setShowMorenoValleyRed]=useState(false)
+  const [showCoronaCup,setShowCoronaCup]=useState(false)
+  const [showCoronaRed,setShowCoronaRed]=useState(false)
   const [showLocations,setShowLocations]=useState(true)   // Feature 2
   const [filterCompanies,setFilterCompanies]=useState(new Set())  // Feature 4
   const [parcelPopup,setParcelPopup]=useState(null)
@@ -585,6 +602,8 @@ export default function MapView({properties,selectedProperty,setSelectedProperty
     fetch('/moreno_valley_green.geojson').then(r=>r.json()).then(setMorenoValleyGreenData).catch(()=>{})
     fetch('/moreno_valley_cup.geojson').then(r=>r.json()).then(setMorenoValleyCupData).catch(()=>{})
     fetch('/moreno_valley_red.geojson').then(r=>r.json()).then(setMorenoValleyRedData).catch(()=>{})
+    fetch('/corona_cup.geojson').then(r=>r.json()).then(setCoronaCupData).catch(()=>{})
+    fetch('/corona_red.geojson').then(r=>r.json()).then(setCoronaRedData).catch(()=>{})
   },[])
 
   // Helper: render layer + attach zone-click listener (Feature 1)
@@ -685,6 +704,8 @@ export default function MapView({properties,selectedProperty,setSelectedProperty
   useEffect(()=>{renderLayer(morenoValleyGreenLayerRef,morenoValleyGreenData,showMorenoValleyGreen,'#22c55e','#16a34a',0.30)},[showMorenoValleyGreen,morenoValleyGreenData,mapReady])
   useEffect(()=>{renderLayer(morenoValleyCupLayerRef,morenoValleyCupData,showMorenoValleyCup,'#f97316','#ea580c',0.30)},[showMorenoValleyCup,morenoValleyCupData,mapReady])
   useEffect(()=>{renderLayer(morenoValleyRedLayerRef,morenoValleyRedData,showMorenoValleyRed,'#ef4444','#dc2626',0.22)},[showMorenoValleyRed,morenoValleyRedData,mapReady])
+  useEffect(()=>{renderLayer(coronaCupLayerRef,coronaCupData,showCoronaCup,'#f97316','#ea580c',0.30)},[showCoronaCup,coronaCupData,mapReady])
+  useEffect(()=>{renderLayer(coronaRedLayerRef,coronaRedData,showCoronaRed,'#ef4444','#dc2626',0.22)},[showCoronaRed,coronaRedData,mapReady])
 
   useEffect(()=>{
     const map=mapRef.current
@@ -762,6 +783,8 @@ export default function MapView({properties,selectedProperty,setSelectedProperty
           showMorenoValleyGreen={showMorenoValleyGreen} setShowMorenoValleyGreen={setShowMorenoValleyGreen}
           showMorenoValleyCup={showMorenoValleyCup} setShowMorenoValleyCup={setShowMorenoValleyCup}
           showMorenoValleyRed={showMorenoValleyRed} setShowMorenoValleyRed={setShowMorenoValleyRed}
+          showCoronaCup={showCoronaCup} setShowCoronaCup={setShowCoronaCup}
+          showCoronaRed={showCoronaRed} setShowCoronaRed={setShowCoronaRed}
         />
 
         <div>
