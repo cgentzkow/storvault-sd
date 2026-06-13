@@ -7,6 +7,8 @@ export default function MapControls({
   showPIL, setShowPIL,
   showParcel, setShowParcel,
   showLocations, setShowLocations,
+  showRiversideUnincorporatedCup, setShowRiversideUnincorporatedCup,
+  showRiversideUnincorporatedRed, setShowRiversideUnincorporatedRed,
 }) {
   const mapBtn=(v)=>({padding:'5px 9px',border:'none',borderRadius:'5px',cursor:'pointer',fontSize:'10px',fontWeight:600,background:mapType===v?'#f59e0b':'#1e2d47',color:mapType===v?'#000':'#94a3b8'})
 
@@ -62,6 +64,18 @@ export default function MapControls({
           </button>
           <button onClick={()=>setShowParcel(v=>!v)} style={btn(showParcel,'#fde047',253,224,71)}>
             {swatch('#fde047')} Parcels{showParcel?' (zoom 14+)':''}
+          </button>
+        </div>
+      </div>
+
+      <div>
+        <div style={{fontSize:'9px',color:'#475569',letterSpacing:'0.1em',marginBottom:'5px'}}>RIVERSIDE COUNTY (UNINC.)</div>
+        <div style={{display:'flex',flexDirection:'column',gap:'3px'}}>
+          <button onClick={()=>setShowRiversideUnincorporatedCup(v=>!v)} style={btn(showRiversideUnincorporatedCup,'#f97316',249,115,22)}>
+            {swatch('#f97316')} C-1/C-P, I-P, M-SC/M-M/M-H (CUP/Plot Plan)
+          </button>
+          <button onClick={()=>setShowRiversideUnincorporatedRed(v=>!v)} style={btn(showRiversideUnincorporatedRed,'#f87171',239,68,68)}>
+            {swatch('#ef4444')} C-P-S, C-R, C-O, C-T, MU, C/V (Not Permitted)
           </button>
         </div>
       </div>

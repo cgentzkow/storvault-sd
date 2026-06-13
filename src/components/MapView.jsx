@@ -203,12 +203,27 @@ const ZONE_INFO = {
   'N-CM-1': { label: 'North 101 Commercial Mixed 1', status: 'banned', detail: 'City of Encinitas North 101 — self-storage not permitted' },
   'N-CM-2': { label: 'North 101 Commercial Mixed 2', status: 'banned', detail: 'City of Encinitas North 101 — self-storage not permitted' },
   'N-CM-3': { label: 'North 101 Commercial Mixed 3', status: 'banned', detail: 'City of Encinitas North 101 — self-storage not permitted' },
+  // Unincorporated Riverside County — Ord. 348 / RCC Ch. 17.240 Mini-Warehouses
+  'C-1/C-P': { label: 'General Commercial (C-1/C-P)', status: 'cup', detail: 'Unincorporated Riverside County — Mini-warehouses allowed with an approved Conditional Use Permit (RCC §17.240.020.A)' },
+  'I-P': { label: 'Industrial Park (I-P)', status: 'cup', detail: 'Unincorporated Riverside County — Mini-warehouses allowed with an approved Plot Plan (RCC §17.240.020.B)' },
+  'M-SC': { label: 'Manufacturing-Service Commercial (M-SC)', status: 'cup', detail: 'Unincorporated Riverside County — Mini-warehouses allowed with an approved Plot Plan (RCC §17.240.020.B)' },
+  'M-M': { label: 'Manufacturing-Medium (M-M)', status: 'cup', detail: 'Unincorporated Riverside County — Mini-warehouses allowed with an approved Plot Plan (RCC §17.240.020.B)' },
+  'M-H': { label: 'Manufacturing-Heavy (M-H)', status: 'cup', detail: 'Unincorporated Riverside County — Mini-warehouses allowed with an approved Plot Plan (RCC §17.240.020.B)' },
+  'C-P-S': { label: 'Scenic Highway Commercial (C-P-S)', status: 'banned', detail: 'Unincorporated Riverside County — Mini-warehouses not listed as a permitted use in this zone (RCC §17.240.020); not permitted' },
+  'C-R': { label: 'Rural Commercial (C-R)', status: 'banned', detail: 'Unincorporated Riverside County — Mini-warehouses not listed as a permitted use in this zone (RCC §17.240.020); not permitted' },
+  'C-O': { label: 'Commercial Office (C-O)', status: 'banned', detail: 'Unincorporated Riverside County — Mini-warehouses not listed as a permitted use in this zone (RCC §17.240.020); not permitted' },
+  'C-T': { label: 'Tourist Commercial (C-T)', status: 'banned', detail: 'Unincorporated Riverside County — Mini-warehouses not listed as a permitted use in this zone (RCC §17.240.020); not permitted' },
+  'MU': { label: 'Mixed Use (MU)', status: 'banned', detail: 'Unincorporated Riverside County — Mini-warehouses not listed as a permitted use in this zone (RCC §17.240.020); not permitted' },
+  'C/V': { label: 'Citrus/Vineyard (C/V)', status: 'banned', detail: 'Unincorporated Riverside County — Mini-warehouses not listed as a permitted use in this zone (RCC §17.240.020); not permitted' },
+  'C-C/V': { label: 'Commercial Citrus/Vineyard (C-C/V)', status: 'banned', detail: 'Unincorporated Riverside County — Mini-warehouses not listed as a permitted use in this zone (RCC §17.240.020); not permitted' },
 }
 
 function getZoneInfo(props) {
-  const zone = props.zone_display || props.name || props.Zone || props.ZoningCode || props.ZoneCode || props.ZONECLASS || props.DetailCode || ''
+  const zone = props.zone_display || props.name || props.Zone || props.ZoningCode || props.ZoneCode || props.ZONECLASS || props.DetailCode || props.ZONING || ''
   const city = props.city || ''
-  const info = ZONE_INFO[zone] || { label: zone || 'Unknown Zone', status: 'unknown', detail: 'No storage data for this zone' }
+  // Riverside County ZONING values sometimes carry a minimum-area suffix (e.g. "M-H-10", "C/V-5") — strip it for lookup
+  const zoneBase = zone.replace(/-[\d\s/]+$/, '')
+  const info = ZONE_INFO[zone] || ZONE_INFO[zoneBase] || { label: zone || 'Unknown Zone', status: 'unknown', detail: 'No storage data for this zone' }
   return { zone, city, ...info }
 }
 
@@ -459,6 +474,8 @@ export default function MapView({properties,selectedProperty,setSelectedProperty
   const ipLayerRef=useRef(null)
   const orangeLayerRef=useRef(null)
   const cityBannedLayerRef=useRef(null)
+  const riversideUnincorporatedCupLayerRef=useRef(null)
+  const riversideUnincorporatedRedLayerRef=useRef(null)
 
   const [greenData,setGreenData]=useState(null)
   const [cityBannedData,setCityBannedData]=useState(null)
@@ -467,6 +484,8 @@ export default function MapView({properties,selectedProperty,setSelectedProperty
   const [ipData,setIpData]=useState(null)
   const [pilData,setPilData]=useState(null)
   const [orangeData,setOrangeData]=useState(null)
+  const [riversideUnincorporatedCupData,setRiversideUnincorporatedCupData]=useState(null)
+  const [riversideUnincorporatedRedData,setRiversideUnincorporatedRedData]=useState(null)
 
   const [mapType,setMapType]=useState('dark')
   const [showParcel,setShowParcel]=useState(false)
@@ -475,6 +494,8 @@ export default function MapView({properties,selectedProperty,setSelectedProperty
   const [showRed,setShowRed]=useState(true)
   const [showPIL,setShowPIL]=useState(true)
   const [showOrange,setShowOrange]=useState(false)
+  const [showRiversideUnincorporatedCup,setShowRiversideUnincorporatedCup]=useState(false)
+  const [showRiversideUnincorporatedRed,setShowRiversideUnincorporatedRed]=useState(false)
   const [showLocations,setShowLocations]=useState(true)   // Feature 2
   const [filterCompanies,setFilterCompanies]=useState(new Set())  // Feature 4
   const [parcelPopup,setParcelPopup]=useState(null)
@@ -530,6 +551,8 @@ export default function MapView({properties,selectedProperty,setSelectedProperty
     fetch('/ip_zones.geojson').then(r=>r.json()).then(setIpData).catch(()=>{})
     fetch('/industrial_overlay.geojson').then(r=>r.json()).then(setPilData).catch(()=>{})
     fetch('/orange_overlay.geojson').then(r=>r.json()).then(setOrangeData).catch(()=>{})
+    fetch('/riverside_unincorporated_cup.geojson').then(r=>r.json()).then(setRiversideUnincorporatedCupData).catch(()=>{})
+    fetch('/riverside_unincorporated_red.geojson').then(r=>r.json()).then(setRiversideUnincorporatedRedData).catch(()=>{})
   },[])
 
   // Helper: render layer + attach zone-click listener (Feature 1)
@@ -623,6 +646,8 @@ export default function MapView({properties,selectedProperty,setSelectedProperty
     pilOverlayRef.current=overlay
   },[showPIL,pilData,mapReady])
   useEffect(()=>{renderLayer(orangeLayerRef,orangeData,showOrange,'#f472b6','#ec4899',0.30)},[showOrange,orangeData,mapReady])
+  useEffect(()=>{renderLayer(riversideUnincorporatedCupLayerRef,riversideUnincorporatedCupData,showRiversideUnincorporatedCup,'#f97316','#ea580c',0.30)},[showRiversideUnincorporatedCup,riversideUnincorporatedCupData,mapReady])
+  useEffect(()=>{renderLayer(riversideUnincorporatedRedLayerRef,riversideUnincorporatedRedData,showRiversideUnincorporatedRed,'#ef4444','#dc2626',0.22)},[showRiversideUnincorporatedRed,riversideUnincorporatedRedData,mapReady])
 
   useEffect(()=>{
     const map=mapRef.current
@@ -693,6 +718,8 @@ export default function MapView({properties,selectedProperty,setSelectedProperty
           showPIL={showPIL} setShowPIL={setShowPIL}
           showParcel={showParcel} setShowParcel={setShowParcel}
           showLocations={showLocations} setShowLocations={setShowLocations}
+          showRiversideUnincorporatedCup={showRiversideUnincorporatedCup} setShowRiversideUnincorporatedCup={setShowRiversideUnincorporatedCup}
+          showRiversideUnincorporatedRed={showRiversideUnincorporatedRed} setShowRiversideUnincorporatedRed={setShowRiversideUnincorporatedRed}
         />
 
         <div>
