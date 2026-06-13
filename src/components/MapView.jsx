@@ -476,6 +476,8 @@ export default function MapView({properties,selectedProperty,setSelectedProperty
   const cityBannedLayerRef=useRef(null)
   const riversideUnincorporatedCupLayerRef=useRef(null)
   const riversideUnincorporatedRedLayerRef=useRef(null)
+  const riversideCityCupLayerRef=useRef(null)
+  const riversideCityRedLayerRef=useRef(null)
 
   const [greenData,setGreenData]=useState(null)
   const [cityBannedData,setCityBannedData]=useState(null)
@@ -486,6 +488,8 @@ export default function MapView({properties,selectedProperty,setSelectedProperty
   const [orangeData,setOrangeData]=useState(null)
   const [riversideUnincorporatedCupData,setRiversideUnincorporatedCupData]=useState(null)
   const [riversideUnincorporatedRedData,setRiversideUnincorporatedRedData]=useState(null)
+  const [riversideCityCupData,setRiversideCityCupData]=useState(null)
+  const [riversideCityRedData,setRiversideCityRedData]=useState(null)
 
   const [mapType,setMapType]=useState('dark')
   const [showParcel,setShowParcel]=useState(false)
@@ -496,6 +500,8 @@ export default function MapView({properties,selectedProperty,setSelectedProperty
   const [showOrange,setShowOrange]=useState(false)
   const [showRiversideUnincorporatedCup,setShowRiversideUnincorporatedCup]=useState(false)
   const [showRiversideUnincorporatedRed,setShowRiversideUnincorporatedRed]=useState(false)
+  const [showRiversideCityCup,setShowRiversideCityCup]=useState(false)
+  const [showRiversideCityRed,setShowRiversideCityRed]=useState(false)
   const [showLocations,setShowLocations]=useState(true)   // Feature 2
   const [filterCompanies,setFilterCompanies]=useState(new Set())  // Feature 4
   const [parcelPopup,setParcelPopup]=useState(null)
@@ -553,6 +559,8 @@ export default function MapView({properties,selectedProperty,setSelectedProperty
     fetch('/orange_overlay.geojson').then(r=>r.json()).then(setOrangeData).catch(()=>{})
     fetch('/riverside_unincorporated_cup.geojson').then(r=>r.json()).then(setRiversideUnincorporatedCupData).catch(()=>{})
     fetch('/riverside_unincorporated_red.geojson').then(r=>r.json()).then(setRiversideUnincorporatedRedData).catch(()=>{})
+    fetch('/riverside_city_cup.geojson').then(r=>r.json()).then(setRiversideCityCupData).catch(()=>{})
+    fetch('/riverside_city_red.geojson').then(r=>r.json()).then(setRiversideCityRedData).catch(()=>{})
   },[])
 
   // Helper: render layer + attach zone-click listener (Feature 1)
@@ -648,6 +656,8 @@ export default function MapView({properties,selectedProperty,setSelectedProperty
   useEffect(()=>{renderLayer(orangeLayerRef,orangeData,showOrange,'#f472b6','#ec4899',0.30)},[showOrange,orangeData,mapReady])
   useEffect(()=>{renderLayer(riversideUnincorporatedCupLayerRef,riversideUnincorporatedCupData,showRiversideUnincorporatedCup,'#f97316','#ea580c',0.30)},[showRiversideUnincorporatedCup,riversideUnincorporatedCupData,mapReady])
   useEffect(()=>{renderLayer(riversideUnincorporatedRedLayerRef,riversideUnincorporatedRedData,showRiversideUnincorporatedRed,'#ef4444','#dc2626',0.22)},[showRiversideUnincorporatedRed,riversideUnincorporatedRedData,mapReady])
+  useEffect(()=>{renderLayer(riversideCityCupLayerRef,riversideCityCupData,showRiversideCityCup,'#f59e0b','#d97706',0.28)},[showRiversideCityCup,riversideCityCupData,mapReady])
+  useEffect(()=>{renderLayer(riversideCityRedLayerRef,riversideCityRedData,showRiversideCityRed,'#ef4444','#dc2626',0.30)},[showRiversideCityRed,riversideCityRedData,mapReady])
 
   useEffect(()=>{
     const map=mapRef.current
@@ -720,6 +730,8 @@ export default function MapView({properties,selectedProperty,setSelectedProperty
           showLocations={showLocations} setShowLocations={setShowLocations}
           showRiversideUnincorporatedCup={showRiversideUnincorporatedCup} setShowRiversideUnincorporatedCup={setShowRiversideUnincorporatedCup}
           showRiversideUnincorporatedRed={showRiversideUnincorporatedRed} setShowRiversideUnincorporatedRed={setShowRiversideUnincorporatedRed}
+          showRiversideCityCup={showRiversideCityCup} setShowRiversideCityCup={setShowRiversideCityCup}
+          showRiversideCityRed={showRiversideCityRed} setShowRiversideCityRed={setShowRiversideCityRed}
         />
 
         <div>

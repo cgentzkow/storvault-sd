@@ -9,6 +9,8 @@ export default function MapControls({
   showLocations, setShowLocations,
   showRiversideUnincorporatedCup, setShowRiversideUnincorporatedCup,
   showRiversideUnincorporatedRed, setShowRiversideUnincorporatedRed,
+  showRiversideCityCup, setShowRiversideCityCup,
+  showRiversideCityRed, setShowRiversideCityRed,
 }) {
   const mapBtn=(v)=>({padding:'5px 9px',border:'none',borderRadius:'5px',cursor:'pointer',fontSize:'10px',fontWeight:600,background:mapType===v?'#f59e0b':'#1e2d47',color:mapType===v?'#000':'#94a3b8'})
 
@@ -76,6 +78,18 @@ export default function MapControls({
           </button>
           <button onClick={()=>setShowRiversideUnincorporatedRed(v=>!v)} style={btn(showRiversideUnincorporatedRed,'#f87171',239,68,68)}>
             {swatch('#ef4444')} C-P-S, C-R, C-O, C-T, MU, C/V (Not Permitted)
+          </button>
+        </div>
+      </div>
+
+      <div>
+        <div style={{fontSize:'9px',color:'#475569',letterSpacing:'0.1em',marginBottom:'5px'}}>CITY OF RIVERSIDE</div>
+        <div style={{display:'flex',flexDirection:'column',gap:'3px'}}>
+          <button onClick={()=>setShowRiversideCityCup(v=>!v)} style={btn(showRiversideCityCup,'#f59e0b',245,158,11)}>
+            {swatch('#f59e0b')} BMP/I/BMP-CS w/ CS Overlay (Design Review)
+          </button>
+          <button onClick={()=>setShowRiversideCityRed(v=>!v)} style={btn(showRiversideCityRed,'#f87171',239,68,68)}>
+            {swatch('#ef4444')} CG/CR/CRC/O/BMP/I/MU (Not Permitted)
           </button>
         </div>
       </div>
