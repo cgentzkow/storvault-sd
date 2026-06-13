@@ -216,6 +216,18 @@ const ZONE_INFO = {
   'MU': { label: 'Mixed Use (MU)', status: 'banned', detail: 'Unincorporated Riverside County — Mini-warehouses not listed as a permitted use in this zone (RCC §17.240.020); not permitted' },
   'C/V': { label: 'Citrus/Vineyard (C/V)', status: 'banned', detail: 'Unincorporated Riverside County — Mini-warehouses not listed as a permitted use in this zone (RCC §17.240.020); not permitted' },
   'C-C/V': { label: 'Commercial Citrus/Vineyard (C-C/V)', status: 'banned', detail: 'Unincorporated Riverside County — Mini-warehouses not listed as a permitted use in this zone (RCC §17.240.020); not permitted' },
+  // City of Moreno Valley — Title 9, Permitted Uses Table 9.02.020-1 (Storage Lots and Mini-Warehouses)
+  'MV-I': { label: 'Industrial (I)', status: 'by_right', detail: 'City of Moreno Valley — Storage Lots and Mini-Warehouses (indoor & outdoor) permitted by right (Table 9.02.020-1)' },
+  'MV-CC': { label: 'Community Commercial (CC)', status: 'cup', detail: 'City of Moreno Valley — Storage Lots and Mini-Warehouses (indoor & outdoor) allowed with a Conditional Use Permit (Table 9.02.020-1)' },
+  'MV-NC': { label: 'Neighborhood Commercial (NC)', status: 'banned', detail: 'City of Moreno Valley — Storage Lots and Mini-Warehouses not listed as a permitted use in this zone (Table 9.02.020-1); not permitted' },
+  'MV-VC': { label: 'Village Commercial (VC)', status: 'banned', detail: 'City of Moreno Valley — Storage Lots and Mini-Warehouses not listed as a permitted use in this zone (Table 9.02.020-1); not permitted' },
+  'MV-OC': { label: 'Office Commercial (OC)', status: 'banned', detail: 'City of Moreno Valley — Storage Lots and Mini-Warehouses not listed as a permitted use in this zone (Table 9.02.020-1); not permitted' },
+  'MV-O': { label: 'Office (O)', status: 'banned', detail: 'City of Moreno Valley — Storage Lots and Mini-Warehouses not listed as a permitted use in this zone (Table 9.02.020-1); not permitted' },
+  'MV-P': { label: 'Public (P)', status: 'banned', detail: 'City of Moreno Valley — Storage Lots and Mini-Warehouses not listed as a permitted use in this zone (Table 9.02.020-1); not permitted' },
+  'MV-LI': { label: 'Light Industrial (LI)', status: 'banned', detail: 'City of Moreno Valley — Storage Lots and Mini-Warehouses not listed as a permitted use in this zone (Table 9.02.020-1); not permitted' },
+  'MV-BP': { label: 'Business Park (BP)', status: 'banned', detail: 'City of Moreno Valley — Storage Lots and Mini-Warehouses not listed as a permitted use in this zone (Table 9.02.020-1); not permitted' },
+  'MV-BPX': { label: 'Business Park-Mixed Use (BPX)', status: 'banned', detail: 'City of Moreno Valley — Storage Lots and Mini-Warehouses not listed as a permitted use in this zone (Table 9.02.020-1); not permitted' },
+  'MV-OS': { label: 'Open Space (OS)', status: 'banned', detail: 'City of Moreno Valley — Storage Lots and Mini-Warehouses not listed as a permitted use in this zone (Table 9.02.020-1); not permitted' },
 }
 
 function getZoneInfo(props) {
@@ -478,6 +490,9 @@ export default function MapView({properties,selectedProperty,setSelectedProperty
   const riversideUnincorporatedRedLayerRef=useRef(null)
   const riversideCityCupLayerRef=useRef(null)
   const riversideCityRedLayerRef=useRef(null)
+  const morenoValleyGreenLayerRef=useRef(null)
+  const morenoValleyCupLayerRef=useRef(null)
+  const morenoValleyRedLayerRef=useRef(null)
 
   const [greenData,setGreenData]=useState(null)
   const [cityBannedData,setCityBannedData]=useState(null)
@@ -490,6 +505,9 @@ export default function MapView({properties,selectedProperty,setSelectedProperty
   const [riversideUnincorporatedRedData,setRiversideUnincorporatedRedData]=useState(null)
   const [riversideCityCupData,setRiversideCityCupData]=useState(null)
   const [riversideCityRedData,setRiversideCityRedData]=useState(null)
+  const [morenoValleyGreenData,setMorenoValleyGreenData]=useState(null)
+  const [morenoValleyCupData,setMorenoValleyCupData]=useState(null)
+  const [morenoValleyRedData,setMorenoValleyRedData]=useState(null)
 
   const [mapType,setMapType]=useState('dark')
   const [showParcel,setShowParcel]=useState(false)
@@ -502,6 +520,9 @@ export default function MapView({properties,selectedProperty,setSelectedProperty
   const [showRiversideUnincorporatedRed,setShowRiversideUnincorporatedRed]=useState(false)
   const [showRiversideCityCup,setShowRiversideCityCup]=useState(false)
   const [showRiversideCityRed,setShowRiversideCityRed]=useState(false)
+  const [showMorenoValleyGreen,setShowMorenoValleyGreen]=useState(false)
+  const [showMorenoValleyCup,setShowMorenoValleyCup]=useState(false)
+  const [showMorenoValleyRed,setShowMorenoValleyRed]=useState(false)
   const [showLocations,setShowLocations]=useState(true)   // Feature 2
   const [filterCompanies,setFilterCompanies]=useState(new Set())  // Feature 4
   const [parcelPopup,setParcelPopup]=useState(null)
@@ -561,6 +582,9 @@ export default function MapView({properties,selectedProperty,setSelectedProperty
     fetch('/riverside_unincorporated_red.geojson').then(r=>r.json()).then(setRiversideUnincorporatedRedData).catch(()=>{})
     fetch('/riverside_city_cup.geojson').then(r=>r.json()).then(setRiversideCityCupData).catch(()=>{})
     fetch('/riverside_city_red.geojson').then(r=>r.json()).then(setRiversideCityRedData).catch(()=>{})
+    fetch('/moreno_valley_green.geojson').then(r=>r.json()).then(setMorenoValleyGreenData).catch(()=>{})
+    fetch('/moreno_valley_cup.geojson').then(r=>r.json()).then(setMorenoValleyCupData).catch(()=>{})
+    fetch('/moreno_valley_red.geojson').then(r=>r.json()).then(setMorenoValleyRedData).catch(()=>{})
   },[])
 
   // Helper: render layer + attach zone-click listener (Feature 1)
@@ -658,6 +682,9 @@ export default function MapView({properties,selectedProperty,setSelectedProperty
   useEffect(()=>{renderLayer(riversideUnincorporatedRedLayerRef,riversideUnincorporatedRedData,showRiversideUnincorporatedRed,'#ef4444','#dc2626',0.22)},[showRiversideUnincorporatedRed,riversideUnincorporatedRedData,mapReady])
   useEffect(()=>{renderLayer(riversideCityCupLayerRef,riversideCityCupData,showRiversideCityCup,'#f59e0b','#d97706',0.28)},[showRiversideCityCup,riversideCityCupData,mapReady])
   useEffect(()=>{renderLayer(riversideCityRedLayerRef,riversideCityRedData,showRiversideCityRed,'#ef4444','#dc2626',0.30)},[showRiversideCityRed,riversideCityRedData,mapReady])
+  useEffect(()=>{renderLayer(morenoValleyGreenLayerRef,morenoValleyGreenData,showMorenoValleyGreen,'#22c55e','#16a34a',0.30)},[showMorenoValleyGreen,morenoValleyGreenData,mapReady])
+  useEffect(()=>{renderLayer(morenoValleyCupLayerRef,morenoValleyCupData,showMorenoValleyCup,'#f97316','#ea580c',0.30)},[showMorenoValleyCup,morenoValleyCupData,mapReady])
+  useEffect(()=>{renderLayer(morenoValleyRedLayerRef,morenoValleyRedData,showMorenoValleyRed,'#ef4444','#dc2626',0.22)},[showMorenoValleyRed,morenoValleyRedData,mapReady])
 
   useEffect(()=>{
     const map=mapRef.current
@@ -732,6 +759,9 @@ export default function MapView({properties,selectedProperty,setSelectedProperty
           showRiversideUnincorporatedRed={showRiversideUnincorporatedRed} setShowRiversideUnincorporatedRed={setShowRiversideUnincorporatedRed}
           showRiversideCityCup={showRiversideCityCup} setShowRiversideCityCup={setShowRiversideCityCup}
           showRiversideCityRed={showRiversideCityRed} setShowRiversideCityRed={setShowRiversideCityRed}
+          showMorenoValleyGreen={showMorenoValleyGreen} setShowMorenoValleyGreen={setShowMorenoValleyGreen}
+          showMorenoValleyCup={showMorenoValleyCup} setShowMorenoValleyCup={setShowMorenoValleyCup}
+          showMorenoValleyRed={showMorenoValleyRed} setShowMorenoValleyRed={setShowMorenoValleyRed}
         />
 
         <div>

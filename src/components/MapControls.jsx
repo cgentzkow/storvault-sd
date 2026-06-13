@@ -11,6 +11,9 @@ export default function MapControls({
   showRiversideUnincorporatedRed, setShowRiversideUnincorporatedRed,
   showRiversideCityCup, setShowRiversideCityCup,
   showRiversideCityRed, setShowRiversideCityRed,
+  showMorenoValleyGreen, setShowMorenoValleyGreen,
+  showMorenoValleyCup, setShowMorenoValleyCup,
+  showMorenoValleyRed, setShowMorenoValleyRed,
 }) {
   const mapBtn=(v)=>({padding:'5px 9px',border:'none',borderRadius:'5px',cursor:'pointer',fontSize:'10px',fontWeight:600,background:mapType===v?'#f59e0b':'#1e2d47',color:mapType===v?'#000':'#94a3b8'})
 
@@ -90,6 +93,21 @@ export default function MapControls({
           </button>
           <button onClick={()=>setShowRiversideCityRed(v=>!v)} style={btn(showRiversideCityRed,'#f87171',239,68,68)}>
             {swatch('#ef4444')} CG/CR/CRC/O/BMP/I/MU (Not Permitted)
+          </button>
+        </div>
+      </div>
+
+      <div>
+        <div style={{fontSize:'9px',color:'#475569',letterSpacing:'0.1em',marginBottom:'5px'}}>MORENO VALLEY</div>
+        <div style={{display:'flex',flexDirection:'column',gap:'3px'}}>
+          <button onClick={()=>setShowMorenoValleyGreen(v=>!v)} style={btn(showMorenoValleyGreen,'#4ade80',34,197,94)}>
+            {swatch('#4ade80')} Industrial (I) — By Right
+          </button>
+          <button onClick={()=>setShowMorenoValleyCup(v=>!v)} style={btn(showMorenoValleyCup,'#f97316',249,115,22)}>
+            {swatch('#f97316')} Community Commercial (CC) — CUP
+          </button>
+          <button onClick={()=>setShowMorenoValleyRed(v=>!v)} style={btn(showMorenoValleyRed,'#f87171',239,68,68)}>
+            {swatch('#ef4444')} NC, VC, OC, O, P, LI, BP, BPX, OS (Not Permitted)
           </button>
         </div>
       </div>
