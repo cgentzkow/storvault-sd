@@ -26,6 +26,8 @@ export default function MapControls({
   showJurupaValleyRed, setShowJurupaValleyRed,
   showMurrietaCup, setShowMurrietaCup,
   showMurrietaRed, setShowMurrietaRed,
+  showHemetCup, setShowHemetCup,
+  showHemetRed, setShowHemetRed,
 }) {
   const mapBtn=(v)=>({padding:'5px 9px',border:'none',borderRadius:'5px',cursor:'pointer',fontSize:'10px',fontWeight:600,background:mapType===v?'#f59e0b':'#1e2d47',color:mapType===v?'#000':'#94a3b8'})
 
@@ -186,6 +188,18 @@ export default function MapControls({
           </button>
           <button onClick={()=>setShowMurrietaRed(v=>!v)} style={btn(showMurrietaRed,'#f87171',239,68,68)}>
             {swatch('#ef4444')} GI-A, O, ORP, RC, INN, C/I (Not Permitted)
+          </button>
+        </div>
+      </div>
+
+      <div>
+        <div style={{fontSize:'9px',color:'#475569',letterSpacing:'0.1em',marginBottom:'5px'}}>HEMET</div>
+        <div style={{display:'flex',flexDirection:'column',gap:'3px'}}>
+          <button onClick={()=>setShowHemetCup(v=>!v)} style={btn(showHemetCup,'#f97316',249,115,22)}>
+            {swatch('#f97316')} C-M, M-1, M-2 — CUP Required
+          </button>
+          <button onClick={()=>setShowHemetRed(v=>!v)} style={btn(showHemetRed,'#f87171',239,68,68)}>
+            {swatch('#ef4444')} O-P, C-1, C-2, B-P (Not Permitted)
           </button>
         </div>
       </div>

@@ -283,6 +283,14 @@ const ZONE_INFO = {
   'MUR-RC': { label: 'Regional Commercial (RC)', status: 'banned', detail: 'City of Murrieta — Personal storage facilities not permitted (Table 16.10-1)' },
   'MUR-INN': { label: 'Innovation District (INN)', status: 'banned', detail: 'City of Murrieta — Personal storage facilities not listed as a permitted use (Table 16.13-1)' },
   'MUR-C/I': { label: 'Commercial/Industrial (C/I)', status: 'banned', detail: 'City of Murrieta — Personal storage facilities not permitted (Table 16.12-1)' },
+  // City of Hemet — Municipal Code Chapter 90 Zoning, Art. XXVI Commercial Zones (Sec. 90-893 Land Use Matrix) & Art. XXX Manufacturing Zones (Sec. 90-1043 Land Use Matrix) — "Storage facility (personal, mini-storage)"
+  'HMT-O-P': { label: 'Office Professional (O-P)', status: 'banned', detail: 'City of Hemet — Storage facility (personal, mini-storage) not permitted (Sec. 90-893 Commercial Zones Land Use Matrix, Item H.12; Secs. 90-4, 90-81)' },
+  'HMT-C-1': { label: 'Neighborhood Commercial (C-1)', status: 'banned', detail: 'City of Hemet — Storage facility (personal, mini-storage) not permitted (Sec. 90-893 Commercial Zones Land Use Matrix, Item H.12; Secs. 90-4, 90-81)' },
+  'HMT-C-2': { label: 'General Commercial (C-2)', status: 'banned', detail: 'City of Hemet — Storage facility (personal, mini-storage) not permitted (Sec. 90-893 Commercial Zones Land Use Matrix, Item H.12; Secs. 90-4, 90-81)' },
+  'HMT-C-M': { label: 'Commercial Manufacturing (C-M)', status: 'cup', detail: 'City of Hemet — Storage facility (personal, mini-storage) requires a Conditional Use Permit (Sec. 90-893 Commercial Zones Land Use Matrix, Item H.12; Secs. 90-4, 90-81)' },
+  'HMT-B-P': { label: 'Business Park (BP)', status: 'banned', detail: 'City of Hemet — Storage facility (personal, mini-storage) not permitted (Sec. 90-1043 Manufacturing Zones Land Use Matrix, Item H.31; Secs. 90-4, 90-81)' },
+  'HMT-M-1': { label: 'Limited Manufacturing (M-1)', status: 'cup', detail: 'City of Hemet — Storage facility (personal, mini-storage) requires a Conditional Use Permit (Sec. 90-1043 Manufacturing Zones Land Use Matrix, Item H.31; Secs. 90-4, 90-81)' },
+  'HMT-M-2': { label: 'Heavy Manufacturing (M-2)', status: 'cup', detail: 'City of Hemet — Storage facility (personal, mini-storage) requires a Conditional Use Permit (Sec. 90-1043 Manufacturing Zones Land Use Matrix, Item H.31; Secs. 90-4, 90-81)' },
 }
 
 function getZoneInfo(props) {
@@ -560,6 +568,8 @@ export default function MapView({properties,selectedProperty,setSelectedProperty
   const jurupaValleyRedLayerRef=useRef(null)
   const murrietaCupLayerRef=useRef(null)
   const murrietaRedLayerRef=useRef(null)
+  const hemetCupLayerRef=useRef(null)
+  const hemetRedLayerRef=useRef(null)
 
   const [greenData,setGreenData]=useState(null)
   const [cityBannedData,setCityBannedData]=useState(null)
@@ -587,6 +597,8 @@ export default function MapView({properties,selectedProperty,setSelectedProperty
   const [jurupaValleyRedData,setJurupaValleyRedData]=useState(null)
   const [murrietaCupData,setMurrietaCupData]=useState(null)
   const [murrietaRedData,setMurrietaRedData]=useState(null)
+  const [hemetCupData,setHemetCupData]=useState(null)
+  const [hemetRedData,setHemetRedData]=useState(null)
 
   const [mapType,setMapType]=useState('dark')
   const [showParcel,setShowParcel]=useState(false)
@@ -614,6 +626,8 @@ export default function MapView({properties,selectedProperty,setSelectedProperty
   const [showJurupaValleyRed,setShowJurupaValleyRed]=useState(false)
   const [showMurrietaCup,setShowMurrietaCup]=useState(false)
   const [showMurrietaRed,setShowMurrietaRed]=useState(false)
+  const [showHemetCup,setShowHemetCup]=useState(false)
+  const [showHemetRed,setShowHemetRed]=useState(false)
   const [showLocations,setShowLocations]=useState(true)   // Feature 2
   const [filterCompanies,setFilterCompanies]=useState(new Set())  // Feature 4
   const [parcelPopup,setParcelPopup]=useState(null)
@@ -688,6 +702,8 @@ export default function MapView({properties,selectedProperty,setSelectedProperty
     fetch('/jurupa_valley_red.geojson').then(r=>r.json()).then(setJurupaValleyRedData).catch(()=>{})
     fetch('/murrieta_cup.geojson').then(r=>r.json()).then(setMurrietaCupData).catch(()=>{})
     fetch('/murrieta_red.geojson').then(r=>r.json()).then(setMurrietaRedData).catch(()=>{})
+    fetch('/hemet_cup.geojson').then(r=>r.json()).then(setHemetCupData).catch(()=>{})
+    fetch('/hemet_red.geojson').then(r=>r.json()).then(setHemetRedData).catch(()=>{})
   },[])
 
   // Helper: render layer + attach zone-click listener (Feature 1)
@@ -800,6 +816,8 @@ export default function MapView({properties,selectedProperty,setSelectedProperty
   useEffect(()=>{renderLayer(jurupaValleyRedLayerRef,jurupaValleyRedData,showJurupaValleyRed,'#ef4444','#dc2626',0.22)},[showJurupaValleyRed,jurupaValleyRedData,mapReady])
   useEffect(()=>{renderLayer(murrietaCupLayerRef,murrietaCupData,showMurrietaCup,'#f97316','#ea580c',0.30)},[showMurrietaCup,murrietaCupData,mapReady])
   useEffect(()=>{renderLayer(murrietaRedLayerRef,murrietaRedData,showMurrietaRed,'#ef4444','#dc2626',0.22)},[showMurrietaRed,murrietaRedData,mapReady])
+  useEffect(()=>{renderLayer(hemetCupLayerRef,hemetCupData,showHemetCup,'#f97316','#ea580c',0.30)},[showHemetCup,hemetCupData,mapReady])
+  useEffect(()=>{renderLayer(hemetRedLayerRef,hemetRedData,showHemetRed,'#ef4444','#dc2626',0.22)},[showHemetRed,hemetRedData,mapReady])
 
   useEffect(()=>{
     const map=mapRef.current
@@ -889,6 +907,8 @@ export default function MapView({properties,selectedProperty,setSelectedProperty
           showJurupaValleyRed={showJurupaValleyRed} setShowJurupaValleyRed={setShowJurupaValleyRed}
           showMurrietaCup={showMurrietaCup} setShowMurrietaCup={setShowMurrietaCup}
           showMurrietaRed={showMurrietaRed} setShowMurrietaRed={setShowMurrietaRed}
+          showHemetCup={showHemetCup} setShowHemetCup={setShowHemetCup}
+          showHemetRed={showHemetRed} setShowHemetRed={setShowHemetRed}
         />
 
         <div>
