@@ -22,6 +22,8 @@ export default function MapControls({
   showTemeculaGreen, setShowTemeculaGreen,
   showTemeculaCup, setShowTemeculaCup,
   showTemeculaRed, setShowTemeculaRed,
+  showJurupaValleyCup, setShowJurupaValleyCup,
+  showJurupaValleyRed, setShowJurupaValleyRed,
 }) {
   const mapBtn=(v)=>({padding:'5px 9px',border:'none',borderRadius:'5px',cursor:'pointer',fontSize:'10px',fontWeight:600,background:mapType===v?'#f59e0b':'#1e2d47',color:mapType===v?'#000':'#94a3b8'})
 
@@ -158,6 +160,18 @@ export default function MapControls({
           </button>
           <button onClick={()=>setShowTemeculaRed(v=>!v)} style={btn(showTemeculaRed,'#f87171',239,68,68)}>
             {swatch('#ef4444')} NC, HT, PO (Not Permitted)
+          </button>
+        </div>
+      </div>
+
+      <div>
+        <div style={{fontSize:'9px',color:'#475569',letterSpacing:'0.1em',marginBottom:'5px'}}>JURUPA VALLEY</div>
+        <div style={{display:'flex',flexDirection:'column',gap:'3px'}}>
+          <button onClick={()=>setShowJurupaValleyCup(v=>!v)} style={btn(showJurupaValleyCup,'#f97316',249,115,22)}>
+            {swatch('#f97316')} C-1/C-P, I-P, M-SC, M-M, M-H, R-VC — CUP/Site Dev Permit
+          </button>
+          <button onClick={()=>setShowJurupaValleyRed(v=>!v)} style={btn(showJurupaValleyRed,'#f87171',239,68,68)}>
+            {swatch('#ef4444')} B-P, C-O, C-P-S, C-R (Not Permitted)
           </button>
         </div>
       </div>

@@ -257,6 +257,21 @@ const ZONE_INFO = {
   'TEM-NC': { label: 'Neighborhood Commercial (NC)', status: 'banned', detail: 'City of Temecula — Mini-storage or mini-warehouse facilities not permitted (Table 17.08.030)' },
   'TEM-HT': { label: 'Highway/Tourist Commercial (HT)', status: 'banned', detail: 'City of Temecula — Mini-storage or mini-warehouse facilities not permitted (Table 17.08.030)' },
   'TEM-PO': { label: 'Professional Office (PO)', status: 'banned', detail: 'City of Temecula — Mini-storage or mini-warehouse facilities not permitted (Table 17.08.030)' },
+  // City of Jurupa Valley — Title 9 Planning & Zoning Municipal Code (mirrors Riverside County Ord. 348 zone classifications)
+  'JV-C-1/C-P': { label: 'General Commercial (C-1/C-P)', status: 'cup', detail: 'City of Jurupa Valley — Mini-warehouse structures require a Conditional Use Permit (Muni. Code §9.115.020.C.9; CUP per §9.240.280)' },
+  'JV-I-P': { label: 'Industrial Park (I-P)', status: 'cup', detail: 'City of Jurupa Valley — Mini warehouses (self-storage) permitted subject to Site Development Permit (Muni. Code §9.145.020.B(1)(g)(viii); SDP per §9.240.330; standards per §9.240.470)' },
+  'JV-M-SC': { label: 'Manufacturing-Service Commercial (M-SC)', status: 'cup', detail: 'City of Jurupa Valley — Mini warehouses (self-storage) permitted subject to Site Development Permit (Muni. Code §9.148.020.B; SDP per §9.240.330; standards per §9.240.470)' },
+  'JV-M-M': { label: 'Manufacturing-Medium (M-M)', status: 'cup', detail: 'City of Jurupa Valley — Mini warehouses (self-storage) permitted subject to Site Development Permit (Muni. Code §9.150.020.B; SDP per §9.240.330; standards per §9.240.470)' },
+  'JV-M-H': { label: 'Manufacturing-Heavy (M-H)', status: 'cup', detail: 'City of Jurupa Valley — Mini warehouses (self-storage) permitted subject to Site Development Permit (Muni. Code §9.155.020.B; SDP per §9.240.330; standards per §9.240.470)' },
+  'JV-R-VC': { label: 'Rubidoux Village Commercial (R-VC)', status: 'cup', detail: 'City of Jurupa Valley — Mini-warehouse structures permitted by Conditional Use Permit in West/East Village areas (Muni. Code §9.140.020.C(11); CUP per §9.240.280)' },
+  'JV-B-P': { label: 'Business Park (B-P)', status: 'banned', detail: 'City of Jurupa Valley — Mini-warehouses/self-storage not a permitted use; zone purpose excludes general warehousing, distribution, shipping, or logistics (Muni. Code §9.112.020, §9.112.010)' },
+  'JV-M-R': { label: 'Mineral Resources (M-R)', status: 'banned', detail: 'City of Jurupa Valley — Mini-warehouses/self-storage not listed as a permitted use (Muni. Code §9.165.020)' },
+  'JV-M-R-A': { label: 'Mineral Resources and Related Manufacturing (M-R-A)', status: 'banned', detail: 'City of Jurupa Valley — Mini-warehouses/self-storage not listed as a permitted use (Muni. Code §9.170.020)' },
+  'JV-C-T': { label: 'Tourist Commercial (C-T)', status: 'banned', detail: 'City of Jurupa Valley — Mini-warehouses/self-storage not listed as a permitted use (Muni. Code §9.120.020)' },
+  'JV-C-P-S': { label: 'Scenic Highway Commercial (C-P-S)', status: 'banned', detail: 'City of Jurupa Valley — Mini-warehouses/self-storage not listed as a permitted use (Muni. Code §9.125.020)' },
+  'JV-C-R': { label: 'Rural Commercial (C-R)', status: 'banned', detail: 'City of Jurupa Valley — Mini-warehouses/self-storage not listed as a permitted use (Muni. Code §9.130.020)' },
+  'JV-C-N': { label: 'Commercial-Neighborhood (C-N)', status: 'banned', detail: 'City of Jurupa Valley — Mini-warehouses/self-storage not listed as a permitted use (Muni. Code §9.132.020)' },
+  'JV-C-O': { label: 'Commercial-Office (C-O)', status: 'banned', detail: 'City of Jurupa Valley — Mini-warehouses/self-storage not listed as a permitted use (Muni. Code §9.135.020)' },
 }
 
 function getZoneInfo(props) {
@@ -530,6 +545,8 @@ export default function MapView({properties,selectedProperty,setSelectedProperty
   const temeculaGreenLayerRef=useRef(null)
   const temeculaCupLayerRef=useRef(null)
   const temeculaRedLayerRef=useRef(null)
+  const jurupaValleyCupLayerRef=useRef(null)
+  const jurupaValleyRedLayerRef=useRef(null)
 
   const [greenData,setGreenData]=useState(null)
   const [cityBannedData,setCityBannedData]=useState(null)
@@ -553,6 +570,8 @@ export default function MapView({properties,selectedProperty,setSelectedProperty
   const [temeculaGreenData,setTemeculaGreenData]=useState(null)
   const [temeculaCupData,setTemeculaCupData]=useState(null)
   const [temeculaRedData,setTemeculaRedData]=useState(null)
+  const [jurupaValleyCupData,setJurupaValleyCupData]=useState(null)
+  const [jurupaValleyRedData,setJurupaValleyRedData]=useState(null)
 
   const [mapType,setMapType]=useState('dark')
   const [showParcel,setShowParcel]=useState(false)
@@ -576,6 +595,8 @@ export default function MapView({properties,selectedProperty,setSelectedProperty
   const [showTemeculaGreen,setShowTemeculaGreen]=useState(false)
   const [showTemeculaCup,setShowTemeculaCup]=useState(false)
   const [showTemeculaRed,setShowTemeculaRed]=useState(false)
+  const [showJurupaValleyCup,setShowJurupaValleyCup]=useState(false)
+  const [showJurupaValleyRed,setShowJurupaValleyRed]=useState(false)
   const [showLocations,setShowLocations]=useState(true)   // Feature 2
   const [filterCompanies,setFilterCompanies]=useState(new Set())  // Feature 4
   const [parcelPopup,setParcelPopup]=useState(null)
@@ -646,6 +667,8 @@ export default function MapView({properties,selectedProperty,setSelectedProperty
     fetch('/temecula_green.geojson').then(r=>r.json()).then(setTemeculaGreenData).catch(()=>{})
     fetch('/temecula_cup.geojson').then(r=>r.json()).then(setTemeculaCupData).catch(()=>{})
     fetch('/temecula_red.geojson').then(r=>r.json()).then(setTemeculaRedData).catch(()=>{})
+    fetch('/jurupa_valley_cup.geojson').then(r=>r.json()).then(setJurupaValleyCupData).catch(()=>{})
+    fetch('/jurupa_valley_red.geojson').then(r=>r.json()).then(setJurupaValleyRedData).catch(()=>{})
   },[])
 
   // Helper: render layer + attach zone-click listener (Feature 1)
@@ -754,6 +777,8 @@ export default function MapView({properties,selectedProperty,setSelectedProperty
   useEffect(()=>{renderLayer(temeculaGreenLayerRef,temeculaGreenData,showTemeculaGreen,'#22c55e','#16a34a',0.30)},[showTemeculaGreen,temeculaGreenData,mapReady])
   useEffect(()=>{renderLayer(temeculaCupLayerRef,temeculaCupData,showTemeculaCup,'#f97316','#ea580c',0.30)},[showTemeculaCup,temeculaCupData,mapReady])
   useEffect(()=>{renderLayer(temeculaRedLayerRef,temeculaRedData,showTemeculaRed,'#ef4444','#dc2626',0.22)},[showTemeculaRed,temeculaRedData,mapReady])
+  useEffect(()=>{renderLayer(jurupaValleyCupLayerRef,jurupaValleyCupData,showJurupaValleyCup,'#f97316','#ea580c',0.30)},[showJurupaValleyCup,jurupaValleyCupData,mapReady])
+  useEffect(()=>{renderLayer(jurupaValleyRedLayerRef,jurupaValleyRedData,showJurupaValleyRed,'#ef4444','#dc2626',0.22)},[showJurupaValleyRed,jurupaValleyRedData,mapReady])
 
   useEffect(()=>{
     const map=mapRef.current
@@ -839,6 +864,8 @@ export default function MapView({properties,selectedProperty,setSelectedProperty
           showTemeculaGreen={showTemeculaGreen} setShowTemeculaGreen={setShowTemeculaGreen}
           showTemeculaCup={showTemeculaCup} setShowTemeculaCup={setShowTemeculaCup}
           showTemeculaRed={showTemeculaRed} setShowTemeculaRed={setShowTemeculaRed}
+          showJurupaValleyCup={showJurupaValleyCup} setShowJurupaValleyCup={setShowJurupaValleyCup}
+          showJurupaValleyRed={showJurupaValleyRed} setShowJurupaValleyRed={setShowJurupaValleyRed}
         />
 
         <div>
