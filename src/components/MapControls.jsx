@@ -26,6 +26,7 @@ export default function MapControls({
   showJurupaValleyRed, setShowJurupaValleyRed,
   showMurrietaCup, setShowMurrietaCup,
   showMurrietaRed, setShowMurrietaRed,
+  showIndioRed, setShowIndioRed,
 }) {
   const mapBtn=(v)=>({padding:'5px 9px',border:'none',borderRadius:'5px',cursor:'pointer',fontSize:'10px',fontWeight:600,background:mapType===v?'#f59e0b':'#1e2d47',color:mapType===v?'#000':'#94a3b8'})
 
@@ -186,6 +187,15 @@ export default function MapControls({
           </button>
           <button onClick={()=>setShowMurrietaRed(v=>!v)} style={btn(showMurrietaRed,'#f87171',239,68,68)}>
             {swatch('#ef4444')} GI-A, O, ORP, RC, INN, C/I (Not Permitted)
+          </button>
+        </div>
+      </div>
+
+      <div>
+        <div style={{fontSize:'9px',color:'#475569',letterSpacing:'0.1em',marginBottom:'5px'}}>INDIO</div>
+        <div style={{display:'flex',flexDirection:'column',gap:'3px'}}>
+          <button onClick={()=>setShowIndioRed(v=>!v)} style={btn(showIndioRed,'#f87171',239,68,68)}>
+            {swatch('#ef4444')} IL, IH, RC, RR, CN-14, CN-20, NC, MUN (Not Permitted)
           </button>
         </div>
       </div>

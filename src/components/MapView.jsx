@@ -283,6 +283,15 @@ const ZONE_INFO = {
   'MUR-RC': { label: 'Regional Commercial (RC)', status: 'banned', detail: 'City of Murrieta — Personal storage facilities not permitted (Table 16.10-1)' },
   'MUR-INN': { label: 'Innovation District (INN)', status: 'banned', detail: 'City of Murrieta — Personal storage facilities not listed as a permitted use (Table 16.13-1)' },
   'MUR-C/I': { label: 'Commercial/Industrial (C/I)', status: 'banned', detail: 'City of Murrieta — Personal storage facilities not permitted (Table 16.12-1)' },
+  // City of Indio — Title 17 Unified Development Code (Ord. 1782, eff. 10-22-2022), Table 2.04.02-1 (Non-Residential Zones) & Table 2.03.02-1 (Mixed-Use Zones) — "Mini-Storage Warehousing or Facility"
+  'IND-IL': { label: 'Light Industrial (IL)', status: 'banned', detail: 'City of Indio — "Mini-Storage Warehousing or Facility" not permitted (Table 2.04.02-1, UDC Ch. 2.04)' },
+  'IND-IH': { label: 'Heavy Industrial (IH)', status: 'banned', detail: 'City of Indio — "Mini-Storage Warehousing or Facility" not permitted (Table 2.04.02-1, UDC Ch. 2.04)' },
+  'IND-RC': { label: 'Resort Commercial (RC)', status: 'banned', detail: 'City of Indio — "Mini-Storage Warehousing or Facility" not permitted (Table 2.04.02-1, UDC Ch. 2.04)' },
+  'IND-RR': { label: 'Resort/Recreation (RR)', status: 'banned', detail: 'City of Indio — "Mini-Storage Warehousing or Facility" not permitted (Table 2.04.02-1, UDC Ch. 2.04)' },
+  'IND-CN-14': { label: 'Connected Neighborhoods — 14 (CN-14)', status: 'banned', detail: 'City of Indio — "Mini-Storage Warehousing or Facility" not permitted (Table 2.03.02-1, UDC Ch. 2.03)' },
+  'IND-CN-20': { label: 'Connected Neighborhoods — 20 (CN-20)', status: 'banned', detail: 'City of Indio — "Mini-Storage Warehousing or Facility" not permitted (Table 2.03.02-1, UDC Ch. 2.03)' },
+  'IND-NC': { label: 'Neighborhood Center (NC)', status: 'banned', detail: 'City of Indio — "Mini-Storage Warehousing or Facility" not permitted (Table 2.03.02-1, UDC Ch. 2.03)' },
+  'IND-MUN': { label: 'Mixed-Use Neighborhood (MUN)', status: 'banned', detail: 'City of Indio — "Mini-Storage Warehousing or Facility" not permitted (Table 2.03.02-1, UDC Ch. 2.03)' },
 }
 
 function getZoneInfo(props) {
@@ -560,6 +569,7 @@ export default function MapView({properties,selectedProperty,setSelectedProperty
   const jurupaValleyRedLayerRef=useRef(null)
   const murrietaCupLayerRef=useRef(null)
   const murrietaRedLayerRef=useRef(null)
+  const indioRedLayerRef=useRef(null)
 
   const [greenData,setGreenData]=useState(null)
   const [cityBannedData,setCityBannedData]=useState(null)
@@ -587,6 +597,7 @@ export default function MapView({properties,selectedProperty,setSelectedProperty
   const [jurupaValleyRedData,setJurupaValleyRedData]=useState(null)
   const [murrietaCupData,setMurrietaCupData]=useState(null)
   const [murrietaRedData,setMurrietaRedData]=useState(null)
+  const [indioRedData,setIndioRedData]=useState(null)
 
   const [mapType,setMapType]=useState('dark')
   const [showParcel,setShowParcel]=useState(false)
@@ -614,6 +625,7 @@ export default function MapView({properties,selectedProperty,setSelectedProperty
   const [showJurupaValleyRed,setShowJurupaValleyRed]=useState(false)
   const [showMurrietaCup,setShowMurrietaCup]=useState(false)
   const [showMurrietaRed,setShowMurrietaRed]=useState(false)
+  const [showIndioRed,setShowIndioRed]=useState(false)
   const [showLocations,setShowLocations]=useState(true)   // Feature 2
   const [filterCompanies,setFilterCompanies]=useState(new Set())  // Feature 4
   const [parcelPopup,setParcelPopup]=useState(null)
@@ -688,6 +700,7 @@ export default function MapView({properties,selectedProperty,setSelectedProperty
     fetch('/jurupa_valley_red.geojson').then(r=>r.json()).then(setJurupaValleyRedData).catch(()=>{})
     fetch('/murrieta_cup.geojson').then(r=>r.json()).then(setMurrietaCupData).catch(()=>{})
     fetch('/murrieta_red.geojson').then(r=>r.json()).then(setMurrietaRedData).catch(()=>{})
+    fetch('/indio_red.geojson').then(r=>r.json()).then(setIndioRedData).catch(()=>{})
   },[])
 
   // Helper: render layer + attach zone-click listener (Feature 1)
@@ -800,6 +813,7 @@ export default function MapView({properties,selectedProperty,setSelectedProperty
   useEffect(()=>{renderLayer(jurupaValleyRedLayerRef,jurupaValleyRedData,showJurupaValleyRed,'#ef4444','#dc2626',0.22)},[showJurupaValleyRed,jurupaValleyRedData,mapReady])
   useEffect(()=>{renderLayer(murrietaCupLayerRef,murrietaCupData,showMurrietaCup,'#f97316','#ea580c',0.30)},[showMurrietaCup,murrietaCupData,mapReady])
   useEffect(()=>{renderLayer(murrietaRedLayerRef,murrietaRedData,showMurrietaRed,'#ef4444','#dc2626',0.22)},[showMurrietaRed,murrietaRedData,mapReady])
+  useEffect(()=>{renderLayer(indioRedLayerRef,indioRedData,showIndioRed,'#ef4444','#dc2626',0.22)},[showIndioRed,indioRedData,mapReady])
 
   useEffect(()=>{
     const map=mapRef.current
@@ -889,6 +903,7 @@ export default function MapView({properties,selectedProperty,setSelectedProperty
           showJurupaValleyRed={showJurupaValleyRed} setShowJurupaValleyRed={setShowJurupaValleyRed}
           showMurrietaCup={showMurrietaCup} setShowMurrietaCup={setShowMurrietaCup}
           showMurrietaRed={showMurrietaRed} setShowMurrietaRed={setShowMurrietaRed}
+          showIndioRed={showIndioRed} setShowIndioRed={setShowIndioRed}
         />
 
         <div>
