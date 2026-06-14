@@ -24,6 +24,8 @@ export default function MapControls({
   showTemeculaRed, setShowTemeculaRed,
   showJurupaValleyCup, setShowJurupaValleyCup,
   showJurupaValleyRed, setShowJurupaValleyRed,
+  showMurrietaCup, setShowMurrietaCup,
+  showMurrietaRed, setShowMurrietaRed,
 }) {
   const mapBtn=(v)=>({padding:'5px 9px',border:'none',borderRadius:'5px',cursor:'pointer',fontSize:'10px',fontWeight:600,background:mapType===v?'#f59e0b':'#1e2d47',color:mapType===v?'#000':'#94a3b8'})
 
@@ -172,6 +174,18 @@ export default function MapControls({
           </button>
           <button onClick={()=>setShowJurupaValleyRed(v=>!v)} style={btn(showJurupaValleyRed,'#f87171',239,68,68)}>
             {swatch('#ef4444')} B-P, C-O, C-P-S, C-R (Not Permitted)
+          </button>
+        </div>
+      </div>
+
+      <div>
+        <div style={{fontSize:'9px',color:'#475569',letterSpacing:'0.1em',marginBottom:'5px'}}>MURRIETA</div>
+        <div style={{display:'flex',flexDirection:'column',gap:'3px'}}>
+          <button onClick={()=>setShowMurrietaCup(v=>!v)} style={btn(showMurrietaCup,'#f97316',249,115,22)}>
+            {swatch('#f97316')} BP, GI, NC, CC — CUP Required
+          </button>
+          <button onClick={()=>setShowMurrietaRed(v=>!v)} style={btn(showMurrietaRed,'#f87171',239,68,68)}>
+            {swatch('#ef4444')} GI-A, O, ORP, RC, INN, C/I (Not Permitted)
           </button>
         </div>
       </div>

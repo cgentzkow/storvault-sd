@@ -272,6 +272,17 @@ const ZONE_INFO = {
   'JV-C-R': { label: 'Rural Commercial (C-R)', status: 'banned', detail: 'City of Jurupa Valley — Mini-warehouses/self-storage not listed as a permitted use (Muni. Code §9.130.020)' },
   'JV-C-N': { label: 'Commercial-Neighborhood (C-N)', status: 'banned', detail: 'City of Jurupa Valley — Mini-warehouses/self-storage not listed as a permitted use (Muni. Code §9.132.020)' },
   'JV-C-O': { label: 'Commercial-Office (C-O)', status: 'banned', detail: 'City of Jurupa Valley — Mini-warehouses/self-storage not listed as a permitted use (Muni. Code §9.135.020)' },
+  // City of Murrieta — Development Code Title 16, Table 16.10-1 (Commercial), Table 16.12-1 (Industrial), Table 16.13-1 (Innovation District) — "Storage, Personal Storage Facility"
+  'MUR-BP': { label: 'Business Park (BP)', status: 'cup', detail: 'City of Murrieta — Personal storage facilities require a Conditional Use Permit (Table 16.12-1)' },
+  'MUR-GI': { label: 'General Industrial (GI)', status: 'cup', detail: 'City of Murrieta — Personal storage facilities require a Conditional Use Permit (Table 16.12-1)' },
+  'MUR-NC': { label: 'Neighborhood Commercial (NC)', status: 'cup', detail: 'City of Murrieta — Personal storage facilities require a Conditional Use Permit (Table 16.10-1)' },
+  'MUR-CC': { label: 'Community Commercial (CC)', status: 'cup', detail: 'City of Murrieta — Personal storage facilities require a Conditional Use Permit (Table 16.10-1)' },
+  'MUR-GIA': { label: 'General Industrial-Annex (GI-A)', status: 'banned', detail: 'City of Murrieta — Personal storage facilities not permitted (Table 16.12-1)' },
+  'MUR-O': { label: 'Office (O)', status: 'banned', detail: 'City of Murrieta — Personal storage facilities not permitted (Table 16.10-1)' },
+  'MUR-ORP': { label: 'Office/Research/Professional (ORP)', status: 'banned', detail: 'City of Murrieta — Personal storage facilities not permitted (Table 16.12-1)' },
+  'MUR-RC': { label: 'Regional Commercial (RC)', status: 'banned', detail: 'City of Murrieta — Personal storage facilities not permitted (Table 16.10-1)' },
+  'MUR-INN': { label: 'Innovation District (INN)', status: 'banned', detail: 'City of Murrieta — Personal storage facilities not listed as a permitted use (Table 16.13-1)' },
+  'MUR-C/I': { label: 'Commercial/Industrial (C/I)', status: 'banned', detail: 'City of Murrieta — Personal storage facilities not permitted (Table 16.12-1)' },
 }
 
 function getZoneInfo(props) {
@@ -547,6 +558,8 @@ export default function MapView({properties,selectedProperty,setSelectedProperty
   const temeculaRedLayerRef=useRef(null)
   const jurupaValleyCupLayerRef=useRef(null)
   const jurupaValleyRedLayerRef=useRef(null)
+  const murrietaCupLayerRef=useRef(null)
+  const murrietaRedLayerRef=useRef(null)
 
   const [greenData,setGreenData]=useState(null)
   const [cityBannedData,setCityBannedData]=useState(null)
@@ -572,6 +585,8 @@ export default function MapView({properties,selectedProperty,setSelectedProperty
   const [temeculaRedData,setTemeculaRedData]=useState(null)
   const [jurupaValleyCupData,setJurupaValleyCupData]=useState(null)
   const [jurupaValleyRedData,setJurupaValleyRedData]=useState(null)
+  const [murrietaCupData,setMurrietaCupData]=useState(null)
+  const [murrietaRedData,setMurrietaRedData]=useState(null)
 
   const [mapType,setMapType]=useState('dark')
   const [showParcel,setShowParcel]=useState(false)
@@ -597,6 +612,8 @@ export default function MapView({properties,selectedProperty,setSelectedProperty
   const [showTemeculaRed,setShowTemeculaRed]=useState(false)
   const [showJurupaValleyCup,setShowJurupaValleyCup]=useState(false)
   const [showJurupaValleyRed,setShowJurupaValleyRed]=useState(false)
+  const [showMurrietaCup,setShowMurrietaCup]=useState(false)
+  const [showMurrietaRed,setShowMurrietaRed]=useState(false)
   const [showLocations,setShowLocations]=useState(true)   // Feature 2
   const [filterCompanies,setFilterCompanies]=useState(new Set())  // Feature 4
   const [parcelPopup,setParcelPopup]=useState(null)
@@ -669,6 +686,8 @@ export default function MapView({properties,selectedProperty,setSelectedProperty
     fetch('/temecula_red.geojson').then(r=>r.json()).then(setTemeculaRedData).catch(()=>{})
     fetch('/jurupa_valley_cup.geojson').then(r=>r.json()).then(setJurupaValleyCupData).catch(()=>{})
     fetch('/jurupa_valley_red.geojson').then(r=>r.json()).then(setJurupaValleyRedData).catch(()=>{})
+    fetch('/murrieta_cup.geojson').then(r=>r.json()).then(setMurrietaCupData).catch(()=>{})
+    fetch('/murrieta_red.geojson').then(r=>r.json()).then(setMurrietaRedData).catch(()=>{})
   },[])
 
   // Helper: render layer + attach zone-click listener (Feature 1)
@@ -779,6 +798,8 @@ export default function MapView({properties,selectedProperty,setSelectedProperty
   useEffect(()=>{renderLayer(temeculaRedLayerRef,temeculaRedData,showTemeculaRed,'#ef4444','#dc2626',0.22)},[showTemeculaRed,temeculaRedData,mapReady])
   useEffect(()=>{renderLayer(jurupaValleyCupLayerRef,jurupaValleyCupData,showJurupaValleyCup,'#f97316','#ea580c',0.30)},[showJurupaValleyCup,jurupaValleyCupData,mapReady])
   useEffect(()=>{renderLayer(jurupaValleyRedLayerRef,jurupaValleyRedData,showJurupaValleyRed,'#ef4444','#dc2626',0.22)},[showJurupaValleyRed,jurupaValleyRedData,mapReady])
+  useEffect(()=>{renderLayer(murrietaCupLayerRef,murrietaCupData,showMurrietaCup,'#f97316','#ea580c',0.30)},[showMurrietaCup,murrietaCupData,mapReady])
+  useEffect(()=>{renderLayer(murrietaRedLayerRef,murrietaRedData,showMurrietaRed,'#ef4444','#dc2626',0.22)},[showMurrietaRed,murrietaRedData,mapReady])
 
   useEffect(()=>{
     const map=mapRef.current
@@ -866,6 +887,8 @@ export default function MapView({properties,selectedProperty,setSelectedProperty
           showTemeculaRed={showTemeculaRed} setShowTemeculaRed={setShowTemeculaRed}
           showJurupaValleyCup={showJurupaValleyCup} setShowJurupaValleyCup={setShowJurupaValleyCup}
           showJurupaValleyRed={showJurupaValleyRed} setShowJurupaValleyRed={setShowJurupaValleyRed}
+          showMurrietaCup={showMurrietaCup} setShowMurrietaCup={setShowMurrietaCup}
+          showMurrietaRed={showMurrietaRed} setShowMurrietaRed={setShowMurrietaRed}
         />
 
         <div>
