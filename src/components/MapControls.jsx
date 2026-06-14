@@ -16,6 +16,9 @@ export default function MapControls({
   showMorenoValleyRed, setShowMorenoValleyRed,
   showCoronaCup, setShowCoronaCup,
   showCoronaRed, setShowCoronaRed,
+  showMenifeeGreen, setShowMenifeeGreen,
+  showMenifeeCup, setShowMenifeeCup,
+  showMenifeeRed, setShowMenifeeRed,
 }) {
   const mapBtn=(v)=>({padding:'5px 9px',border:'none',borderRadius:'5px',cursor:'pointer',fontSize:'10px',fontWeight:600,background:mapType===v?'#f59e0b':'#1e2d47',color:mapType===v?'#000':'#94a3b8'})
 
@@ -122,6 +125,21 @@ export default function MapControls({
           </button>
           <button onClick={()=>setShowCoronaRed(v=>!v)} style={btn(showCoronaRed,'#f87171',239,68,68)}>
             {swatch('#ef4444')} M-2, M-3, M-4, C-P, O-P, C-2, C-3 (Not Permitted)
+          </button>
+        </div>
+      </div>
+
+      <div>
+        <div style={{fontSize:'9px',color:'#475569',letterSpacing:'0.1em',marginBottom:'5px'}}>MENIFEE</div>
+        <div style={{display:'flex',flexDirection:'column',gap:'3px'}}>
+          <button onClick={()=>setShowMenifeeGreen(v=>!v)} style={btn(showMenifeeGreen,'#4ade80',34,197,94)}>
+            {swatch('#4ade80')} Heavy Industrial/Mfg (HI) — By Right
+          </button>
+          <button onClick={()=>setShowMenifeeCup(v=>!v)} style={btn(showMenifeeCup,'#f97316',249,115,22)}>
+            {swatch('#f97316')} Commercial Retail (CR), Business Park/Light Ind (BP) — CUP
+          </button>
+          <button onClick={()=>setShowMenifeeRed(v=>!v)} style={btn(showMenifeeRed,'#f87171',239,68,68)}>
+            {swatch('#ef4444')} CO, EDC-NG/MB/CC/NR/SG (Not Permitted)
           </button>
         </div>
       </div>

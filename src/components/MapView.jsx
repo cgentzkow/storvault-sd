@@ -239,6 +239,16 @@ const ZONE_INFO = {
   'OP': { label: 'Office Professional (O-P)', status: 'banned', detail: 'City of Corona — Self storage / mini-warehouse not listed as a permitted use (Chapter 17.33, Table 1-17.33)' },
   'C2': { label: 'Restricted Commercial (C-2)', status: 'banned', detail: 'City of Corona — Self storage / mini-warehouse not listed as a permitted use (Chapter 17.33, Table 1-17.33)' },
   'C3': { label: 'General Commercial (C-3)', status: 'banned', detail: 'City of Corona — Self storage / mini-warehouse not listed as a permitted use (Chapter 17.33, Table 1-17.33)' },
+  // City of Menifee — Development Code (adopted 2019, eff. 2020), Table 9.135.030-1 (Commercial/Industrial Zones) & Table 9.140.030-1 (EDC Zones)
+  'MNF-HI': { label: 'Heavy Industrial/Manufacturing (HI)', status: 'by_right', detail: 'City of Menifee — Self-Storage, public storage facilities permitted by right (Development Code Table 9.135.030-1)' },
+  'MNF-CR': { label: 'Commercial Retail (CR)', status: 'cup', detail: 'City of Menifee — Self-Storage, public storage facilities require a Conditional Use Permit (Development Code Table 9.135.030-1)' },
+  'MNF-BP': { label: 'Business Park/Light Industrial (BP)', status: 'cup', detail: 'City of Menifee — Self-Storage, public storage facilities require a Conditional Use Permit (Development Code Table 9.135.030-1)' },
+  'MNF-CO': { label: 'Commercial Office (CO)', status: 'banned', detail: 'City of Menifee — Self-Storage, public storage facilities not a permitted use (Development Code Table 9.135.030-1)' },
+  'MNF-EDC-NG': { label: 'Economic Development Corridor - Northern Gateway (EDC-NG)', status: 'banned', detail: 'City of Menifee — New Self-Storage, public storage facilities not permitted in EDC zones (Development Code Table 9.140.030-1)' },
+  'MNF-EDC-MB': { label: 'Economic Development Corridor - McCall Boulevard (EDC-MB)', status: 'banned', detail: 'City of Menifee — New Self-Storage, public storage facilities not permitted in EDC zones (Development Code Table 9.140.030-1)' },
+  'MNF-EDC-CC': { label: 'Economic Development Corridor - Community Core (EDC-CC)', status: 'banned', detail: 'City of Menifee — New Self-Storage, public storage facilities not permitted in EDC zones, including the Auto Overlay (Development Code Table 9.140.030-1)' },
+  'MNF-EDC-NR': { label: 'Economic Development Corridor - Newport Road (EDC-NR)', status: 'banned', detail: 'City of Menifee — New Self-Storage, public storage facilities not permitted in EDC zones (Development Code Table 9.140.030-1)' },
+  'MNF-EDC-SG': { label: 'Economic Development Corridor - Southern Gateway (EDC-SG)', status: 'banned', detail: 'City of Menifee — New Self-Storage, public storage facilities not permitted in EDC zones (Development Code Table 9.140.030-1)' },
 }
 
 function getZoneInfo(props) {
@@ -506,6 +516,9 @@ export default function MapView({properties,selectedProperty,setSelectedProperty
   const morenoValleyRedLayerRef=useRef(null)
   const coronaCupLayerRef=useRef(null)
   const coronaRedLayerRef=useRef(null)
+  const menifeeGreenLayerRef=useRef(null)
+  const menifeeCupLayerRef=useRef(null)
+  const menifeeRedLayerRef=useRef(null)
 
   const [greenData,setGreenData]=useState(null)
   const [cityBannedData,setCityBannedData]=useState(null)
@@ -523,6 +536,9 @@ export default function MapView({properties,selectedProperty,setSelectedProperty
   const [morenoValleyRedData,setMorenoValleyRedData]=useState(null)
   const [coronaCupData,setCoronaCupData]=useState(null)
   const [coronaRedData,setCoronaRedData]=useState(null)
+  const [menifeeGreenData,setMenifeeGreenData]=useState(null)
+  const [menifeeCupData,setMenifeeCupData]=useState(null)
+  const [menifeeRedData,setMenifeeRedData]=useState(null)
 
   const [mapType,setMapType]=useState('dark')
   const [showParcel,setShowParcel]=useState(false)
@@ -540,6 +556,9 @@ export default function MapView({properties,selectedProperty,setSelectedProperty
   const [showMorenoValleyRed,setShowMorenoValleyRed]=useState(false)
   const [showCoronaCup,setShowCoronaCup]=useState(false)
   const [showCoronaRed,setShowCoronaRed]=useState(false)
+  const [showMenifeeGreen,setShowMenifeeGreen]=useState(false)
+  const [showMenifeeCup,setShowMenifeeCup]=useState(false)
+  const [showMenifeeRed,setShowMenifeeRed]=useState(false)
   const [showLocations,setShowLocations]=useState(true)   // Feature 2
   const [filterCompanies,setFilterCompanies]=useState(new Set())  // Feature 4
   const [parcelPopup,setParcelPopup]=useState(null)
@@ -604,6 +623,9 @@ export default function MapView({properties,selectedProperty,setSelectedProperty
     fetch('/moreno_valley_red.geojson').then(r=>r.json()).then(setMorenoValleyRedData).catch(()=>{})
     fetch('/corona_cup.geojson').then(r=>r.json()).then(setCoronaCupData).catch(()=>{})
     fetch('/corona_red.geojson').then(r=>r.json()).then(setCoronaRedData).catch(()=>{})
+    fetch('/menifee_green.geojson').then(r=>r.json()).then(setMenifeeGreenData).catch(()=>{})
+    fetch('/menifee_cup.geojson').then(r=>r.json()).then(setMenifeeCupData).catch(()=>{})
+    fetch('/menifee_red.geojson').then(r=>r.json()).then(setMenifeeRedData).catch(()=>{})
   },[])
 
   // Helper: render layer + attach zone-click listener (Feature 1)
@@ -706,6 +728,9 @@ export default function MapView({properties,selectedProperty,setSelectedProperty
   useEffect(()=>{renderLayer(morenoValleyRedLayerRef,morenoValleyRedData,showMorenoValleyRed,'#ef4444','#dc2626',0.22)},[showMorenoValleyRed,morenoValleyRedData,mapReady])
   useEffect(()=>{renderLayer(coronaCupLayerRef,coronaCupData,showCoronaCup,'#f97316','#ea580c',0.30)},[showCoronaCup,coronaCupData,mapReady])
   useEffect(()=>{renderLayer(coronaRedLayerRef,coronaRedData,showCoronaRed,'#ef4444','#dc2626',0.22)},[showCoronaRed,coronaRedData,mapReady])
+  useEffect(()=>{renderLayer(menifeeGreenLayerRef,menifeeGreenData,showMenifeeGreen,'#22c55e','#16a34a',0.30)},[showMenifeeGreen,menifeeGreenData,mapReady])
+  useEffect(()=>{renderLayer(menifeeCupLayerRef,menifeeCupData,showMenifeeCup,'#f97316','#ea580c',0.30)},[showMenifeeCup,menifeeCupData,mapReady])
+  useEffect(()=>{renderLayer(menifeeRedLayerRef,menifeeRedData,showMenifeeRed,'#ef4444','#dc2626',0.22)},[showMenifeeRed,menifeeRedData,mapReady])
 
   useEffect(()=>{
     const map=mapRef.current
@@ -785,6 +810,9 @@ export default function MapView({properties,selectedProperty,setSelectedProperty
           showMorenoValleyRed={showMorenoValleyRed} setShowMorenoValleyRed={setShowMorenoValleyRed}
           showCoronaCup={showCoronaCup} setShowCoronaCup={setShowCoronaCup}
           showCoronaRed={showCoronaRed} setShowCoronaRed={setShowCoronaRed}
+          showMenifeeGreen={showMenifeeGreen} setShowMenifeeGreen={setShowMenifeeGreen}
+          showMenifeeCup={showMenifeeCup} setShowMenifeeCup={setShowMenifeeCup}
+          showMenifeeRed={showMenifeeRed} setShowMenifeeRed={setShowMenifeeRed}
         />
 
         <div>
