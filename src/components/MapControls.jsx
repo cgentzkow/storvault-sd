@@ -19,6 +19,9 @@ export default function MapControls({
   showMenifeeGreen, setShowMenifeeGreen,
   showMenifeeCup, setShowMenifeeCup,
   showMenifeeRed, setShowMenifeeRed,
+  showTemeculaGreen, setShowTemeculaGreen,
+  showTemeculaCup, setShowTemeculaCup,
+  showTemeculaRed, setShowTemeculaRed,
 }) {
   const mapBtn=(v)=>({padding:'5px 9px',border:'none',borderRadius:'5px',cursor:'pointer',fontSize:'10px',fontWeight:600,background:mapType===v?'#f59e0b':'#1e2d47',color:mapType===v?'#000':'#94a3b8'})
 
@@ -140,6 +143,21 @@ export default function MapControls({
           </button>
           <button onClick={()=>setShowMenifeeRed(v=>!v)} style={btn(showMenifeeRed,'#f87171',239,68,68)}>
             {swatch('#ef4444')} CO, EDC-NG/MB/CC/NR/SG (Not Permitted)
+          </button>
+        </div>
+      </div>
+
+      <div>
+        <div style={{fontSize:'9px',color:'#475569',letterSpacing:'0.1em',marginBottom:'5px'}}>TEMECULA</div>
+        <div style={{display:'flex',flexDirection:'column',gap:'3px'}}>
+          <button onClick={()=>setShowTemeculaGreen(v=>!v)} style={btn(showTemeculaGreen,'#4ade80',34,197,94)}>
+            {swatch('#4ade80')} SC, LI — By Right
+          </button>
+          <button onClick={()=>setShowTemeculaCup(v=>!v)} style={btn(showTemeculaCup,'#f97316',249,115,22)}>
+            {swatch('#f97316')} CC, BP — CUP
+          </button>
+          <button onClick={()=>setShowTemeculaRed(v=>!v)} style={btn(showTemeculaRed,'#f87171',239,68,68)}>
+            {swatch('#ef4444')} NC, HT, PO (Not Permitted)
           </button>
         </div>
       </div>

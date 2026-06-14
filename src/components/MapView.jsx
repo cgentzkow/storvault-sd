@@ -249,6 +249,14 @@ const ZONE_INFO = {
   'MNF-EDC-CC': { label: 'Economic Development Corridor - Community Core (EDC-CC)', status: 'banned', detail: 'City of Menifee — New Self-Storage, public storage facilities not permitted in EDC zones, including the Auto Overlay (Development Code Table 9.140.030-1)' },
   'MNF-EDC-NR': { label: 'Economic Development Corridor - Newport Road (EDC-NR)', status: 'banned', detail: 'City of Menifee — New Self-Storage, public storage facilities not permitted in EDC zones (Development Code Table 9.140.030-1)' },
   'MNF-EDC-SG': { label: 'Economic Development Corridor - Southern Gateway (EDC-SG)', status: 'banned', detail: 'City of Menifee — New Self-Storage, public storage facilities not permitted in EDC zones (Development Code Table 9.140.030-1)' },
+  // City of Temecula — Title 17 Zoning, Chapter 17.08, Table 17.08.030 (Schedule of Permitted Uses, Commercial/Office/Industrial Districts) — "Mini-storage or mini-warehouse facilities"
+  'TEM-SC': { label: 'Service Commercial (SC)', status: 'by_right', detail: 'City of Temecula — Mini-storage or mini-warehouse facilities permitted by right (Table 17.08.030)' },
+  'TEM-LI': { label: 'Light Industrial (LI)', status: 'by_right', detail: 'City of Temecula — Mini-storage or mini-warehouse facilities permitted by right (Table 17.08.030)' },
+  'TEM-CC': { label: 'Community Commercial (CC)', status: 'cup', detail: 'City of Temecula — Mini-storage or mini-warehouse facilities require a Conditional Use Permit (Table 17.08.030)' },
+  'TEM-BP': { label: 'Business Park (BP)', status: 'cup', detail: 'City of Temecula — Mini-storage or mini-warehouse facilities require a Conditional Use Permit (Table 17.08.030)' },
+  'TEM-NC': { label: 'Neighborhood Commercial (NC)', status: 'banned', detail: 'City of Temecula — Mini-storage or mini-warehouse facilities not permitted (Table 17.08.030)' },
+  'TEM-HT': { label: 'Highway/Tourist Commercial (HT)', status: 'banned', detail: 'City of Temecula — Mini-storage or mini-warehouse facilities not permitted (Table 17.08.030)' },
+  'TEM-PO': { label: 'Professional Office (PO)', status: 'banned', detail: 'City of Temecula — Mini-storage or mini-warehouse facilities not permitted (Table 17.08.030)' },
 }
 
 function getZoneInfo(props) {
@@ -519,6 +527,9 @@ export default function MapView({properties,selectedProperty,setSelectedProperty
   const menifeeGreenLayerRef=useRef(null)
   const menifeeCupLayerRef=useRef(null)
   const menifeeRedLayerRef=useRef(null)
+  const temeculaGreenLayerRef=useRef(null)
+  const temeculaCupLayerRef=useRef(null)
+  const temeculaRedLayerRef=useRef(null)
 
   const [greenData,setGreenData]=useState(null)
   const [cityBannedData,setCityBannedData]=useState(null)
@@ -539,6 +550,9 @@ export default function MapView({properties,selectedProperty,setSelectedProperty
   const [menifeeGreenData,setMenifeeGreenData]=useState(null)
   const [menifeeCupData,setMenifeeCupData]=useState(null)
   const [menifeeRedData,setMenifeeRedData]=useState(null)
+  const [temeculaGreenData,setTemeculaGreenData]=useState(null)
+  const [temeculaCupData,setTemeculaCupData]=useState(null)
+  const [temeculaRedData,setTemeculaRedData]=useState(null)
 
   const [mapType,setMapType]=useState('dark')
   const [showParcel,setShowParcel]=useState(false)
@@ -559,6 +573,9 @@ export default function MapView({properties,selectedProperty,setSelectedProperty
   const [showMenifeeGreen,setShowMenifeeGreen]=useState(false)
   const [showMenifeeCup,setShowMenifeeCup]=useState(false)
   const [showMenifeeRed,setShowMenifeeRed]=useState(false)
+  const [showTemeculaGreen,setShowTemeculaGreen]=useState(false)
+  const [showTemeculaCup,setShowTemeculaCup]=useState(false)
+  const [showTemeculaRed,setShowTemeculaRed]=useState(false)
   const [showLocations,setShowLocations]=useState(true)   // Feature 2
   const [filterCompanies,setFilterCompanies]=useState(new Set())  // Feature 4
   const [parcelPopup,setParcelPopup]=useState(null)
@@ -626,6 +643,9 @@ export default function MapView({properties,selectedProperty,setSelectedProperty
     fetch('/menifee_green.geojson').then(r=>r.json()).then(setMenifeeGreenData).catch(()=>{})
     fetch('/menifee_cup.geojson').then(r=>r.json()).then(setMenifeeCupData).catch(()=>{})
     fetch('/menifee_red.geojson').then(r=>r.json()).then(setMenifeeRedData).catch(()=>{})
+    fetch('/temecula_green.geojson').then(r=>r.json()).then(setTemeculaGreenData).catch(()=>{})
+    fetch('/temecula_cup.geojson').then(r=>r.json()).then(setTemeculaCupData).catch(()=>{})
+    fetch('/temecula_red.geojson').then(r=>r.json()).then(setTemeculaRedData).catch(()=>{})
   },[])
 
   // Helper: render layer + attach zone-click listener (Feature 1)
@@ -731,6 +751,9 @@ export default function MapView({properties,selectedProperty,setSelectedProperty
   useEffect(()=>{renderLayer(menifeeGreenLayerRef,menifeeGreenData,showMenifeeGreen,'#22c55e','#16a34a',0.30)},[showMenifeeGreen,menifeeGreenData,mapReady])
   useEffect(()=>{renderLayer(menifeeCupLayerRef,menifeeCupData,showMenifeeCup,'#f97316','#ea580c',0.30)},[showMenifeeCup,menifeeCupData,mapReady])
   useEffect(()=>{renderLayer(menifeeRedLayerRef,menifeeRedData,showMenifeeRed,'#ef4444','#dc2626',0.22)},[showMenifeeRed,menifeeRedData,mapReady])
+  useEffect(()=>{renderLayer(temeculaGreenLayerRef,temeculaGreenData,showTemeculaGreen,'#22c55e','#16a34a',0.30)},[showTemeculaGreen,temeculaGreenData,mapReady])
+  useEffect(()=>{renderLayer(temeculaCupLayerRef,temeculaCupData,showTemeculaCup,'#f97316','#ea580c',0.30)},[showTemeculaCup,temeculaCupData,mapReady])
+  useEffect(()=>{renderLayer(temeculaRedLayerRef,temeculaRedData,showTemeculaRed,'#ef4444','#dc2626',0.22)},[showTemeculaRed,temeculaRedData,mapReady])
 
   useEffect(()=>{
     const map=mapRef.current
@@ -813,6 +836,9 @@ export default function MapView({properties,selectedProperty,setSelectedProperty
           showMenifeeGreen={showMenifeeGreen} setShowMenifeeGreen={setShowMenifeeGreen}
           showMenifeeCup={showMenifeeCup} setShowMenifeeCup={setShowMenifeeCup}
           showMenifeeRed={showMenifeeRed} setShowMenifeeRed={setShowMenifeeRed}
+          showTemeculaGreen={showTemeculaGreen} setShowTemeculaGreen={setShowTemeculaGreen}
+          showTemeculaCup={showTemeculaCup} setShowTemeculaCup={setShowTemeculaCup}
+          showTemeculaRed={showTemeculaRed} setShowTemeculaRed={setShowTemeculaRed}
         />
 
         <div>
