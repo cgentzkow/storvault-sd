@@ -35,6 +35,9 @@ export default function MapControls({
   showEastvaleGreen, setShowEastvaleGreen,
   showEastvaleCup, setShowEastvaleCup,
   showEastvaleRed, setShowEastvaleRed,
+  showLakeElsinoreGreen, setShowLakeElsinoreGreen,
+  showLakeElsinoreCup, setShowLakeElsinoreCup,
+  showLakeElsinoreRed, setShowLakeElsinoreRed,
 }) {
   const mapBtn=(v)=>({padding:'5px 9px',border:'none',borderRadius:'5px',cursor:'pointer',fontSize:'10px',fontWeight:600,background:mapType===v?'#f59e0b':'#1e2d47',color:mapType===v?'#000':'#94a3b8'})
 
@@ -246,6 +249,21 @@ export default function MapControls({
           </button>
           <button onClick={()=>setShowEastvaleRed(v=>!v)} style={btn(showEastvaleRed,'#f87171',239,68,68)}>
             {swatch('#ef4444')} C-P-S, W-1 (Scenic Hwy Commercial, Watercourse/Conservation) — Not Permitted
+          </button>
+        </div>
+      </div>
+
+      <div>
+        <div style={{fontSize:'9px',color:'#475569',letterSpacing:'0.1em',marginBottom:'5px'}}>LAKE ELSINORE</div>
+        <div style={{display:'flex',flexDirection:'column',gap:'3px'}}>
+          <button onClick={()=>setShowLakeElsinoreGreen(v=>!v)} style={btn(showLakeElsinoreGreen,'#4ade80',34,197,94)}>
+            {swatch('#4ade80')} M-2 (General Manufacturing) — By Right
+          </button>
+          <button onClick={()=>setShowLakeElsinoreCup(v=>!v)} style={btn(showLakeElsinoreCup,'#f97316',249,115,22)}>
+            {swatch('#f97316')} M-1, C-M (Limited Manufacturing, Commercial Manufacturing) — CUP
+          </button>
+          <button onClick={()=>setShowLakeElsinoreRed(v=>!v)} style={btn(showLakeElsinoreRed,'#f87171',239,68,68)}>
+            {swatch('#ef4444')} C-1, C-2, C-O, C-P, CMU (Commercial, Office, Mixed Use) — Not Permitted
           </button>
         </div>
       </div>

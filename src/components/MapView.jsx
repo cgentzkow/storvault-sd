@@ -255,6 +255,16 @@ const ZONE_INFO = {
   'EV-LI': { label: 'Light Industrial (LI)', status: 'cup', detail: 'City of Eastvale — "LI" zone designation per current GIS/zoning data, not separately listed in 2014 Zoning Code Table 3.3-1; treated as functionally equivalent to Industrial Park (I-P) — Mini Storage requires a Conditional Use Permit (Sec. 4.12)' },
   'EV-CPS': { label: 'Scenic Highway Commercial (C-P-S)', status: 'banned', detail: 'City of Eastvale — Mini Storage / Warehousing & Distribution incl. Mini-Storage Facilities not listed as a permitted or CUP use (Zoning Code Table 3.3-1)' },
   'EV-W1': { label: 'Watercourse, Watershed, and Conservation (W-1)', status: 'banned', detail: 'City of Eastvale — Mini Storage / Warehousing & Distribution incl. Mini-Storage Facilities not listed as a permitted or CUP use (Zoning Code Table 3.3-1)' },
+  // City of Lake Elsinore — Lake Elsinore Municipal Code (LEMC) Title 17 Zoning
+  'LE-M2': { label: 'General Manufacturing (M-2)', status: 'by_right', detail: 'City of Lake Elsinore — "Moving agencies and storage warehouses" and "Warehousing excluding freight and truck terminals" permitted by right (LEMC 17.140.020.T and .Z)' },
+  'LE-M1': { label: 'Limited Manufacturing (M-1)', status: 'cup', detail: 'City of Lake Elsinore — "Mini-storage or mini-warehouses" requires a Conditional Use Permit (LEMC 17.136.030.F)' },
+  'LE-CM': { label: 'Commercial Manufacturing (C-M)', status: 'cup', detail: 'City of Lake Elsinore — "Mini-storage or mini-warehouses and service" requires a Conditional Use Permit (LEMC 17.132.030.H)' },
+  'LE-C1': { label: 'Neighborhood Commercial (C-1)', status: 'banned', detail: 'City of Lake Elsinore — Mini-storage/mini-warehouse not listed as a permitted or CUP use (LEMC 17.120.020, 17.120.030)' },
+  'LE-C1CP': { label: 'Neighborhood Commercial / Commercial Park (C-1/C-P)', status: 'banned', detail: 'City of Lake Elsinore — Mini-storage/mini-warehouse not listed as a permitted or CUP use in either component zone (LEMC 17.120, 17.128)' },
+  'LE-C2': { label: 'General Commercial (C-2)', status: 'banned', detail: 'City of Lake Elsinore — Mini-storage/mini-warehouse not listed; service businesses involving warehousing or storage (other than accessory retail storage) are explicitly excluded (LEMC 17.124.020.O, 17.124.030)' },
+  'LE-CO': { label: 'Commercial Office (C-O)', status: 'banned', detail: 'City of Lake Elsinore — Mini-storage/mini-warehouse not listed as a permitted or CUP use (LEMC 17.116.020, 17.116.030)' },
+  'LE-CP': { label: 'Commercial Park (C-P)', status: 'banned', detail: 'City of Lake Elsinore — Mini-storage/mini-warehouse not listed as a permitted or CUP use; district limited to tourist/recreational uses (LEMC 17.128.020, 17.128.030)' },
+  'LE-CMU': { label: 'Commercial Mixed Use (CMU)', status: 'banned', detail: 'City of Lake Elsinore — Mini-storage/mini-warehouse not listed in the CMU district use table (LEMC 17.134)' },
   // City of Menifee — Development Code (adopted 2019, eff. 2020), Table 9.135.030-1 (Commercial/Industrial Zones) & Table 9.140.030-1 (EDC Zones)
   'MNF-HI': { label: 'Heavy Industrial/Manufacturing (HI)', status: 'by_right', detail: 'City of Menifee — Self-Storage, public storage facilities permitted by right (Development Code Table 9.135.030-1)' },
   'MNF-CR': { label: 'Commercial Retail (CR)', status: 'cup', detail: 'City of Menifee — Self-Storage, public storage facilities require a Conditional Use Permit (Development Code Table 9.135.030-1)' },
@@ -602,6 +612,9 @@ export default function MapView({properties,selectedProperty,setSelectedProperty
   const eastvaleGreenLayerRef=useRef(null)
   const eastvaleCupLayerRef=useRef(null)
   const eastvaleRedLayerRef=useRef(null)
+  const lakeElsinoreGreenLayerRef=useRef(null)
+  const lakeElsinoreCupLayerRef=useRef(null)
+  const lakeElsinoreRedLayerRef=useRef(null)
 
   const [greenData,setGreenData]=useState(null)
   const [cityBannedData,setCityBannedData]=useState(null)
@@ -638,6 +651,9 @@ export default function MapView({properties,selectedProperty,setSelectedProperty
   const [eastvaleGreenData,setEastvaleGreenData]=useState(null)
   const [eastvaleCupData,setEastvaleCupData]=useState(null)
   const [eastvaleRedData,setEastvaleRedData]=useState(null)
+  const [lakeElsinoreGreenData,setLakeElsinoreGreenData]=useState(null)
+  const [lakeElsinoreCupData,setLakeElsinoreCupData]=useState(null)
+  const [lakeElsinoreRedData,setLakeElsinoreRedData]=useState(null)
 
   const [mapType,setMapType]=useState('dark')
   const [showParcel,setShowParcel]=useState(false)
@@ -674,6 +690,9 @@ export default function MapView({properties,selectedProperty,setSelectedProperty
   const [showEastvaleGreen,setShowEastvaleGreen]=useState(false)
   const [showEastvaleCup,setShowEastvaleCup]=useState(false)
   const [showEastvaleRed,setShowEastvaleRed]=useState(false)
+  const [showLakeElsinoreGreen,setShowLakeElsinoreGreen]=useState(false)
+  const [showLakeElsinoreCup,setShowLakeElsinoreCup]=useState(false)
+  const [showLakeElsinoreRed,setShowLakeElsinoreRed]=useState(false)
   const [showLocations,setShowLocations]=useState(true)   // Feature 2
   const [filterCompanies,setFilterCompanies]=useState(new Set())  // Feature 4
   const [parcelPopup,setParcelPopup]=useState(null)
@@ -757,6 +776,9 @@ export default function MapView({properties,selectedProperty,setSelectedProperty
     fetch('/eastvale_green.geojson').then(r=>r.json()).then(setEastvaleGreenData).catch(()=>{})
     fetch('/eastvale_cup.geojson').then(r=>r.json()).then(setEastvaleCupData).catch(()=>{})
     fetch('/eastvale_red.geojson').then(r=>r.json()).then(setEastvaleRedData).catch(()=>{})
+    fetch('/lake_elsinore_green.geojson').then(r=>r.json()).then(setLakeElsinoreGreenData).catch(()=>{})
+    fetch('/lake_elsinore_cup.geojson').then(r=>r.json()).then(setLakeElsinoreCupData).catch(()=>{})
+    fetch('/lake_elsinore_red.geojson').then(r=>r.json()).then(setLakeElsinoreRedData).catch(()=>{})
   },[])
 
   // Helper: render layer + attach zone-click listener (Feature 1)
@@ -878,6 +900,9 @@ export default function MapView({properties,selectedProperty,setSelectedProperty
   useEffect(()=>{renderLayer(eastvaleGreenLayerRef,eastvaleGreenData,showEastvaleGreen,'#22c55e','#16a34a',0.30)},[showEastvaleGreen,eastvaleGreenData,mapReady])
   useEffect(()=>{renderLayer(eastvaleCupLayerRef,eastvaleCupData,showEastvaleCup,'#f97316','#ea580c',0.30)},[showEastvaleCup,eastvaleCupData,mapReady])
   useEffect(()=>{renderLayer(eastvaleRedLayerRef,eastvaleRedData,showEastvaleRed,'#ef4444','#dc2626',0.22)},[showEastvaleRed,eastvaleRedData,mapReady])
+  useEffect(()=>{renderLayer(lakeElsinoreGreenLayerRef,lakeElsinoreGreenData,showLakeElsinoreGreen,'#22c55e','#16a34a',0.30)},[showLakeElsinoreGreen,lakeElsinoreGreenData,mapReady])
+  useEffect(()=>{renderLayer(lakeElsinoreCupLayerRef,lakeElsinoreCupData,showLakeElsinoreCup,'#f97316','#ea580c',0.30)},[showLakeElsinoreCup,lakeElsinoreCupData,mapReady])
+  useEffect(()=>{renderLayer(lakeElsinoreRedLayerRef,lakeElsinoreRedData,showLakeElsinoreRed,'#ef4444','#dc2626',0.22)},[showLakeElsinoreRed,lakeElsinoreRedData,mapReady])
 
   useEffect(()=>{
     const map=mapRef.current
@@ -976,6 +1001,9 @@ export default function MapView({properties,selectedProperty,setSelectedProperty
           showEastvaleGreen={showEastvaleGreen} setShowEastvaleGreen={setShowEastvaleGreen}
           showEastvaleCup={showEastvaleCup} setShowEastvaleCup={setShowEastvaleCup}
           showEastvaleRed={showEastvaleRed} setShowEastvaleRed={setShowEastvaleRed}
+          showLakeElsinoreGreen={showLakeElsinoreGreen} setShowLakeElsinoreGreen={setShowLakeElsinoreGreen}
+          showLakeElsinoreCup={showLakeElsinoreCup} setShowLakeElsinoreCup={setShowLakeElsinoreCup}
+          showLakeElsinoreRed={showLakeElsinoreRed} setShowLakeElsinoreRed={setShowLakeElsinoreRed}
         />
 
         <div>
