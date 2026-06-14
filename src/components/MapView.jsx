@@ -246,6 +246,15 @@ const ZONE_INFO = {
   'PER-PO': { label: 'Professional Office (PO)', status: 'cup', detail: 'City of Perris — Mini-storage/wholesale storage requires a Conditional Use Permit (Sec. 19.43.030(6))' },
   'PER-CN': { label: 'Commercial Neighborhood (CN)', status: 'banned', detail: 'City of Perris — Self-storage/mini-warehouse not listed as a permitted or CUP use (Sec. 19.36.020 & 19.36.030)' },
   'PER-CC': { label: 'Commercial Community (CC)', status: 'banned', detail: 'City of Perris — Self-storage/mini-warehouse not listed as a permitted or CUP use (Sec. 19.38.020 & 19.38.030)' },
+  // City of Eastvale — Zoning Code (eff. Dec 2013), Chapter 3, Table 3.3-1 (Use Matrix for Commercial, Business Park, Industrial, and Special Purpose Zones), "Mini Storage" & "Warehousing and Distribution, including Mini-Storage Facilities" rows, Section 4.12
+  'EV-MSC': { label: 'Manufacturing - Service Commercial (M-SC)', status: 'by_right', detail: 'City of Eastvale — Mini Storage permitted by right (Zoning Code Table 3.3-1, Sec. 4.12); also covered as Warehousing & Distribution incl. Mini-Storage Facilities, permitted by right' },
+  'EV-MM': { label: 'Manufacturing - Medium (M-M)', status: 'by_right', detail: 'City of Eastvale — Mini Storage permitted by right (Zoning Code Table 3.3-1, Sec. 4.12); also covered as Warehousing & Distribution incl. Mini-Storage Facilities, permitted by right' },
+  'EV-MH': { label: 'Manufacturing - Heavy (M-H)', status: 'by_right', detail: 'City of Eastvale — Mini Storage permitted by right (Zoning Code Table 3.3-1, Sec. 4.12); also covered as Warehousing & Distribution incl. Mini-Storage Facilities, permitted by right' },
+  'EV-C1CP': { label: 'General Commercial (C-1/C-P)', status: 'cup', detail: 'City of Eastvale — Mini Storage requires a Conditional Use Permit (Zoning Code Table 3.3-1, Sec. 4.12)' },
+  'EV-IP': { label: 'Industrial Park (I-P)', status: 'cup', detail: 'City of Eastvale — Mini Storage requires a Conditional Use Permit as a stand-alone use (Zoning Code Table 3.3-1, Sec. 4.12); Warehousing & Distribution incl. Mini-Storage Facilities is permitted by right when part of a larger warehousing/distribution operation' },
+  'EV-LI': { label: 'Light Industrial (LI)', status: 'cup', detail: 'City of Eastvale — "LI" zone designation per current GIS/zoning data, not separately listed in 2014 Zoning Code Table 3.3-1; treated as functionally equivalent to Industrial Park (I-P) — Mini Storage requires a Conditional Use Permit (Sec. 4.12)' },
+  'EV-CPS': { label: 'Scenic Highway Commercial (C-P-S)', status: 'banned', detail: 'City of Eastvale — Mini Storage / Warehousing & Distribution incl. Mini-Storage Facilities not listed as a permitted or CUP use (Zoning Code Table 3.3-1)' },
+  'EV-W1': { label: 'Watercourse, Watershed, and Conservation (W-1)', status: 'banned', detail: 'City of Eastvale — Mini Storage / Warehousing & Distribution incl. Mini-Storage Facilities not listed as a permitted or CUP use (Zoning Code Table 3.3-1)' },
   // City of Menifee — Development Code (adopted 2019, eff. 2020), Table 9.135.030-1 (Commercial/Industrial Zones) & Table 9.140.030-1 (EDC Zones)
   'MNF-HI': { label: 'Heavy Industrial/Manufacturing (HI)', status: 'by_right', detail: 'City of Menifee — Self-Storage, public storage facilities permitted by right (Development Code Table 9.135.030-1)' },
   'MNF-CR': { label: 'Commercial Retail (CR)', status: 'cup', detail: 'City of Menifee — Self-Storage, public storage facilities require a Conditional Use Permit (Development Code Table 9.135.030-1)' },
@@ -590,6 +599,9 @@ export default function MapView({properties,selectedProperty,setSelectedProperty
   const perrisGreenLayerRef=useRef(null)
   const perrisCupLayerRef=useRef(null)
   const perrisRedLayerRef=useRef(null)
+  const eastvaleGreenLayerRef=useRef(null)
+  const eastvaleCupLayerRef=useRef(null)
+  const eastvaleRedLayerRef=useRef(null)
 
   const [greenData,setGreenData]=useState(null)
   const [cityBannedData,setCityBannedData]=useState(null)
@@ -623,6 +635,9 @@ export default function MapView({properties,selectedProperty,setSelectedProperty
   const [perrisGreenData,setPerrisGreenData]=useState(null)
   const [perrisCupData,setPerrisCupData]=useState(null)
   const [perrisRedData,setPerrisRedData]=useState(null)
+  const [eastvaleGreenData,setEastvaleGreenData]=useState(null)
+  const [eastvaleCupData,setEastvaleCupData]=useState(null)
+  const [eastvaleRedData,setEastvaleRedData]=useState(null)
 
   const [mapType,setMapType]=useState('dark')
   const [showParcel,setShowParcel]=useState(false)
@@ -656,6 +671,9 @@ export default function MapView({properties,selectedProperty,setSelectedProperty
   const [showPerrisGreen,setShowPerrisGreen]=useState(false)
   const [showPerrisCup,setShowPerrisCup]=useState(false)
   const [showPerrisRed,setShowPerrisRed]=useState(false)
+  const [showEastvaleGreen,setShowEastvaleGreen]=useState(false)
+  const [showEastvaleCup,setShowEastvaleCup]=useState(false)
+  const [showEastvaleRed,setShowEastvaleRed]=useState(false)
   const [showLocations,setShowLocations]=useState(true)   // Feature 2
   const [filterCompanies,setFilterCompanies]=useState(new Set())  // Feature 4
   const [parcelPopup,setParcelPopup]=useState(null)
@@ -736,6 +754,9 @@ export default function MapView({properties,selectedProperty,setSelectedProperty
     fetch('/perris_green.geojson').then(r=>r.json()).then(setPerrisGreenData).catch(()=>{})
     fetch('/perris_cup.geojson').then(r=>r.json()).then(setPerrisCupData).catch(()=>{})
     fetch('/perris_red.geojson').then(r=>r.json()).then(setPerrisRedData).catch(()=>{})
+    fetch('/eastvale_green.geojson').then(r=>r.json()).then(setEastvaleGreenData).catch(()=>{})
+    fetch('/eastvale_cup.geojson').then(r=>r.json()).then(setEastvaleCupData).catch(()=>{})
+    fetch('/eastvale_red.geojson').then(r=>r.json()).then(setEastvaleRedData).catch(()=>{})
   },[])
 
   // Helper: render layer + attach zone-click listener (Feature 1)
@@ -854,6 +875,9 @@ export default function MapView({properties,selectedProperty,setSelectedProperty
   useEffect(()=>{renderLayer(perrisGreenLayerRef,perrisGreenData,showPerrisGreen,'#22c55e','#16a34a',0.30)},[showPerrisGreen,perrisGreenData,mapReady])
   useEffect(()=>{renderLayer(perrisCupLayerRef,perrisCupData,showPerrisCup,'#f97316','#ea580c',0.30)},[showPerrisCup,perrisCupData,mapReady])
   useEffect(()=>{renderLayer(perrisRedLayerRef,perrisRedData,showPerrisRed,'#ef4444','#dc2626',0.22)},[showPerrisRed,perrisRedData,mapReady])
+  useEffect(()=>{renderLayer(eastvaleGreenLayerRef,eastvaleGreenData,showEastvaleGreen,'#22c55e','#16a34a',0.30)},[showEastvaleGreen,eastvaleGreenData,mapReady])
+  useEffect(()=>{renderLayer(eastvaleCupLayerRef,eastvaleCupData,showEastvaleCup,'#f97316','#ea580c',0.30)},[showEastvaleCup,eastvaleCupData,mapReady])
+  useEffect(()=>{renderLayer(eastvaleRedLayerRef,eastvaleRedData,showEastvaleRed,'#ef4444','#dc2626',0.22)},[showEastvaleRed,eastvaleRedData,mapReady])
 
   useEffect(()=>{
     const map=mapRef.current
@@ -949,6 +973,9 @@ export default function MapView({properties,selectedProperty,setSelectedProperty
           showPerrisGreen={showPerrisGreen} setShowPerrisGreen={setShowPerrisGreen}
           showPerrisCup={showPerrisCup} setShowPerrisCup={setShowPerrisCup}
           showPerrisRed={showPerrisRed} setShowPerrisRed={setShowPerrisRed}
+          showEastvaleGreen={showEastvaleGreen} setShowEastvaleGreen={setShowEastvaleGreen}
+          showEastvaleCup={showEastvaleCup} setShowEastvaleCup={setShowEastvaleCup}
+          showEastvaleRed={showEastvaleRed} setShowEastvaleRed={setShowEastvaleRed}
         />
 
         <div>

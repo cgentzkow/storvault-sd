@@ -32,6 +32,9 @@ export default function MapControls({
   showPerrisGreen, setShowPerrisGreen,
   showPerrisCup, setShowPerrisCup,
   showPerrisRed, setShowPerrisRed,
+  showEastvaleGreen, setShowEastvaleGreen,
+  showEastvaleCup, setShowEastvaleCup,
+  showEastvaleRed, setShowEastvaleRed,
 }) {
   const mapBtn=(v)=>({padding:'5px 9px',border:'none',borderRadius:'5px',cursor:'pointer',fontSize:'10px',fontWeight:600,background:mapType===v?'#f59e0b':'#1e2d47',color:mapType===v?'#000':'#94a3b8'})
 
@@ -228,6 +231,21 @@ export default function MapControls({
           </button>
           <button onClick={()=>setShowPerrisRed(v=>!v)} style={btn(showPerrisRed,'#f87171',239,68,68)}>
             {swatch('#ef4444')} CN, CC (Commercial Neighborhood/Community) — Not Permitted
+          </button>
+        </div>
+      </div>
+
+      <div>
+        <div style={{fontSize:'9px',color:'#475569',letterSpacing:'0.1em',marginBottom:'5px'}}>EASTVALE</div>
+        <div style={{display:'flex',flexDirection:'column',gap:'3px'}}>
+          <button onClick={()=>setShowEastvaleGreen(v=>!v)} style={btn(showEastvaleGreen,'#4ade80',34,197,94)}>
+            {swatch('#4ade80')} M-SC, M-M, M-H (Manufacturing) — By Right
+          </button>
+          <button onClick={()=>setShowEastvaleCup(v=>!v)} style={btn(showEastvaleCup,'#f97316',249,115,22)}>
+            {swatch('#f97316')} C-1/C-P, I-P, LI (Commercial, Industrial Park, Light Industrial) — CUP
+          </button>
+          <button onClick={()=>setShowEastvaleRed(v=>!v)} style={btn(showEastvaleRed,'#f87171',239,68,68)}>
+            {swatch('#ef4444')} C-P-S, W-1 (Scenic Hwy Commercial, Watercourse/Conservation) — Not Permitted
           </button>
         </div>
       </div>
