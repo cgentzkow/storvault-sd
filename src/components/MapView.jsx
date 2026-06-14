@@ -291,6 +291,15 @@ const ZONE_INFO = {
   'HMT-B-P': { label: 'Business Park (BP)', status: 'banned', detail: 'City of Hemet — Storage facility (personal, mini-storage) not permitted (Sec. 90-1043 Manufacturing Zones Land Use Matrix, Item H.31; Secs. 90-4, 90-81)' },
   'HMT-M-1': { label: 'Limited Manufacturing (M-1)', status: 'cup', detail: 'City of Hemet — Storage facility (personal, mini-storage) requires a Conditional Use Permit (Sec. 90-1043 Manufacturing Zones Land Use Matrix, Item H.31; Secs. 90-4, 90-81)' },
   'HMT-M-2': { label: 'Heavy Manufacturing (M-2)', status: 'cup', detail: 'City of Hemet — Storage facility (personal, mini-storage) requires a Conditional Use Permit (Sec. 90-1043 Manufacturing Zones Land Use Matrix, Item H.31; Secs. 90-4, 90-81)' },
+  // City of Indio — Title 17 Unified Development Code (Ord. 1782, eff. 10-22-2022), Table 2.04.02-1 (Non-Residential Zones) & Table 2.03.02-1 (Mixed-Use Zones) — "Mini-Storage Warehousing or Facility"
+  'IND-IL': { label: 'Light Industrial (IL)', status: 'banned', detail: 'City of Indio — "Mini-Storage Warehousing or Facility" not permitted (Table 2.04.02-1, UDC Ch. 2.04)' },
+  'IND-IH': { label: 'Heavy Industrial (IH)', status: 'banned', detail: 'City of Indio — "Mini-Storage Warehousing or Facility" not permitted (Table 2.04.02-1, UDC Ch. 2.04)' },
+  'IND-RC': { label: 'Resort Commercial (RC)', status: 'banned', detail: 'City of Indio — "Mini-Storage Warehousing or Facility" not permitted (Table 2.04.02-1, UDC Ch. 2.04)' },
+  'IND-RR': { label: 'Resort/Recreation (RR)', status: 'banned', detail: 'City of Indio — "Mini-Storage Warehousing or Facility" not permitted (Table 2.04.02-1, UDC Ch. 2.04)' },
+  'IND-CN-14': { label: 'Connected Neighborhoods — 14 (CN-14)', status: 'banned', detail: 'City of Indio — "Mini-Storage Warehousing or Facility" not permitted (Table 2.03.02-1, UDC Ch. 2.03)' },
+  'IND-CN-20': { label: 'Connected Neighborhoods — 20 (CN-20)', status: 'banned', detail: 'City of Indio — "Mini-Storage Warehousing or Facility" not permitted (Table 2.03.02-1, UDC Ch. 2.03)' },
+  'IND-NC': { label: 'Neighborhood Center (NC)', status: 'banned', detail: 'City of Indio — "Mini-Storage Warehousing or Facility" not permitted (Table 2.03.02-1, UDC Ch. 2.03)' },
+  'IND-MUN': { label: 'Mixed-Use Neighborhood (MUN)', status: 'banned', detail: 'City of Indio — "Mini-Storage Warehousing or Facility" not permitted (Table 2.03.02-1, UDC Ch. 2.03)' },
 }
 
 function getZoneInfo(props) {
@@ -570,6 +579,7 @@ export default function MapView({properties,selectedProperty,setSelectedProperty
   const murrietaRedLayerRef=useRef(null)
   const hemetCupLayerRef=useRef(null)
   const hemetRedLayerRef=useRef(null)
+  const indioRedLayerRef=useRef(null)
 
   const [greenData,setGreenData]=useState(null)
   const [cityBannedData,setCityBannedData]=useState(null)
@@ -599,6 +609,7 @@ export default function MapView({properties,selectedProperty,setSelectedProperty
   const [murrietaRedData,setMurrietaRedData]=useState(null)
   const [hemetCupData,setHemetCupData]=useState(null)
   const [hemetRedData,setHemetRedData]=useState(null)
+  const [indioRedData,setIndioRedData]=useState(null)
 
   const [mapType,setMapType]=useState('dark')
   const [showParcel,setShowParcel]=useState(false)
@@ -628,6 +639,7 @@ export default function MapView({properties,selectedProperty,setSelectedProperty
   const [showMurrietaRed,setShowMurrietaRed]=useState(false)
   const [showHemetCup,setShowHemetCup]=useState(false)
   const [showHemetRed,setShowHemetRed]=useState(false)
+  const [showIndioRed,setShowIndioRed]=useState(false)
   const [showLocations,setShowLocations]=useState(true)   // Feature 2
   const [filterCompanies,setFilterCompanies]=useState(new Set())  // Feature 4
   const [parcelPopup,setParcelPopup]=useState(null)
@@ -704,6 +716,7 @@ export default function MapView({properties,selectedProperty,setSelectedProperty
     fetch('/murrieta_red.geojson').then(r=>r.json()).then(setMurrietaRedData).catch(()=>{})
     fetch('/hemet_cup.geojson').then(r=>r.json()).then(setHemetCupData).catch(()=>{})
     fetch('/hemet_red.geojson').then(r=>r.json()).then(setHemetRedData).catch(()=>{})
+    fetch('/indio_red.geojson').then(r=>r.json()).then(setIndioRedData).catch(()=>{})
   },[])
 
   // Helper: render layer + attach zone-click listener (Feature 1)
@@ -818,6 +831,7 @@ export default function MapView({properties,selectedProperty,setSelectedProperty
   useEffect(()=>{renderLayer(murrietaRedLayerRef,murrietaRedData,showMurrietaRed,'#ef4444','#dc2626',0.22)},[showMurrietaRed,murrietaRedData,mapReady])
   useEffect(()=>{renderLayer(hemetCupLayerRef,hemetCupData,showHemetCup,'#f97316','#ea580c',0.30)},[showHemetCup,hemetCupData,mapReady])
   useEffect(()=>{renderLayer(hemetRedLayerRef,hemetRedData,showHemetRed,'#ef4444','#dc2626',0.22)},[showHemetRed,hemetRedData,mapReady])
+  useEffect(()=>{renderLayer(indioRedLayerRef,indioRedData,showIndioRed,'#ef4444','#dc2626',0.22)},[showIndioRed,indioRedData,mapReady])
 
   useEffect(()=>{
     const map=mapRef.current
@@ -909,6 +923,7 @@ export default function MapView({properties,selectedProperty,setSelectedProperty
           showMurrietaRed={showMurrietaRed} setShowMurrietaRed={setShowMurrietaRed}
           showHemetCup={showHemetCup} setShowHemetCup={setShowHemetCup}
           showHemetRed={showHemetRed} setShowHemetRed={setShowHemetRed}
+          showIndioRed={showIndioRed} setShowIndioRed={setShowIndioRed}
         />
 
         <div>
