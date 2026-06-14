@@ -239,6 +239,13 @@ const ZONE_INFO = {
   'OP': { label: 'Office Professional (O-P)', status: 'banned', detail: 'City of Corona — Self storage / mini-warehouse not listed as a permitted use (Chapter 17.33, Table 1-17.33)' },
   'C2': { label: 'Restricted Commercial (C-2)', status: 'banned', detail: 'City of Corona — Self storage / mini-warehouse not listed as a permitted use (Chapter 17.33, Table 1-17.33)' },
   'C3': { label: 'General Commercial (C-3)', status: 'banned', detail: 'City of Corona — Self storage / mini-warehouse not listed as a permitted use (Chapter 17.33, Table 1-17.33)' },
+  // City of Perris — Title 19 Zoning Ordinance, Chapter 19.44 (Industrial Zones, Sec. 19.44.020 Table) & Chapter 19.43 (PO Zone, Sec. 19.43.020/030)
+  'PER-LI': { label: 'Light Industrial (LI)', status: 'by_right', detail: 'City of Perris — Mini-storage/wholesale storage permitted by right (Sec. 19.44.020, Table: Allowed Land Uses in Industrial Zone Districts)' },
+  'PER-GI': { label: 'General Industrial (GI)', status: 'by_right', detail: 'City of Perris — Mini-storage/wholesale storage permitted by right (Sec. 19.44.020, Table: Allowed Land Uses in Industrial Zone Districts)' },
+  'PER-BP': { label: 'Business Park (BP)', status: 'cup', detail: 'City of Perris — Mini-storage/wholesale storage requires a Conditional Use Permit (Sec. 19.44.020, Table: Allowed Land Uses in Industrial Zone Districts)' },
+  'PER-PO': { label: 'Professional Office (PO)', status: 'cup', detail: 'City of Perris — Mini-storage/wholesale storage requires a Conditional Use Permit (Sec. 19.43.030(6))' },
+  'PER-CN': { label: 'Commercial Neighborhood (CN)', status: 'banned', detail: 'City of Perris — Self-storage/mini-warehouse not listed as a permitted or CUP use (Sec. 19.36.020 & 19.36.030)' },
+  'PER-CC': { label: 'Commercial Community (CC)', status: 'banned', detail: 'City of Perris — Self-storage/mini-warehouse not listed as a permitted or CUP use (Sec. 19.38.020 & 19.38.030)' },
   // City of Menifee — Development Code (adopted 2019, eff. 2020), Table 9.135.030-1 (Commercial/Industrial Zones) & Table 9.140.030-1 (EDC Zones)
   'MNF-HI': { label: 'Heavy Industrial/Manufacturing (HI)', status: 'by_right', detail: 'City of Menifee — Self-Storage, public storage facilities permitted by right (Development Code Table 9.135.030-1)' },
   'MNF-CR': { label: 'Commercial Retail (CR)', status: 'cup', detail: 'City of Menifee — Self-Storage, public storage facilities require a Conditional Use Permit (Development Code Table 9.135.030-1)' },
@@ -580,6 +587,9 @@ export default function MapView({properties,selectedProperty,setSelectedProperty
   const hemetCupLayerRef=useRef(null)
   const hemetRedLayerRef=useRef(null)
   const indioRedLayerRef=useRef(null)
+  const perrisGreenLayerRef=useRef(null)
+  const perrisCupLayerRef=useRef(null)
+  const perrisRedLayerRef=useRef(null)
 
   const [greenData,setGreenData]=useState(null)
   const [cityBannedData,setCityBannedData]=useState(null)
@@ -610,6 +620,9 @@ export default function MapView({properties,selectedProperty,setSelectedProperty
   const [hemetCupData,setHemetCupData]=useState(null)
   const [hemetRedData,setHemetRedData]=useState(null)
   const [indioRedData,setIndioRedData]=useState(null)
+  const [perrisGreenData,setPerrisGreenData]=useState(null)
+  const [perrisCupData,setPerrisCupData]=useState(null)
+  const [perrisRedData,setPerrisRedData]=useState(null)
 
   const [mapType,setMapType]=useState('dark')
   const [showParcel,setShowParcel]=useState(false)
@@ -640,6 +653,9 @@ export default function MapView({properties,selectedProperty,setSelectedProperty
   const [showHemetCup,setShowHemetCup]=useState(false)
   const [showHemetRed,setShowHemetRed]=useState(false)
   const [showIndioRed,setShowIndioRed]=useState(false)
+  const [showPerrisGreen,setShowPerrisGreen]=useState(false)
+  const [showPerrisCup,setShowPerrisCup]=useState(false)
+  const [showPerrisRed,setShowPerrisRed]=useState(false)
   const [showLocations,setShowLocations]=useState(true)   // Feature 2
   const [filterCompanies,setFilterCompanies]=useState(new Set())  // Feature 4
   const [parcelPopup,setParcelPopup]=useState(null)
@@ -717,6 +733,9 @@ export default function MapView({properties,selectedProperty,setSelectedProperty
     fetch('/hemet_cup.geojson').then(r=>r.json()).then(setHemetCupData).catch(()=>{})
     fetch('/hemet_red.geojson').then(r=>r.json()).then(setHemetRedData).catch(()=>{})
     fetch('/indio_red.geojson').then(r=>r.json()).then(setIndioRedData).catch(()=>{})
+    fetch('/perris_green.geojson').then(r=>r.json()).then(setPerrisGreenData).catch(()=>{})
+    fetch('/perris_cup.geojson').then(r=>r.json()).then(setPerrisCupData).catch(()=>{})
+    fetch('/perris_red.geojson').then(r=>r.json()).then(setPerrisRedData).catch(()=>{})
   },[])
 
   // Helper: render layer + attach zone-click listener (Feature 1)
@@ -832,6 +851,9 @@ export default function MapView({properties,selectedProperty,setSelectedProperty
   useEffect(()=>{renderLayer(hemetCupLayerRef,hemetCupData,showHemetCup,'#f97316','#ea580c',0.30)},[showHemetCup,hemetCupData,mapReady])
   useEffect(()=>{renderLayer(hemetRedLayerRef,hemetRedData,showHemetRed,'#ef4444','#dc2626',0.22)},[showHemetRed,hemetRedData,mapReady])
   useEffect(()=>{renderLayer(indioRedLayerRef,indioRedData,showIndioRed,'#ef4444','#dc2626',0.22)},[showIndioRed,indioRedData,mapReady])
+  useEffect(()=>{renderLayer(perrisGreenLayerRef,perrisGreenData,showPerrisGreen,'#22c55e','#16a34a',0.30)},[showPerrisGreen,perrisGreenData,mapReady])
+  useEffect(()=>{renderLayer(perrisCupLayerRef,perrisCupData,showPerrisCup,'#f97316','#ea580c',0.30)},[showPerrisCup,perrisCupData,mapReady])
+  useEffect(()=>{renderLayer(perrisRedLayerRef,perrisRedData,showPerrisRed,'#ef4444','#dc2626',0.22)},[showPerrisRed,perrisRedData,mapReady])
 
   useEffect(()=>{
     const map=mapRef.current
@@ -924,6 +946,9 @@ export default function MapView({properties,selectedProperty,setSelectedProperty
           showHemetCup={showHemetCup} setShowHemetCup={setShowHemetCup}
           showHemetRed={showHemetRed} setShowHemetRed={setShowHemetRed}
           showIndioRed={showIndioRed} setShowIndioRed={setShowIndioRed}
+          showPerrisGreen={showPerrisGreen} setShowPerrisGreen={setShowPerrisGreen}
+          showPerrisCup={showPerrisCup} setShowPerrisCup={setShowPerrisCup}
+          showPerrisRed={showPerrisRed} setShowPerrisRed={setShowPerrisRed}
         />
 
         <div>
